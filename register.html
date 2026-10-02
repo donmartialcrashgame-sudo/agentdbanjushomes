@@ -68,11 +68,14 @@
 </div>
 <div class="foot">Already have an agent account? <a href="login.html">Sign in here</a>.</div>
 </main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL='https://cpgajlsyuieeengdnamy.supabase.co';
-const CONFIG={functions:SUPABASE_URL+'/functions/v1',anonKey:'sb_publishable_fbcJT-QGKyZg0tDkOQ_CcQf2ugW'};
+const SUPABASE_KEY='sb_publishable_fbcJT-QGKyZg0tDkOQ_CcQf2ugW';
+const dbh=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const REGISTRATION_FN=SUPABASE_URL+'/functions/v1/dbh-agent-registration';
 const $=id=>document.getElementById(id);
-let applicationId=null,emailVerified=false,otpRequested=false;
+let otpSent=false;
 const show=(el,msg,cls)=>{el.textContent=msg;el.className=cls};
 function err(msg){show($('error'),msg,'error show');window.scrollTo({top:120,behavior:'smooth'})}
 function ok(msg){show($('success'),msg,'success show')}
@@ -80,36 +83,82 @@ function clearMsg(){$('error').className='error';$('success').className='success
 function setProgress(n){$('progressText').textContent='Step '+n+' of 4';$('stepBadge').textContent='Step '+n;$('progressBar').style.width=(n*25)+'%'}
 function val(id){return $(id).value.trim()}
 function validPhone(v){return /^[+0-9 ()-]{7,20}$/.test(v)}
-async function callFunction(name,body){
- const r=await fetch(CONFIG.functions+'/'+name,{method:'POST',headers:{'Content-Type':'application/json','apikey':CONFIG.anonKey,'Authorization':'Bearer '+CONFIG.anonKey},body:JSON.stringify(body)});
- let data={};try{data=await r.json()}catch{}
- if(!r.ok)throw new Error(data.error||data.message||'The server could not complete this request.');
- return data;
+async function sendEmailOtp(){
+  const email=val('email').toLowerCase();
+  const {error}=await dbh.auth.signInWithOtp({
+    email,
+    options:{
+      shouldCreateUser:true,
+      data:{
+        full_name:[val('firstName'),val('lastName')].filter(Boolean).join(' '),
+        phone:val('phone'),
+        whatsapp:val('whatsapp'),
+        agent_registration:true
+      }
+    }
+  });
+  if(error)throw error;
+}
+async function getAccessToken(){
+  const {data,error}=await dbh.auth.getSession();
+  if(error||!data.session)throw new Error('Your email verification session is missing. Please request a new code.');
+  return data.session.access_token;
+}
+async function submitApplication(){
+  const token=await getAccessToken();
+  const payload={
+    action:'submit_application',
+    email:val('email').toLowerCase(),
+    first_name:val('firstName'),
+    last_name:val('lastName'),
+    phone:val('phone'),
+    whatsapp:val('whatsapp'),
+    business_name:val('businessName'),
+    agent_type:val('agentType'),
+    state:val('state'),
+    city_area:val('cityArea'),
+    address:val('address'),
+    description:val('description')
+  };
+  const r=await fetch(REGISTRATION_FN,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+token},body:JSON.stringify(payload)});
+  let data={};try{data=await r.json()}catch{}
+  if(!r.ok)throw new Error(data.error||'The server could not submit your application.');
+  return data;
 }
 $('form').addEventListener('submit',async e=>{
  e.preventDefault();clearMsg();
  if(!$('form').checkValidity())return err('Please complete all required fields before continuing.');
  if(!validPhone(val('phone'))||!validPhone(val('whatsapp')))return err('Please enter valid phone and WhatsApp numbers.');
- const email=val('email').toLowerCase();
- const payload={action:'start_application',email,first_name:val('firstName'),last_name:val('lastName'),phone:val('phone'),whatsapp:val('whatsapp'),business_name:val('businessName'),agent_type:val('agentType'),state:val('state'),city_area:val('cityArea'),address:val('address'),description:val('description')};
- $('submitBtn').disabled=true;$('submitBtn').innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Sending code...';
+ if(!$('agree').checked)return err('Please accept the application agreement.');
+ $('submitBtn').disabled=true;$('submitBtn').innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Sending OTP...';
  try{
-   const data=await callFunction('dbh-agent-registration',payload);
-   applicationId=data.application_id||data.id||null;otpRequested=true;$('otpBox').classList.add('show');setProgress(2);
-   $('otpStatus').textContent='A verification code has been sent to '+email+'. Enter it above to continue.';
-   ok('Application started. Check your email for the verification code.');
- }catch(ex){err(ex.message)}
- finally{$('submitBtn').disabled=false;$('submitBtn').innerHTML='<i class="fa-solid fa-paper-plane"></i> Start application'}
+   await sendEmailOtp();
+   otpSent=true;$('otpBox').classList.add('show');setProgress(2);
+   $('otpStatus').textContent='A 6-digit verification code has been sent to '+val('email').toLowerCase()+'. Enter it above to continue.';
+   ok('Verification code sent. Check your inbox and enter the 6-digit code.');
+   $('otp').focus();
+ }catch(ex){err(ex.message||'We could not send the verification code.')}
+ finally{$('submitBtn').disabled=false;$('submitBtn').innerHTML='<i class="fa-solid fa-paper-plane"></i> Send verification code'}
 });
 $('verifyBtn').addEventListener('click',async()=>{
- clearMsg();const code=val('otp');if(!applicationId)return err('Start the application first.');if(!/^\d{6}$/.test(code))return err('Enter the 6-digit email verification code.');
+ clearMsg();const code=val('otp');
+ if(!otpSent)return err('Please request the email verification code first.');
+ if(!/^\d{6}$/.test(code))return err('Enter the 6-digit email verification code.');
  $('verifyBtn').disabled=true;$('verifyBtn').innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Verifying...';
  try{
-  const data=await callFunction('dbh-agent-registration',{action:'verify_email',application_id:applicationId,email:val('email').toLowerCase(),otp:code});
-  emailVerified=true;setProgress(3);$('otpStatus').textContent='Email verified successfully. Your application can now proceed to DBH Admin review.';$('otpBox').style.background='#f0fdf4';$('otpBox').style.borderRadius='12px';$('otpBox').style.padding='16px';$('verifyBtn').disabled=true;$('verifyBtn').innerHTML='<i class="fa-solid fa-circle-check"></i> Verified';
-  ok(data.message||'Email verified. Your application has been submitted for review.');
+  const {data,error}=await dbh.auth.verifyOtp({email:val('email').toLowerCase(),token:code,type:'email'});
+  if(error)throw error;
+  if(!data.session)throw new Error('Email verification succeeded but no secure session was returned.');
+  setProgress(3);
+  $('otpStatus').textContent='Email verified. Submitting your application securely to DBH...';
+  const result=await submitApplication();
+  setProgress(4);
+  $('otpBox').style.background='#f0fdf4';$('otpBox').style.borderRadius='12px';$('otpBox').style.padding='16px';
+  $('otpStatus').textContent='Email verified successfully. Application reference: '+result.application_id;
+  $('verifyBtn').disabled=true;$('verifyBtn').innerHTML='<i class="fa-solid fa-circle-check"></i> Verified';
   $('submitBtn').innerHTML='<i class="fa-solid fa-check"></i> Application submitted';$('submitBtn').disabled=true;
- }catch(ex){err(ex.message);$('verifyBtn').disabled=false;$('verifyBtn').innerHTML='<i class="fa-solid fa-shield-check"></i> Verify email'}
+  ok(result.message||'Your DBH agent application has been submitted for Admin review.');
+ }catch(ex){err(ex.message||'Email verification failed.');$('verifyBtn').disabled=false;$('verifyBtn').innerHTML='<i class="fa-solid fa-shield-check"></i> Verify email'}
 });
 addEventListener('load',()=>setTimeout(()=>$('loader').classList.add('hide'),400));
 </script>

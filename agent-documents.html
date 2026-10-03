@@ -17,9 +17,10 @@
 .layout{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:18px;align-items:start}.card{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 12px 35px rgba(18,48,82,.05)}.card-body{padding:22px}.card-title{display:flex;align-items:flex-start;justify-content:space-between;gap:15px}.card-title h2{margin:0;color:var(--navy);font-size:18px}.card-title p{margin:6px 0 0;color:var(--muted);font-size:11px;line-height:1.55}.required{padding:6px 9px;border-radius:999px;background:#fff8e8;color:var(--amber);font-size:9px;font-weight:900;white-space:nowrap}
 .progress{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:20px 0 24px}.progress span{height:6px;border-radius:99px;background:#e8eef6}.progress span.done,.progress span.current{background:var(--blue)}
 .notice{display:flex;gap:11px;background:#eff6ff;border:1px solid #dbeafe;border-radius:13px;padding:13px;margin-bottom:17px;color:#155eaa;font-size:10px;line-height:1.6}.notice i{font-size:16px;margin-top:1px}.notice strong{color:var(--navy)}
+.locked-banner{display:none;gap:11px;align-items:center;background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;border-radius:13px;padding:13px;margin-bottom:17px;font-size:10px;line-height:1.5}.locked-banner.show{display:flex}.locked-banner i{font-size:17px}
 .fee{display:flex;align-items:center;justify-content:space-between;gap:15px;border:1px solid var(--line);border-radius:14px;padding:14px;background:#fafcff;margin-bottom:17px}.fee strong{display:block;color:var(--navy);font-size:11px}.fee small{display:block;color:var(--muted);font-size:9px;line-height:1.45;margin-top:4px}.fee-value{font-size:20px;font-weight:950;color:var(--blue);white-space:nowrap}
-.doc{border:1px solid var(--line);border-radius:16px;padding:17px;margin-top:14px}.doc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.doc-number{width:32px;height:32px;border-radius:10px;background:#edf5ff;color:var(--blue);display:grid;place-items:center;font-weight:950;font-size:12px;flex:0 0 auto}.doc-heading{display:flex;gap:10px}.doc h3{margin:0;color:var(--navy);font-size:14px}.doc p{margin:4px 0 0;color:var(--muted);font-size:10px;line-height:1.5}.doc-status{font-size:9px;font-weight:900;padding:6px 8px;border-radius:999px;background:#f1f5f9;color:#64748b;white-space:nowrap}.doc-status.ok{background:#f0fdf4;color:var(--green)}.doc-status.review{background:#fff8e8;color:var(--amber)}.doc-status.bad{background:#fef2f2;color:var(--red)}
-.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:15px}.field label{display:block;font-size:10px;font-weight:850;margin-bottom:7px}.field select,.field input[type=file]{width:100%;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--text);font-size:11px;padding:11px;outline:0}.field select:focus,.field input[type=file]:focus{border-color:#60a5fa;box-shadow:0 0 0 3px #dbeafe}.upload{margin-top:11px;border:1.5px dashed #bfd0e4;border-radius:12px;padding:12px;background:#f8fafc}.upload small{display:block;color:var(--muted);font-size:9px;margin-top:6px}.file-name{font-size:10px;color:var(--muted);margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.message{display:none;padding:12px;border-radius:11px;font-size:10px;line-height:1.55;margin-top:15px}.message.show{display:block}.message.ok{background:#f0fdf4;border:1px solid #bbf7d0;color:var(--green)}.message.err{background:#fef2f2;border:1px solid #fecaca;color:var(--red)}
+.doc{border:1px solid var(--line);border-radius:16px;padding:17px;margin-top:14px}.doc.locked{background:#fafcff;border-color:#dbe5ef}.doc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.doc-number{width:32px;height:32px;border-radius:10px;background:#edf5ff;color:var(--blue);display:grid;place-items:center;font-weight:950;font-size:12px;flex:0 0 auto}.doc-heading{display:flex;gap:10px}.doc h3{margin:0;color:var(--navy);font-size:14px}.doc p{margin:4px 0 0;color:var(--muted);font-size:10px;line-height:1.5}.doc-status{font-size:9px;font-weight:900;padding:6px 8px;border-radius:999px;background:#f1f5f9;color:#64748b;white-space:nowrap}.doc-status.ok{background:#f0fdf4;color:var(--green)}.doc-status.review{background:#fff8e8;color:var(--amber)}.doc-status.bad{background:#fef2f2;color:var(--red)}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:15px}.field label{display:block;font-size:10px;font-weight:850;margin-bottom:7px}.field select,.field input[type=file]{width:100%;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--text);font-size:11px;padding:11px;outline:0}.field select:focus,.field input[type=file]:focus{border-color:#60a5fa;box-shadow:0 0 0 3px #dbeafe}.doc.locked select,.doc.locked input{background:#f1f5f9;color:#64748b;cursor:not-allowed}.upload{margin-top:11px;border:1.5px dashed #bfd0e4;border-radius:12px;padding:12px;background:#f8fafc}.upload small{display:block;color:var(--muted);font-size:9px;margin-top:6px}.file-name{font-size:10px;color:var(--muted);margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.message{display:none;padding:12px;border-radius:11px;font-size:10px;line-height:1.55;margin-top:15px}.message.show{display:block}.message.ok{background:#f0fdf4;border:1px solid #bbf7d0;color:var(--green)}.message.err{background:#fef2f2;border:1px solid #fecaca;color:var(--red)}
 .actions{display:flex;justify-content:space-between;gap:10px;margin-top:20px}.btn{border:1px solid var(--line);background:#fff;color:var(--navy);border-radius:11px;padding:11px 15px;font-size:11px;font-weight:900;cursor:pointer;display:inline-flex;align-items:center;gap:8px}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn:disabled{opacity:.6;cursor:not-allowed}
 .info-card{padding:20px}.info-card h3{margin:0;color:var(--navy);font-size:14px}.info-card p{font-size:10px;line-height:1.65;color:var(--muted);margin:7px 0 0}.application{background:linear-gradient(145deg,var(--navy),var(--blue));color:#fff;border-radius:17px;padding:18px;margin-bottom:14px}.application .label{font-size:9px;font-weight:900;letter-spacing:.12em;color:#bfdbfe}.application strong{display:block;font-size:16px;margin-top:5px}.application small{display:block;color:#dbeafe;font-size:9px;margin-top:5px;word-break:break-word}.checklist{display:grid;gap:11px;margin-top:16px}.check{display:flex;gap:9px;align-items:flex-start;font-size:10px;color:#52657a;line-height:1.45}.check i{color:var(--blue);margin-top:1px}.security{margin-top:14px;padding:13px;border-radius:12px;background:#f8fafc;border:1px solid var(--line);font-size:9px;color:var(--muted);line-height:1.55}.security i{color:var(--green);margin-right:5px}
 .spinner{width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;display:inline-block;animation:spin .7s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
@@ -35,25 +36,26 @@
 <aside class="side" id="dbhSidebar"></aside>
 <main class="main">
 <section class="pagehead">
-<div><div class="eyebrow">AGENT VERIFICATION</div><h1>Verification Documents</h1><p class="lead">Submit the two legal documents required for your DBH agent application. Your documents remain private and are reviewed by DBH Admin.</p></div>
+<div><div class="eyebrow">AGENT VERIFICATION</div><h1>Verification Documents</h1><p class="lead">Submit the two legal documents required for your DBH agent application. Once both are submitted, they are locked and cannot be replaced from this page.</p></div>
 <div class="status-chip"><i class="fa-solid fa-shield-halved"></i><span id="applicationStatus">Application</span></div>
 </section>
 <div class="layout">
 <section class="card">
 <div class="card-body">
-<div class="card-title"><div><h2>Legal documents</h2><p>Choose exactly two documents and upload a clear PDF, JPG or PNG file for each.</p></div><span class="required">2 REQUIRED</span></div>
+<div class="card-title"><div><h2>Legal documents</h2><p id="instructionText">Choose exactly two documents and upload a clear PDF, JPG or PNG file for each.</p></div><span class="required">2 REQUIRED</span></div>
 <div class="progress" aria-label="Application progress"><span class="done"></span><span class="done"></span><span class="current"></span><span></span></div>
 <div class="fee"><div><strong>DBH agent registration fee</strong><small>Payment is separate from document review. The amount below comes from the current DBH agent settings.</small></div><div class="fee-value" id="feeAmount">Loading...</div></div>
 <div class="notice"><i class="fa-solid fa-circle-info"></i><div><strong>Important:</strong> submitting your documents does not automatically verify or approve your agent account. DBH Admin reviews the application and document status separately.</div></div>
+<div id="lockedBanner" class="locked-banner"><i class="fa-solid fa-lock"></i><div><strong>Documents submitted and locked.</strong><br>Your two legal documents have already been submitted. You cannot upload another document here. Continuing will take you to the payment step.</div></div>
 <div id="msg" class="message"></div>
 
-<article class="doc">
+<article class="doc" id="docCard1">
 <div class="doc-top"><div class="doc-heading"><div class="doc-number">01</div><div><h3>Identity document</h3><p>Select one government-issued identity document that belongs to you.</p></div></div><span class="doc-status" id="docStatus1">Not submitted</span></div>
 <div class="fields"><div class="field"><label for="type1">Document type</label><select id="type1"><option value="">Select document type</option><option>NIN Slip/Card</option><option>International Passport</option><option>Driver's Licence</option><option>Voter's Card / PVC</option><option>Government-issued National ID</option><option>Government-issued Residence/Identity Permit</option></select></div><div class="field"><label for="file1">Document file</label><input type="file" id="file1" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"></div></div>
 <div class="upload"><small><i class="fa-solid fa-file-arrow-up"></i> PDF, JPG or PNG • maximum 10 MB</small><div class="file-name" id="fileName1">No document selected.</div></div>
 </article>
 
-<article class="doc">
+<article class="doc" id="docCard2">
 <div class="doc-top"><div class="doc-heading"><div class="doc-number">02</div><div><h3>Additional legal document</h3><p>Select a business, tax, address or additional government document.</p></div></div><span class="doc-status" id="docStatus2">Not submitted</span></div>
 <div class="fields"><div class="field"><label for="type2">Document type</label><select id="type2"><option value="">Select document type</option><option>CAC Business Name Certificate</option><option>CAC Certificate of Incorporation</option><option>Company Status Report / CAC Document</option><option>TIN / Tax Document</option><option>Tax Clearance Certificate</option><option>Utility Bill / Proof of Address</option><option>Government-issued National ID</option><option>International Passport</option><option>Driver's Licence</option><option>Voter's Card / PVC</option><option>Other Government-issued Legal Document</option></select></div><div class="field"><label for="file2">Document file</label><input type="file" id="file2" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"></div></div>
 <div class="upload"><small><i class="fa-solid fa-file-arrow-up"></i> PDF, JPG or PNG • maximum 10 MB</small><div class="file-name" id="fileName2">No document selected.</div></div>
@@ -65,7 +67,7 @@
 
 <aside class="info-column">
 <div class="application"><div class="label">CURRENT APPLICATION</div><strong id="applicationName">Loading...</strong><small id="applicationEmail">Loading your saved application...</small><small id="applicationRef">Application: loading...</small></div>
-<div class="card info-card"><h3>Document checklist</h3><p>Use clear, readable files. DBH Admin may request more information if a document cannot be verified.</p><div class="checklist"><div class="check"><i class="fa-solid fa-circle-check"></i><span>Email/account verification completed</span></div><div class="check"><i class="fa-solid fa-circle-check"></i><span>Agent onboarding details saved</span></div><div class="check"><i class="fa-regular fa-circle"></i><span>Two legal documents submitted</span></div><div class="check"><i class="fa-regular fa-circle"></i><span>DBH Admin review</span></div></div><div class="security"><i class="fa-solid fa-lock"></i>Your documents are stored in the private <strong>agent-documents</strong> storage area and are not published as public property images.</div></div>
+<div class="card info-card"><h3>Document checklist</h3><p>Use clear, readable files. DBH Admin may request more information if a document cannot be verified.</p><div class="checklist"><div class="check"><i class="fa-solid fa-circle-check"></i><span>Email/account verification completed</span></div><div class="check"><i class="fa-solid fa-circle-check"></i><span>Agent onboarding details saved</span></div><div class="check"><i id="docCheckIcon" class="fa-regular fa-circle"></i><span id="docCheckText">Two legal documents submitted</span></div><div class="check"><i class="fa-regular fa-circle"></i><span>DBH Admin review</span></div></div><div class="security"><i class="fa-solid fa-lock"></i>Your documents are stored in the private <strong>agent-documents</strong> storage area and are not published as public property images.</div></div>
 </aside>
 </div>
 </main>
@@ -80,40 +82,13 @@ const S=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const $=id=>document.getElementById(id);
 let app=null,currentUser=null,existing=[];
 
-function showMessage(text,type){
-  const el=$('msg');el.textContent=text;el.className='message show '+type;
-}
-function setBusy(on,label){
-  const b=$('submit');
-  if(on){b.dataset.original=b.innerHTML;b.disabled=true;b.innerHTML='<span class="spinner"></span>'+label}
-  else{b.disabled=false;b.innerHTML=b.dataset.original||'<i class="fa-solid fa-cloud-arrow-up"></i> Submit documents'}
-}
-function moneyText(amount,currency,enabled){
-  if(enabled===false)return 'Disabled';
-  const n=Number(amount||0);
-  const cur=String(currency||'NGN').toUpperCase();
-  const formatted=n.toLocaleString(cur==='NGN'?'en-NG':'en-US',{maximumFractionDigits:2});
-  const symbols={NGN:'₦',USD:'$',GBP:'£',EUR:'€',CAD:'CA$'};
-  return symbols[cur] ? symbols[cur]+formatted : cur+' '+formatted;
-}
-async function loadFee(){
-  const {data,error}=await S.from('agent_settings').select('registration_fee,currency,fee_enabled').eq('id',true).maybeSingle();
-  if(error){$('feeAmount').textContent='See payment page';return}
-  if(data)$('feeAmount').textContent=moneyText(data.registration_fee,data.currency,data.fee_enabled);
-}
-function statusClass(status){
-  const s=String(status||'').toLowerCase();
-  if(['approved','verified'].includes(s))return 'ok';
-  if(['rejected','suspended'].includes(s))return 'bad';
-  if(['pending','needs_information'].includes(s))return 'review';
-  return '';
-}
-function statusText(status){
-  return String(status||'pending').replaceAll('_',' ');
-}
-function setDocStatus(slot,text,status){
-  const el=$('docStatus'+slot);el.textContent=text;el.className='doc-status '+statusClass(status);
-}
+function showMessage(text,type){const el=$('msg');el.textContent=text;el.className='message show '+type}
+function setBusy(on,label){const b=$('submit');if(on){b.dataset.original=b.innerHTML;b.disabled=true;b.innerHTML='<span class="spinner"></span>'+label}else{b.disabled=false;b.innerHTML=b.dataset.original||'<i class="fa-solid fa-cloud-arrow-up"></i> Submit documents'}}
+function moneyText(amount,currency,enabled){if(enabled===false)return 'Disabled';const n=Number(amount||0);const cur=String(currency||'NGN').toUpperCase();const formatted=n.toLocaleString(cur==='NGN'?'en-NG':'en-US',{maximumFractionDigits:2});const symbols={NGN:'₦',USD:'$',GBP:'£',EUR:'€',CAD:'CA$'};return symbols[cur] ? symbols[cur]+formatted : cur+' '+formatted}
+async function loadFee(){const {data,error}=await S.from('agent_settings').select('registration_fee,currency,fee_enabled').eq('id',true).maybeSingle();if(error){$('feeAmount').textContent='See payment page';return}if(data)$('feeAmount').textContent=moneyText(data.registration_fee,data.currency,data.fee_enabled)}
+function statusClass(status){const s=String(status||'').toLowerCase();if(['approved','verified'].includes(s))return 'ok';if(['rejected','suspended'].includes(s))return 'bad';if(['pending','needs_information'].includes(s))return 'review';return ''}
+function statusText(status){return String(status||'pending').replaceAll('_',' ')}
+function setDocStatus(slot,text,status){const el=$('docStatus'+slot);el.textContent=text;el.className='doc-status '+statusClass(status)}
 function applyExisting(){
   $('applicationStatus').textContent=statusText(app.status||'pending');
   $('applicationName').textContent=app.full_name||currentUser.email||'DBH Agent';
@@ -122,22 +97,46 @@ function applyExisting(){
   if(existing[0])setDocStatus(1,'Submitted: '+existing[0].document_type,existing[0].status);
   if(existing[1])setDocStatus(2,'Submitted: '+existing[1].document_type,existing[1].status);
 }
+function lockDocuments(){
+  existing.slice(0,2).forEach((d,i)=>{
+    const slot=i+1;
+    const card=$('docCard'+slot);
+    card.classList.add('locked');
+    $('type'+slot).value=d.document_type||'';
+    $('type'+slot).disabled=true;
+    $('file'+slot).disabled=true;
+    $('fileName'+slot).textContent='Submitted and locked';
+    setDocStatus(slot,'Submitted • Locked','pending');
+  });
+  $('submit').disabled=true;
+  $('submit').innerHTML='<i class="fa-solid fa-lock"></i> Documents locked';
+  $('back').style.display='none';
+  $('lockedBanner').classList.add('show');
+  $('instructionText').textContent='Your two legal documents have been submitted and are now locked.';
+  $('docCheckIcon').className='fa-solid fa-circle-check';
+  $('docCheckText').textContent='Two legal documents submitted';
+}
+async function hasPaid(){
+  const {data,error}=await S.from('agent_payment_records').select('status').eq('application_id',app.id).eq('payment_type','registration_fee').order('created_at',{ascending:false}).limit(1).maybeSingle();
+  if(error)return false;
+  return ['successful','completed','paid'].includes(String(data?.status||'').toLowerCase());
+}
+async function continueNext(){
+  const paid=await hasPaid();
+  location.href=paid?'dashboard.html':'payment.html';
+}
 async function loadExisting(){
   const {data,error}=await S.from('agent_application_documents').select('id,document_type,status,admin_note,created_at').eq('application_id',app.id).order('created_at',{ascending:true});
   if(error)throw error;
   existing=data||[];
   applyExisting();
+  if(existing.length>=2){
+    lockDocuments();
+    setTimeout(continueNext,900);
+  }
 }
-function extensionFor(file){
-  if(file.type==='application/pdf')return 'pdf';
-  if(file.type==='image/png')return 'png';
-  return 'jpg';
-}
-function validateFile(file,slot){
-  if(!file)throw new Error('Please choose a file for Document '+slot+'.');
-  if(file.size>10*1024*1024)throw new Error('Document '+slot+' is larger than 10 MB. Maximum size is 10 MB.');
-  if(!['application/pdf','image/jpeg','image/png'].includes(file.type))throw new Error('Document '+slot+' must be a PDF, JPG or PNG file.');
-}
+function extensionFor(file){if(file.type==='application/pdf')return 'pdf';if(file.type==='image/png')return 'png';return 'jpg'}
+function validateFile(file,slot){if(!file)throw new Error('Please choose a file for Document '+slot+'.');if(file.size>10*1024*1024)throw new Error('Document '+slot+' is larger than 10 MB. Maximum size is 10 MB.');if(!['application/pdf','image/jpeg','image/png'].includes(file.type))throw new Error('Document '+slot+' must be a PDF, JPG or PNG file.')}
 async function uploadOne(type,file,slot){
   validateFile(file,slot);
   if(!type)throw new Error('Please select a document type for Document '+slot+'.');
@@ -146,12 +145,36 @@ async function uploadOne(type,file,slot){
   const up=await S.storage.from('agent-documents').upload(path,file,{upsert:false,contentType:file.type});
   if(up.error)throw up.error;
   const ins=await S.from('agent_application_documents').insert({application_id:app.id,user_id:currentUser.id,document_type:type,storage_path:path,status:'pending'});
-  if(ins.error){
-    await S.storage.from('agent-documents').remove([path]);
-    throw ins.error;
-  }
+  if(ins.error){await S.storage.from('agent-documents').remove([path]);throw ins.error}
   return ins.data?.[0]||{document_type:type,status:'pending'};
 }
+$('file1').addEventListener('change',e=>{$('fileName1').textContent=e.target.files[0]?.name||'No document selected.'});
+$('file2').addEventListener('change',e=>{$('fileName2').textContent=e.target.files[0]?.name||'No document selected.'});
+$('submit').addEventListener('click',async()=>{
+  if(!app||!currentUser){showMessage('Please wait while your application loads.','err');return}
+  const t1=$('type1').value,t2=$('type2').value,f1=$('file1').files[0],f2=$('file2').files[0];
+  if(!t1||!t2){showMessage('Please select a document type for both documents.','err');return}
+  if(t1===t2){showMessage('Please choose two different document types.','err');return}
+  if(existing.length>=2){lockDocuments();await continueNext();return}
+  setBusy(true,'Submitting documents...');
+  try{
+    await uploadOne(t1,f1,1);
+    try{await uploadOne(t2,f2,2)}catch(secondError){
+      showMessage('Document 1 was uploaded, but Document 2 could not be submitted. The page will remain available so the second document can be completed.','err');
+      throw secondError;
+    }
+    await loadExisting();
+    lockDocuments();
+    showMessage('Both documents were submitted successfully. Moving to the next step...','ok');
+    setTimeout(continueNext,900);
+  }catch(e){
+    console.error(e);
+    if(!document.getElementById('msg').classList.contains('show')||!document.getElementById('msg').classList.contains('err'))showMessage(e.message||'Unable to submit documents.','err');
+    if(!$('submit').disabled)setBusy(false);
+  }
+});
+$('back').addEventListener('click',()=>location.href='agent-onboarding.html');
+$('logout').addEventListener('click',async()=>{const b=$('logout');b.disabled=true;try{await S.auth.signOut();location.href='index.html'}catch(e){b.disabled=false;showMessage(e.message||'Unable to sign out.','err')}});
 async function boot(){
   try{
     const {data,error}=await S.auth.getSession();
@@ -167,35 +190,6 @@ async function boot(){
     setTimeout(()=>location.href='login.html',1800);
   }
 }
-$('file1').addEventListener('change',e=>{$('fileName1').textContent=e.target.files[0]?.name||'No document selected.'});
-$('file2').addEventListener('change',e=>{$('fileName2').textContent=e.target.files[0]?.name||'No document selected.'});
-$('submit').addEventListener('click',async()=>{
-  if(!app||!currentUser){showMessage('Please wait while your application loads.','err');return}
-  const t1=$('type1').value,t2=$('type2').value,f1=$('file1').files[0],f2=$('file2').files[0];
-  if(!t1||!t2){showMessage('Please select a document type for both documents.','err');return}
-  if(t1===t2){showMessage('Please choose two different document types.','err');return}
-  if(existing.length>=2){showMessage('Two documents are already on your application. DBH Admin will review them.','err');return}
-  setBusy(true,'Submitting documents...');
-  try{
-    await uploadOne(t1,f1,1);
-    try{await uploadOne(t2,f2,2)}catch(secondError){
-      showMessage('Document 1 was uploaded, but Document 2 could not be submitted. Please refresh and complete the second document.','err');
-      throw secondError;
-    }
-    await loadExisting();
-    showMessage('Both documents were submitted successfully. DBH Admin can now review your application.','ok');
-    $('submit').disabled=true;
-    setTimeout(()=>location.href='dashboard.html',1400);
-  }catch(e){
-    console.error(e);
-    if(!document.getElementById('msg').classList.contains('show')||!document.getElementById('msg').classList.contains('err'))showMessage(e.message||'Unable to submit documents.','err');
-  }finally{if(!$('submit').disabled)setBusy(false)}
-});
-$('back').addEventListener('click',()=>location.href='agent-onboarding.html');
-$('logout').addEventListener('click',async()=>{
-  const b=$('logout');b.disabled=true;
-  try{await S.auth.signOut();location.href='index.html'}catch(e){b.disabled=false;showMessage(e.message||'Unable to sign out.','err')}
-});
 boot();
 </script>
 </body>

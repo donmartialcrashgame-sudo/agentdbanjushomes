@@ -25,7 +25,7 @@
 <div class="toolbar"><span id="summary">Loading notifications...</span><button class="btn primary" id="readAll"><i class="fa-solid fa-check-double"></i> Mark all as read</button></div>
 <div id="msg" class="msg"></div><section class="list" id="list"></section>
 </main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="assets/js/app.js"></script>
 <script>
 const U='https://cpgajlsyuieeengdnamy.supabase.co',K='sb_publishable_fbcJT-QGKyZg0tDkpbDkOQ_CcQf2ugW',S=window.supabase.createClient(U,K),$=id=>document.getElementById(id);
 function icon(type){type=String(type||'').toLowerCase();if(type.includes('payment'))return 'fa-credit-card';if(type.includes('verif')||type.includes('document'))return 'fa-file-shield';if(type.includes('property'))return 'fa-house';if(type.includes('security'))return 'fa-shield-halved';return 'fa-bell'}

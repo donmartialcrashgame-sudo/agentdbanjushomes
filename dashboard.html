@@ -34,7 +34,7 @@ button,a{font:inherit}a{text-decoration:none;color:inherit}
 <header class="top">
 <a class="brand" href="index.html"><img src="https://dbanjushomes-com.onrender.com/dbh-logo.jpg" alt="DBH"><div>D Banjus Homes Nig Ltd<small>AGENT PORTAL</small></div></a>
 <div class="top-actions">
-<button class="icon bell" aria-label="Notifications"><i class="fa-regular fa-bell"></i><span class="dot">0</span></button>
+<a class="icon bell" aria-label="Notifications" href="notifications.html"><i class="fa-regular fa-bell"></i><span class="dot" id="notificationCount">0</span></a>
 <button class="icon mobile-menu" id="menu" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
 <button class="icon" id="logout" aria-label="Sign out"><i class="fa-solid fa-right-from-bracket"></i></button>
 </div>
@@ -143,6 +143,8 @@ async function boot(){
     }
 
     const user=sessionData.session.user;
+    const {count:unreadCount,error:notificationError}=await S.from('notifications').select('id',{count:'exact',head:true}).eq('user_id',user.id).eq('is_read',false);
+    if(!notificationError) $('notificationCount').textContent=String(unreadCount||0);
     const {data:app,error:appError}=await S.from('agent_applications')
       .select('*')
       .eq('user_id',user.id)

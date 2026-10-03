@@ -50,6 +50,7 @@
 <a href="dashboard.html" data-page="dashboard.html"><i class="fa-solid fa-gauge-high"></i> Overview</a>
 <a id="propertiesNav" class="disabled" href="#" data-page="properties.html" aria-disabled="true"><i class="fa-solid fa-house"></i> My Properties <i class="fa-solid fa-lock lock"></i></a>
 <a id="addPropertyNav" class="disabled" href="#" data-page="add-property.html" aria-disabled="true"><i class="fa-solid fa-plus"></i> Add Property <i class="fa-solid fa-lock lock"></i></a>
+<a id="activityNav" class="disabled" href="#" data-page="activity.html" aria-disabled="true"><i class="fa-solid fa-chart-line"></i> Activity & Reports <i class="fa-solid fa-lock lock"></i></a>
 <a id="enquiriesNav" class="disabled" href="#" data-page="enquiries.html" aria-disabled="true"><i class="fa-solid fa-comments"></i> Customer Enquiries <i class="fa-solid fa-lock lock"></i></a>
 <a href="payment-result.html" data-page="payment-result.html"><i class="fa-solid fa-receipt"></i> Payment Receipt</a>
 <a href="agent-documents.html" data-page="agent-documents.html"><i class="fa-solid fa-file-shield"></i> Verification</a>
@@ -132,7 +133,7 @@ function setButtonLoading(button,on,label){
   else{button.disabled=false;button.innerHTML=button.dataset.original||label}
 }
 function setToolAccess(open){
-  const links=[$('propertiesNav'),$('addPropertyNav'),$('enquiriesNav')];
+  const links=[$('propertiesNav'),$('addPropertyNav'),$('activityNav'),$('enquiriesNav')];
   links.forEach(link=>{
     if(open){
       link.classList.remove('disabled');

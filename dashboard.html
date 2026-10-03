@@ -60,6 +60,7 @@ async function boot(){
  $('welcome').textContent='Welcome back, '+((app.full_name||'Agent').split(' ')[0]);
 }
 $('menu').onclick=()=> $('side').classList.toggle('open');
+$('pay').onclick=()=>{const b=$('pay');b.innerHTML='<span class="spin"></span>Opening secure payment...';b.style.pointerEvents='none';setTimeout(()=>location.href='payment.html',250)};
 $('logout').onclick=async()=>{const b=$('logout');loading(b,true,'Signing out...');try{await S.auth.signOut();location.href='index.html'}catch(e){loading(b,false);}};
 boot();
 </script>

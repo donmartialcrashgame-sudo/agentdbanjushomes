@@ -15,7 +15,7 @@ button,a{font:inherit}a{text-decoration:none;color:inherit}
 .brand{display:flex;align-items:center;gap:10px;font-weight:900;color:var(--d)}.brand img{width:43px;height:43px;border-radius:11px;object-fit:cover}.brand small{display:block;color:var(--m);font-size:9px;letter-spacing:.12em}
 .top-actions{display:flex;gap:8px;align-items:center}.icon{width:40px;height:40px;border:1px solid var(--l);background:#fff;border-radius:11px;color:var(--d);display:grid;place-items:center;position:relative;cursor:pointer}.dot{position:absolute;right:-2px;top:-3px;background:#dc2626;color:#fff;font-size:8px;padding:2px 5px;border-radius:99px}
 .shell{display:grid;grid-template-columns:245px 1fr;min-height:calc(100vh - 72px)}.side{background:#fff;border-right:1px solid var(--l);padding:22px 14px;position:sticky;top:72px;height:calc(100vh - 72px)}
-.agent{background:linear-gradient(145deg,#062b52,#0b63ce);color:#fff;border-radius:17px;padding:16px;margin-bottom:18px}.agent .avatar{width:42px;height:42px;border-radius:12px;background:#ffffff1c;display:grid;place-items:center;font-size:18px;margin-bottom:12px}.agent strong{display:block;font-size:13px}.agent small{font-size:9px;color:#bfdbfe}.status{display:inline-flex;margin-top:10px;padding:5px 8px;border-radius:99px;background:#ffffff18;color:#dbeafe;font-size:8px;font-weight:900}
+.agent{background:linear-gradient(145deg,#062b52,#0b63ce);color:#fff;border-radius:17px;padding:16px;margin-bottom:18px}.agent .avatar{width:42px;height:42px;border-radius:12px;background:#ffffff1c;display:grid;place-items:center;font-size:18px;margin-bottom:12px}.agent strong{display:block;font-size:13px}.agent small{font-size:9px;color:#bfdbfe}.status-row{display:flex;align-items:center;gap:8px;margin-top:10px}.status{display:inline-flex;padding:5px 8px;border-radius:99px;background:#ffffff18;color:#dbeafe;font-size:8px;font-weight:900}.verified-badge{display:none;width:34px;height:34px;object-fit:contain;filter:drop-shadow(0 5px 8px #0003)}.verified-badge.show{display:block}
 .nav{display:grid;gap:4px}.nav a{padding:12px;border-radius:11px;color:#475569;font-size:12px;font-weight:800;display:flex;gap:11px;align-items:center}.nav a i{width:17px;text-align:center}.nav a.active,.nav a:hover{background:#eff6ff;color:var(--b)}.nav .locked{opacity:.48}.mobile-menu{display:none}
 .main{padding:30px;max-width:1250px;width:100%;margin:auto}.welcome{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:22px}.eyebrow{font-size:9px;font-weight:900;letter-spacing:.14em;color:var(--b)}h1{font-size:32px;letter-spacing:-.04em;margin:7px 0}.sub{color:var(--m);font-size:12px;line-height:1.6}
 .notice{background:#fff;border:1px solid #bfdbfe;border-left:4px solid var(--b);padding:17px 18px;border-radius:15px;margin-bottom:20px;display:flex;gap:13px;align-items:flex-start}.notice i{color:var(--b);font-size:19px}.notice b{font-size:12px}.notice p{margin:5px 0 0;color:var(--m);font-size:10px;line-height:1.6}
@@ -45,7 +45,7 @@ button,a{font:inherit}a{text-decoration:none;color:inherit}
 <div class="agent">
 <div class="avatar"><i class="fa-solid fa-user-tie"></i></div>
 <strong id="name">Loading...</strong><small id="email">Loading...</small>
-<div class="status" id="status">PENDING</div>
+<div class="status-row"><div class="status" id="status">PENDING</div><img id="verifiedBadge" class="verified-badge" src="assets/images/verified-badge.svg" alt="Verified agent badge" title="Verified agent"></div>
 </div>
 <nav class="nav">
 <a href="dashboard.html" data-page="dashboard.html"><i class="fa-solid fa-gauge-high"></i> Overview</a>
@@ -169,6 +169,8 @@ async function boot(){
     const status=cleanStatus(app.status);
     $('status').textContent=status.toUpperCase();
     $('verifyStat').textContent=status;
+    const isVerified=status==='verified'||status==='approved';
+    $('verifiedBadge').classList.toggle('show',isVerified);
     $('welcome').textContent='Welcome back, '+fullName.trim().split(/\s+/)[0];
 
     const {data:settings,error:settingsError}=await S.from('agent_settings').select('*').eq('id',true).maybeSingle();

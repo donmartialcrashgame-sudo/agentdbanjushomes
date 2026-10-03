@@ -3,21 +3,21 @@
   const NAV=[
     ['dashboard.html','fa-gauge-high','Overview','dashboard'],
     ['properties.html','fa-house','My Properties','propertiesNav'],
-    ['add-property.html','fa-plus','Add Property','addPropertyNav'],
+    ['add-property.html','fa-house-circle-plus','Add Property','addPropertyNav'],
     ['activity.html','fa-chart-line','Activity & Reports','activityNav'],
-    ['enquiries.html','fa-triangle-exclamation','Complaints & Reports','enquiriesNav'],
-    ['payment-result.html','fa-receipt','Payment Receipt',''],
-    ['agent-documents.html','fa-file-shield','Verification',''],
+    ['enquiries.html','fa-flag','Complaints & Reports','enquiriesNav'],
+    ['payment-result.html','fa-file-invoice-dollar','Payment Receipts',''],
+    ['agent-documents.html','fa-id-card','Verification',''],
     ['notifications.html','fa-bell','Notifications',''],
-    ['settings.html','fa-gear','Settings','']
+    ['settings.html','fa-sliders','Settings','']
   ];
 
   function sidebarMarkup(){
     return '<div class="agent">'+
-      '<div class="avatar"><i class="fa-solid fa-user-tie"></i></div>'+
+      '<div class="avatar"><i class="fa-solid fa-user"></i></div>'+
       '<strong id="name">Loading...</strong>'+
       '<small id="email">Loading...</small>'+
-      '<div class="status-row"><div class="status" id="status">PENDING</div>'+
+      '<div class="status-row"><span class="status-dot" aria-hidden="true"></span><div class="status" id="status">PENDING</div>'+
       '<img id="verifiedBadge" class="verified-badge" src="assets/images/verified-badge.svg" alt="Verified agent badge" title="Verified agent"></div>'+
       '</div>'+
       '<nav class="nav" id="agentNav">'+
@@ -38,7 +38,8 @@
       '#dbhSidebar .agent .avatar{width:43px!important;height:43px!important;border-radius:13px;background:#ffffff1c;display:grid!important;place-items:center;margin:0 0 12px!important;font-size:18px;position:static!important}'+
       '#dbhSidebar .agent strong{display:block!important;font-size:13px!important;line-height:1.3;color:#fff;position:static!important;margin:0}'+
       '#dbhSidebar .agent small{display:block!important;font-size:9px!important;line-height:1.3;color:#bfdbfe!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;position:static!important;margin:4px 0 0}'+
-      '#dbhSidebar .status-row{display:flex!important;align-items:center!important;gap:8px!important;margin-top:10px!important;position:static!important}'+
+      '#dbhSidebar .status-row{display:flex!important;align-items:center!important;gap:7px!important;margin-top:10px!important;position:static!important}'+
+      '#dbhSidebar .status-dot{width:7px!important;height:7px!important;border-radius:50%!important;background:#f59e0b!important;box-shadow:0 0 0 3px #ffffff18!important;flex:0 0 7px!important}'+
       '#dbhSidebar .status{position:static!important;display:inline-flex!important;align-items:center!important;width:auto!important;height:auto!important;min-height:0!important;padding:5px 8px!important;margin:0!important;border-radius:999px!important;background:#ffffff18!important;color:#dbeafe!important;font-size:8px!important;font-weight:900!important;line-height:1!important;text-transform:uppercase!important;box-shadow:none!important;white-space:nowrap!important}'+
       '#dbhSidebar .verified-badge{display:none!important;width:34px!important;height:34px!important;max-width:34px!important;max-height:34px!important;min-width:34px!important;min-height:34px!important;object-fit:contain!important;position:static!important;margin:0!important;padding:0!important;filter:drop-shadow(0 5px 8px #0003)}'+
       '#dbhSidebar .verified-badge.show{display:block!important}'+
@@ -90,6 +91,22 @@
     document.querySelectorAll('#dbhSidebar nav a[data-page]').forEach(function(a){
       a.classList.toggle('active',a.dataset.page===page);
     });
+
+    const statusEl=document.getElementById('status');
+    const badge=document.getElementById('verifiedBadge');
+    const dot=document.querySelector('#dbhSidebar .status-dot');
+    function syncVerificationBadge(){
+      const value=String(statusEl?.textContent||'').trim().toLowerCase();
+      const verified=['verified','approved','active'].includes(value);
+      if(badge) badge.classList.toggle('show',verified);
+      if(dot){
+        dot.style.background=verified?'#22c55e':value==='rejected'||value==='suspended'?'#ef4444':'#f59e0b';
+      }
+    }
+    syncVerificationBadge();
+    if(statusEl && window.MutationObserver){
+      new MutationObserver(syncVerificationBadge).observe(statusEl,{childList:true,subtree:true,characterData:true});
+    }
   }
 
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init);

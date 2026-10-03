@@ -1,1 +1,125 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Submitted Documents | DBH Agent Portal</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"><style>body{margin:0;font-family:Arial,sans-serif;background:#f5f8fc;color:#062b52}.top{height:70px;background:#fff;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;padding:0 24px}.brand{display:flex;align-items:center;gap:10px;font-weight:800}.brand img{width:42px;height:42px;border-radius:10px}.side{background:#fff;border-right:1px solid #e2e8f0;min-height:calc(100vh - 70px)}.shell{display:grid;grid-template-columns:250px 1fr}.main{max-width:1100px;width:100%;margin:auto;padding:30px}.card{background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:22px;margin-top:20px}.banner{background:#f0fdf4;border:1px solid #bbf7d0;padding:14px;border-radius:12px;color:#166534;font-size:12px}.docs{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}.doc{border:1px solid #e2e8f0;border-radius:14px;overflow:hidden}.head,.foot{padding:14px;display:flex;justify-content:space-between;gap:10px}.preview{height:300px;background:#eef3f8}.preview iframe,.preview img{width:100%;height:100%;border:0;object-fit:contain}.badge{font-size:10px;background:#f0fdf4;color:#15803d;padding:6px 8px;border-radius:20px;font-weight:800}.small{font-size:9px;color:#6b7b90;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.btn{padding:10px 14px;border:1px solid #dbe3ec;border-radius:10px;background:#fff;color:#062b52;font-weight:800;cursor:pointer}.primary{background:#0b63ce;color:#fff;border-color:#0b63ce}.actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}@media(max-width:900px){.shell{display:block}.side{min-height:auto}.docs{grid-template-columns:1fr}.main{padding:18px 12px}}</style></head><body><header class="top"><a class="brand" href="dashboard.html"><img src="https://dbanjushomes-com.onrender.com/dbh-logo.jpg" alt="DBH">D Banjus Homes Nig Ltd</a><button class="btn" id="logout"><i class="fa-solid fa-right-from-bracket"></i></button></header><div class="shell"><aside class="side" id="dbhSidebar"></aside><main class="main"><h1>Submitted Legal Documents</h1><p>You can view your two submitted documents below. They are locked and cannot be replaced from the agent portal.</p><div class="card"><div class="banner"><i class="fa-solid fa-lock"></i> Documents submitted and locked. DBH Admin will review them.</div><div class="docs" id="docs">Loading...</div><div class="actions"><a class="btn" href="dashboard.html">Dashboard</a><a class="btn primary" id="continueBtn" href="payment.html">Continue to Payment</a></div></div></main></div><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="assets/js/app.js"></script><script>const S=window.supabase.createClient('https://cpgajlsyuieeengdnamy.supabase.co','sb_publishable_fbcJT-QGKyZg0tDkpbDkOQ_CcQf2ugW');const $=id=>document.getElementById(id);function esc(x){return String(x||'').replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[m]))}async function boot(){try{const {data,error}=await S.auth.getSession();if(error||!data.session)throw new Error('Please sign in again.');const u=data.session.user;const {data:a,error:ae}=await S.from('agent_applications').select('id').eq('user_id',u.id).order('created_at',{ascending:false}).limit(1).maybeSingle();if(ae)throw ae;if(!a)throw new Error('Application not found.');const {data:d,error:de}=await S.from('agent_application_documents').select('document_type,storage_path,status,created_at').eq('application_id',a.id).order('created_at',{ascending:true}).limit(2);if(de)throw de;if(!d||d.length<2)throw new Error('Submitted documents not found.');const {data:p}=await S.from('agent_payment_records').select('status').eq('application_id',a.id).eq('payment_type','registration_fee').order('created_at',{ascending:false}).limit(1).maybeSingle();if(['successful','completed','paid'].includes(String(p?.status||'').toLowerCase())){$('continueBtn').href='dashboard.html';$('continueBtn').innerHTML='<i class="fa-solid fa-gauge"></i> Continue to Dashboard'}let html='';for(const x of d){const {data:signed,error:se}=await S.storage.from('agent-documents').createSignedUrl(x.storage_path,600);if(se)throw se;const url=signed.signedUrl;const image=/\.(png|jpe?g)$/i.test(x.storage_path);html+='<article class="doc"><div class="head"><div><b>'+esc(x.document_type)+'</b><div class="small">Submitted '+new Date(x.created_at).toLocaleString()+'</div></div><span class="badge"><i class="fa-solid fa-lock"></i> Locked</span></div><div class="preview">'+(image?'<img src="'+esc(url)+'" alt="Submitted document">':'<iframe src="'+esc(url)+'#toolbar=1" title="Submitted PDF"></iframe>')+'</div><div class="foot"><span class="small">Private view</span><button class="btn" data-url="'+esc(url)+'">Open full view</button></div></article>'}$('docs').innerHTML=html;document.querySelectorAll('[data-url]').forEach(b=>b.onclick=()=>window.open(b.dataset.url,'_blank','noopener,noreferrer'))}catch(e){$('docs').textContent=e.message}}$('logout').onclick=async()=>{await S.auth.signOut();location.href='index.html'};boot();</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Submitted Documents | DBH Agent Portal</title>
+<link rel="icon" href="https://dbanjushomes-com.onrender.com/dbh-logo.jpg">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+<style>
+:root{--blue:#0b63ce;--deep:#062b52;--text:#0f172a;--muted:#64748b;--line:#e2e8f0;--bg:#f5f9fe;--soft:#eff6ff;--green:#15803d}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--text)}
+a{text-decoration:none;color:inherit}button{font:inherit}
+.top{height:72px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:50}
+.brand{display:flex;align-items:center;gap:10px;font-weight:900;color:var(--deep)}.brand img{width:43px;height:43px;border-radius:11px;object-fit:cover}.brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:.12em}
+.top-actions{display:flex;gap:8px}.icon{width:40px;height:40px;border:1px solid var(--line);background:#fff;border-radius:11px;color:var(--deep);display:grid;place-items:center;cursor:pointer}.icon:hover{background:var(--soft);color:var(--blue)}
+.shell{display:grid;grid-template-columns:250px 1fr;min-height:calc(100vh - 72px)}
+.side{background:#fff;border-right:1px solid var(--line);min-height:calc(100vh - 72px)}
+.main{width:100%;max-width:1250px;margin:auto;padding:34px}
+.eyebrow{font-size:9px;font-weight:900;letter-spacing:.14em;color:var(--blue)}
+h1{font-size:34px;letter-spacing:-.04em;margin:7px 0}.intro{color:var(--muted);font-size:12px;line-height:1.7;max-width:760px}
+.card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px;margin-top:22px;box-shadow:0 8px 30px #062b5208}
+.lock-banner{display:flex;gap:13px;align-items:flex-start;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:15px;padding:16px;color:#166534}
+.lock-icon{width:42px;height:42px;border-radius:12px;background:#dcfce7;display:grid;place-items:center;color:var(--green);font-size:17px;flex:0 0 42px}
+.lock-banner b{font-size:12px}.lock-banner p{margin:5px 0 0;font-size:10px;line-height:1.6;color:#166534}
+.docs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:20px}
+.doc{border:1px solid var(--line);border-radius:17px;overflow:hidden;background:#fff}
+.doc-head{padding:15px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line)}
+.doc-title{font-size:13px;font-weight:900;color:var(--deep)}.small{font-size:9px;color:var(--muted);line-height:1.5}
+.locked{display:inline-flex;align-items:center;gap:5px;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;border-radius:999px;padding:6px 9px;font-size:8px;font-weight:900;white-space:nowrap}
+.preview{height:380px;background:#eef3f8;position:relative;display:grid;place-items:center}
+.preview iframe{width:100%;height:100%;border:0;background:#fff}.preview img{width:100%;height:100%;object-fit:contain;padding:12px}
+.doc-foot{padding:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid var(--line)}
+.private{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:9px}.private i{color:var(--blue)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--deep);font-size:11px;font-weight:900;cursor:pointer}.btn:hover{background:var(--soft);border-color:#bfdbfe}
+.primary{background:var(--blue);border-color:var(--blue);color:#fff}.primary:hover{background:#0959b8;color:#fff}
+.actions{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:20px}.actions-left,.actions-right{display:flex;gap:9px;flex-wrap:wrap}
+.notice{margin-top:16px;background:#fff;border:1px solid #dbeafe;border-radius:13px;padding:12px 14px;color:var(--muted);font-size:9px;line-height:1.6}.notice i{color:var(--blue);margin-right:5px}
+.empty{padding:35px;text-align:center;color:var(--muted);font-size:12px}
+@media(max-width:900px){.shell{display:block}.side{min-height:0}.main{padding:25px 18px}.docs{grid-template-columns:1fr}.preview{height:360px}}
+@media(max-width:600px){.top{padding:0 14px}.brand div{font-size:12px}h1{font-size:27px}.main{padding:22px 14px}.card{padding:15px}.doc-head{display:block}.locked{margin-top:9px}.preview{height:300px}.actions{display:block}.actions-left,.actions-right{margin-top:9px}.actions .btn{width:100%}}
+</style>
+</head>
+<body>
+<header class="top">
+<a class="brand" href="dashboard.html"><img src="https://dbanjushomes-com.onrender.com/dbh-logo.jpg" alt="DBH logo"><div>D Banjus Homes Nig Ltd<small>AGENT PORTAL</small></div></a>
+<div class="top-actions">
+<a class="icon" href="notifications.html" aria-label="Notifications"><i class="fa-regular fa-bell"></i></a>
+<button class="icon" id="logout" aria-label="Sign out"><i class="fa-solid fa-right-from-bracket"></i></button>
+</div>
+</header>
+
+<div class="shell">
+<aside class="side" id="dbhSidebar"></aside>
+<main class="main">
+<div class="eyebrow"><i class="fa-solid fa-shield-halved"></i> VERIFICATION DOCUMENTS</div>
+<h1>Your submitted documents</h1>
+<p class="intro">Your two required legal documents have been submitted successfully. You can view them here at any time, but they are locked and cannot be replaced from the agent portal.</p>
+
+<section class="card">
+<div class="lock-banner">
+<div class="lock-icon"><i class="fa-solid fa-lock"></i></div>
+<div><b>Documents submitted and locked</b><p>DBH has received your documents. They remain private to your account while DBH Admin reviews your application.</p></div>
+</div>
+
+<div class="docs" id="docs"><div class="empty"><i class="fa-solid fa-spinner fa-spin"></i> Loading your documents...</div></div>
+
+<div class="notice"><i class="fa-solid fa-circle-info"></i> These documents are stored privately. The preview below is for viewing only and does not replace the original documents you submitted.</div>
+
+<div class="actions">
+<div class="actions-left">
+<a class="btn" href="agent-documents.html"><i class="fa-solid fa-file-arrow-up"></i> Document status</a>
+</div>
+<div class="actions-right">
+<a class="btn" href="dashboard.html"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+<a class="btn primary" id="continueBtn" href="payment.html"><i class="fa-solid fa-credit-card"></i> Continue to Payment</a>
+</div>
+</div>
+</section>
+</main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/app.js"></script>
+<script>
+const S=window.supabase.createClient('https://cpgajlsyuieeengdnamy.supabase.co','sb_publishable_fbcJT-QGKyZg0tDkpbDkOQ_CcQf2ugW');
+const $=id=>document.getElementById(id);
+function esc(x){return String(x??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function docName(value){return String(value||'Document').replaceAll('_',' ').replace(/\b\w/g,m=>m.toUpperCase())}
+async function boot(){
+ try{
+  const {data,error}=await S.auth.getSession();
+  if(error||!data.session){location.href='login.html';return}
+  const u=data.session.user;
+  const {data:a,error:ae}=await S.from('agent_applications').select('id').eq('user_id',u.id).order('created_at',{ascending:false}).limit(1).maybeSingle();
+  if(ae)throw ae;if(!a)throw new Error('Application not found.');
+  const {data:d,error:de}=await S.from('agent_application_documents').select('document_type,storage_path,status,created_at').eq('application_id',a.id).order('created_at',{ascending:true}).limit(2);
+  if(de)throw de;if(!d||d.length<2)throw new Error('Your submitted documents could not be found.');
+  const {data:p}=await S.from('agent_payment_records').select('status').eq('application_id',a.id).eq('payment_type','registration_fee').order('created_at',{ascending:false}).limit(1).maybeSingle();
+  const paid=['successful','completed','paid'].includes(String(p?.status||'').toLowerCase());
+  if(paid){$('continueBtn').href='dashboard.html';$('continueBtn').innerHTML='<i class="fa-solid fa-gauge-high"></i> Continue to Dashboard'}
+  let html='';
+  for(const x of d){
+   const {data:signed,error:se}=await S.storage.from('agent-documents').createSignedUrl(x.storage_path,600);
+   if(se)throw se;
+   const url=signed.signedUrl;
+   const image=/\.(png|jpe?g|webp)$/i.test(x.storage_path);
+   html+='<article class="doc">'+
+    '<div class="doc-head"><div><div class="doc-title"><i class="fa-solid fa-file-shield"></i> '+esc(docName(x.document_type))+'</div><div class="small">Submitted '+esc(new Date(x.created_at).toLocaleString())+'</div></div><span class="locked"><i class="fa-solid fa-lock"></i> LOCKED</span></div>'+
+    '<div class="preview">'+(image?'<img src="'+esc(url)+'" alt="Submitted '+esc(docName(x.document_type))+'">':'<iframe src="'+esc(url)+'#toolbar=1&navpanes=0" title="Submitted PDF document"></iframe>')+'</div>'+
+    '<div class="doc-foot"><span class="private"><i class="fa-solid fa-eye"></i> Private viewing</span><button class="btn" data-url="'+esc(url)+'"><i class="fa-solid fa-up-right-from-square"></i> Open full view</button></div>'+
+    '</article>';
+  }
+  $('docs').innerHTML=html;
+  document.querySelectorAll('[data-url]').forEach(b=>b.onclick=()=>window.open(b.dataset.url,'_blank','noopener,noreferrer'));
+ }catch(e){
+  console.error(e);
+  $('docs').innerHTML='<div class="empty"><i class="fa-solid fa-triangle-exclamation"></i><br><br>'+esc(e.message||'Unable to load your documents.')+'</div>';
+ }
+}
+$('logout').onclick=async()=>{await S.auth.signOut();location.href='index.html'};
+boot();
+</script>
+</body>
+</html>

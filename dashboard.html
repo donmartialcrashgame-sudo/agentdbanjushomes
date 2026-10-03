@@ -35,27 +35,27 @@ button,a{font:inherit}a{text-decoration:none;color:inherit}
 <a class="brand" href="index.html"><img src="https://dbanjushomes-com.onrender.com/dbh-logo.jpg" alt="DBH"><div>D Banjus Homes Nig Ltd<small>AGENT PORTAL</small></div></a>
 <div class="top-actions">
 <a class="icon bell" aria-label="Notifications" href="notifications.html"><i class="fa-regular fa-bell"></i><span class="dot" id="notificationCount">0</span></a>
-<button class="icon mobile-menu" id="menu" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
+<button class="icon mobile-menu" id="dbhMenu" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
 <button class="icon" id="logout" aria-label="Sign out"><i class="fa-solid fa-right-from-bracket"></i></button>
 </div>
 </header>
 
 <div class="shell">
-<aside class="side" id="side">
+<aside class="side" id="dbhSidebar">
 <div class="agent">
 <div class="avatar"><i class="fa-solid fa-user-tie"></i></div>
 <strong id="name">Loading...</strong><small id="email">Loading...</small>
 <div class="status" id="status">PENDING</div>
 </div>
 <nav class="nav">
-<a class="active" href="dashboard.html"><i class="fa-solid fa-gauge-high"></i> Overview</a>
+<a href="dashboard.html" data-page="dashboard.html"><i class="fa-solid fa-gauge-high"></i> Overview</a>
 <a class="locked" href="#" title="Available after payment and approval"><i class="fa-solid fa-house"></i> My Properties <i class="fa-solid fa-lock" style="margin-left:auto"></i></a>
 <a class="locked" href="#" title="Available after payment and approval"><i class="fa-solid fa-plus"></i> Add Property <i class="fa-solid fa-lock" style="margin-left:auto"></i></a>
 <a class="locked" href="#" title="Available after activation"><i class="fa-solid fa-comments"></i> Customer Enquiries <i class="fa-solid fa-lock" style="margin-left:auto"></i></a>
-<a href="payment.html"><i class="fa-solid fa-credit-card"></i> Registration Payment</a>
-<a href="agent-documents.html"><i class="fa-solid fa-file-shield"></i> Verification</a>
-<a href="notifications.html"><i class="fa-regular fa-bell"></i> Notifications</a>
-<a href="#"><i class="fa-solid fa-gear"></i> Settings</a>
+<a href="payment-result.html" data-page="payment-result.html"><i class="fa-solid fa-receipt"></i> Payment Receipt</a>
+<a href="agent-documents.html" data-page="agent-documents.html"><i class="fa-solid fa-file-shield"></i> Verification</a>
+<a href="notifications.html" data-page="notifications.html"><i class="fa-regular fa-bell"></i> Notifications</a>
+<a href="settings.html" data-page="settings.html"><i class="fa-solid fa-gear"></i> Settings</a>
 </nav>
 </aside>
 
@@ -101,6 +101,7 @@ button,a{font:inherit}a{text-decoration:none;color:inherit}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/app.js"></script>
 <script>
 const SUPABASE_URL='https://cpgajlsyuieeengdnamy.supabase.co';
 const SUPABASE_KEY='sb_publishable_fbcJT-QGKyZg0tDkpbDkOQ_CcQf2ugW';
@@ -237,8 +238,6 @@ async function boot(){
     showMessage('Something went wrong while loading the dashboard. Please refresh and try again.', 'err');
   }
 }
-
-$('menu').onclick=()=> $('side').classList.toggle('open');
 
 $('logout').onclick=async()=>{
   const button=$('logout');

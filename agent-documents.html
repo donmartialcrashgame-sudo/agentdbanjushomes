@@ -46,7 +46,8 @@
 <div class="progress" aria-label="Application progress"><span class="done"></span><span class="done"></span><span class="current"></span><span></span></div>
 <div class="fee"><div><strong>DBH agent registration fee</strong><small>Payment is separate from document review. The amount below comes from the current DBH agent settings.</small></div><div class="fee-value" id="feeAmount">Loading...</div></div>
 <div class="notice"><i class="fa-solid fa-circle-info"></i><div><strong>Important:</strong> submitting your documents does not automatically verify or approve your agent account. DBH Admin reviews the application and document status separately.</div></div>
-<div id="lockedBanner" class="locked-banner"><i class="fa-solid fa-lock"></i><div><strong>Documents submitted and locked.</strong><br>Your two legal documents have already been submitted. You cannot upload another document here. Continuing will take you to the payment step.</div></div>
+<div id="lockedBanner" class="locked-banner"><i class="fa-solid fa-lock"></i><div><strong>Documents submitted and locked.</strong><br>Your approved/pending documents are locked. A document that DBH Admin declines will remain available here so you can replace it.</div></div>
+<div id="declinedBanner" class="notice" style="display:none;background:#fff7ed;border-color:#fed7aa;color:#9a3412"><i class="fa-solid fa-triangle-exclamation"></i><div><strong>Action required:</strong> one or more documents were declined by DBH Admin. Replace only the declined document below. Your other submitted document remains locked.</div></div>
 <div id="msg" class="message"></div>
 
 <article class="doc" id="docCard1">
@@ -98,23 +99,43 @@ function applyExisting(){
   if(existing[1])setDocStatus(2,'Submitted: '+existing[1].document_type,existing[1].status);
 }
 function lockDocuments(){
+  let hasDeclined=false;
   existing.slice(0,2).forEach((d,i)=>{
     const slot=i+1;
     const card=$('docCard'+slot);
-    card.classList.add('locked');
     $('type'+slot).value=d.document_type||'';
-    $('type'+slot).disabled=true;
-    $('file'+slot).disabled=true;
-    $('fileName'+slot).textContent='Submitted and locked';
-    setDocStatus(slot,'Submitted • Locked','pending');
+    if(String(d.status||'').toLowerCase()==='declined'){
+      hasDeclined=true;
+      card.classList.remove('locked');
+      card.style.borderColor='#fed7aa';
+      $('type'+slot).disabled=false;
+      $('file'+slot).disabled=false;
+      $('fileName'+slot).textContent='Choose a replacement document';
+      setDocStatus(slot,'Declined • Replace required','bad');
+      $('docCheckIcon').className='fa-solid fa-triangle-exclamation';
+      $('docCheckText').textContent='Declined document requires replacement';
+    }else{
+      card.classList.add('locked');
+      $('type'+slot).disabled=true;
+      $('file'+slot).disabled=true;
+      $('fileName'+slot).textContent='Submitted and locked';
+      setDocStatus(slot,'Submitted • Locked',d.status);
+    }
   });
-  $('submit').disabled=true;
-  $('submit').innerHTML='<i class="fa-solid fa-lock"></i> Documents locked';
   $('back').style.display='none';
-  $('lockedBanner').classList.add('show');
-  $('instructionText').textContent='Your two legal documents have been submitted and are now locked.';
-  $('docCheckIcon').className='fa-solid fa-circle-check';
-  $('docCheckText').textContent='Two legal documents submitted';
+  if(hasDeclined){
+    $('lockedBanner').classList.remove('show');
+    $('declinedBanner').style.display='flex';
+    $('submit').disabled=false;
+    $('submit').innerHTML='<i class="fa-solid fa-rotate"></i> Replace declined document';
+    $('instructionText').textContent='Replace only the document marked Declined. Other submitted documents remain locked.';
+  }else{
+    $('submit').disabled=true;
+    $('submit').innerHTML='<i class="fa-solid fa-lock"></i> Documents locked';
+    $('lockedBanner').classList.add('show');
+    $('declinedBanner').style.display='none';
+    $('instructionText').textContent='Your two legal documents have been submitted and are now locked.';
+  }
 }
 async function hasPaid(){
   const {data,error}=await S.from('agent_payment_records').select('status').eq('application_id',app.id).eq('payment_type','registration_fee').order('created_at',{ascending:false}).limit(1).maybeSingle();
@@ -125,13 +146,14 @@ async function continueNext(){
   location.href='agent-document-view.html';
 }
 async function loadExisting(){
-  const {data,error}=await S.from('agent_application_documents').select('id,document_type,status,admin_note,created_at').eq('application_id',app.id).order('created_at',{ascending:true});
+  const {data,error}=await S.from('agent_application_documents').select('id,document_type,status,admin_note,message_type,storage_path,created_at').eq('application_id',app.id).order('created_at',{ascending:true});
   if(error)throw error;
-  existing=data||[];
+  existing=(data||[]).slice(0,2);
   applyExisting();
   if(existing.length>=2){
+    const hasDeclined=existing.some(d=>String(d.status||'').toLowerCase()==='declined');
     lockDocuments();
-    setTimeout(continueNext,900);
+    if(!hasDeclined)setTimeout(continueNext,900);
   }
 }
 function extensionFor(file){if(file.type==='application/pdf')return 'pdf';if(file.type==='image/png')return 'png';return 'jpg'}
@@ -139,10 +161,24 @@ function validateFile(file,slot){if(!file)throw new Error('Please choose a file 
 async function uploadOne(type,file,slot){
   validateFile(file,slot);
   if(!type)throw new Error('Please select a document type for Document '+slot+'.');
+  const old=existing[slot-1];
+  if(old && String(old.status||'').toLowerCase()!=='declined')throw new Error('Document '+slot+' is locked because it was not declined.');
   const safe=type.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
   const path=currentUser.id+'/'+app.id+'/document-'+slot+'-'+safe+'-'+Date.now()+'.'+extensionFor(file);
   const up=await S.storage.from('agent-documents').upload(path,file,{upsert:false,contentType:file.type});
   if(up.error)throw up.error;
+  if(old){
+    const upd=await S.from('agent_application_documents').update({
+      document_type:type,
+      storage_path:path,
+      status:'pending',
+      admin_note:null,
+      message_type:'document_not_original'
+    }).eq('id',old.id).eq('application_id',app.id);
+    if(upd.error){await S.storage.from('agent-documents').remove([path]);throw upd.error}
+    if(old.storage_path)await S.storage.from('agent-documents').remove([old.storage_path]);
+    return {document_type:type,status:'pending'};
+  }
   const ins=await S.from('agent_application_documents').insert({application_id:app.id,user_id:currentUser.id,document_type:type,storage_path:path,status:'pending'});
   if(ins.error){await S.storage.from('agent-documents').remove([path]);throw ins.error}
   return ins.data?.[0]||{document_type:type,status:'pending'};
@@ -154,8 +190,16 @@ $('submit').addEventListener('click',async()=>{
   const t1=$('type1').value,t2=$('type2').value,f1=$('file1').files[0],f2=$('file2').files[0];
   if(!t1||!t2){showMessage('Please select a document type for both documents.','err');return}
   if(t1===t2){showMessage('Please choose two different document types.','err');return}
-  if(existing.length>=2){lockDocuments();await continueNext();return}
-  setBusy(true,'Submitting documents...');
+  const hasDeclined=existing.some(d=>String(d.status||'').toLowerCase()==='declined');
+  if(existing.length>=2&&!hasDeclined){lockDocuments();await continueNext();return}
+  if(existing.length>=2&&hasDeclined){
+    const declinedSlots=existing.map((d,i)=>String(d.status||'').toLowerCase()==='declined'?i+1:null).filter(Boolean);
+    for(const slot of declinedSlots){
+      const type=$('type'+slot).value,file=$('file'+slot).files[0];
+      if(!file)throw new Error('Please choose a replacement file for declined Document '+slot+'.');
+    }
+  }
+  setBusy(true,hasDeclined?'Replacing declined document...':'Submitting documents...');
   try{
     await uploadOne(t1,f1,1);
     try{await uploadOne(t2,f2,2)}catch(secondError){
@@ -163,13 +207,20 @@ $('submit').addEventListener('click',async()=>{
       throw secondError;
     }
     await loadExisting();
-    lockDocuments();
-    showMessage('Both documents were submitted successfully. Moving to the next step...','ok');
-    setTimeout(continueNext,900);
+    const stillDeclined=existing.some(d=>String(d.status||'').toLowerCase()==='declined');
+    if(stillDeclined){
+      setBusy(false);
+      showMessage('Your replacement document was submitted for review. The declined document has been reopened and is now Pending.','ok');
+      lockDocuments();
+    }else{
+      lockDocuments();
+      showMessage('The replacement document was submitted successfully. Moving to the next step...','ok');
+      setTimeout(continueNext,900);
+    }
   }catch(e){
     console.error(e);
     if(!document.getElementById('msg').classList.contains('show')||!document.getElementById('msg').classList.contains('err'))showMessage(e.message||'Unable to submit documents.','err');
-    if(!$('submit').disabled)setBusy(false);
+    if(!$('submit').disabled && !hasDeclined)setBusy(false);
   }
 });
 $('back').addEventListener('click',()=>location.href='agent-onboarding.html');

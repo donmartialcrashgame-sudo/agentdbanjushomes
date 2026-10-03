@@ -37,21 +37,83 @@
 <script>
 const U="https://cpgajlsyuieeengdnamy.supabase.co",K="sb_publishable_fbcJT-QGKyZg0tDkpbDkOQ_CcQf2ugW",S=window.supabase.createClient(U,K),FN=U+"/functions/v1/dbh-agent-payment",$=id=>document.getElementById(id);
 let cfg=null;
-function money(amount,currency){const n=Number(amount||0);if(currency==='NGN')return '₦'+n.toLocaleString('en-NG',{maximumFractionDigits:0});if(currency==='USD')return '$("msg").textContent=t;$("msg").className="msg show "+c}
-function loading(on,label){const b=$("pay");if(on){b.dataset.label=b.innerHTML;b.disabled=true;b.innerHTML='<span class="spin"></span>'+label}else{b.disabled=false;b.innerHTML=b.dataset.label||'<i class="fa-solid fa-lock"></i> Continue to secure payment'}}
-async function token(){const {data,error}=await S.auth.getSession();if(error||!data.session){location.href="login.html";throw new Error("Please sign in again.")}return data.session.access_token}
-async function call(body){const t=await token();const r=await fetch(FN,{method:"POST",headers:{"Content-Type":"application/json","apikey":K,"Authorization":"Bearer "+t},body:JSON.stringify(body)});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"Payment request failed.");return d}
-async function boot(){try{cfg=await call({action:"config"});$("price").textContent=money(cfg.amount,cfg.currency);$("fee").textContent=money(cfg.amount,cfg.currency);$("currency").textContent=cfg.currency+" • TEST MODE";if(cfg.payments?.some(p=>p.status==="successful")){$("pay").disabled=true;$("pay").innerHTML='<i class="fa-solid fa-circle-check"></i> Registration fee already paid';msg("Your DBH registration fee is already paid.","ok")}}catch(e){msg(e.message,"err");$("pay").disabled=true}}
-$("pay").onclick=async()=>{loading(true,"Preparing secure checkout...");try{const d=await call({action:"init_checkout"});const c=d.checkout;if(!window.FlutterwaveCheckout)throw new Error("Flutterwave checkout library could not be loaded. Please reload and try again.");let finished=false;FlutterwaveCheckout({...c,callback:async(payment)=>{try{finished=true;msg("Payment received. DBH is verifying the transaction...","ok");const v=await call({action:"verify",reference:payment.tx_ref||c.tx_ref,transaction_id:String(payment.transaction_id||payment.id||"")});if(v.status==="successful"){location.href="payment-result.html?reference="+encodeURIComponent(c.tx_ref)+"&transaction_id="+encodeURIComponent(payment.transaction_id||payment.id||"")}else{location.href="payment-result.html?reference="+encodeURIComponent(c.tx_ref)}}catch(e){msg(e.message,"err")}},onclose:(incomplete)=>{if(incomplete&&!finished)msg("Payment window closed. No payment was confirmed.","err")}})}catch(e){msg(e.message,"err")}finally{loading(false)}};
-boot();
-</script>
-</body></html>+n.toLocaleString('en-US',{maximumFractionDigits:2});if(currency==='GBP')return '£'+n.toLocaleString('en-GB',{maximumFractionDigits:2});if(currency==='EUR')return '€'+n.toLocaleString('de-DE',{maximumFractionDigits:2});return currency+' '+n.toLocaleString('en-US',{maximumFractionDigits:2})}
+function money(amount,currency){
+  const n=Number(amount||0),cur=String(currency||"NGN").toUpperCase();
+  if(cur==="NGN") return "₦"+n.toLocaleString("en-NG",{maximumFractionDigits:0});
+  if(cur==="USD") return "$"+n.toLocaleString("en-US",{maximumFractionDigits:2});
+  if(cur==="GBP") return "£"+n.toLocaleString("en-GB",{maximumFractionDigits:2});
+  if(cur==="EUR") return "€"+n.toLocaleString("de-DE",{maximumFractionDigits:2});
+  return cur+" "+n.toLocaleString("en-US",{maximumFractionDigits:2});
+}
 function msg(t,c){$("msg").textContent=t;$("msg").className="msg show "+c}
-function loading(on,label){const b=$("pay");if(on){b.dataset.label=b.innerHTML;b.disabled=true;b.innerHTML='<span class="spin"></span>'+label}else{b.disabled=false;b.innerHTML=b.dataset.label||'<i class="fa-solid fa-lock"></i> Continue to secure payment'}}
-async function token(){const {data,error}=await S.auth.getSession();if(error||!data.session){location.href="login.html";throw new Error("Please sign in again.")}return data.session.access_token}
-async function call(body){const t=await token();const r=await fetch(FN,{method:"POST",headers:{"Content-Type":"application/json","apikey":K,"Authorization":"Bearer "+t},body:JSON.stringify(body)});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"Payment request failed.");return d}
-async function boot(){try{cfg=await call({action:"config"});const sym=cfg.currency==="USD"?"$":cfg.currency+" ";$("price").textContent=sym+Number(cfg.amount).toFixed(2);$("fee").textContent=sym+Number(cfg.amount).toFixed(2);$("currency").textContent=cfg.currency+" • TEST MODE";if(cfg.payments?.some(p=>p.status==="successful")){$("pay").disabled=true;$("pay").innerHTML='<i class="fa-solid fa-circle-check"></i> Registration fee already paid';msg("Your DBH registration fee is already paid.","ok")}}catch(e){msg(e.message,"err");$("pay").disabled=true}}
-$("pay").onclick=async()=>{loading(true,"Preparing secure checkout...");try{const d=await call({action:"init_checkout"});const c=d.checkout;if(!window.FlutterwaveCheckout)throw new Error("Flutterwave checkout library could not be loaded. Please reload and try again.");let finished=false;FlutterwaveCheckout({...c,callback:async(payment)=>{try{finished=true;msg("Payment received. DBH is verifying the transaction...","ok");const v=await call({action:"verify",reference:payment.tx_ref||c.tx_ref,transaction_id:String(payment.transaction_id||payment.id||"")});if(v.status==="successful"){location.href="payment-result.html?reference="+encodeURIComponent(c.tx_ref)+"&transaction_id="+encodeURIComponent(payment.transaction_id||payment.id||"")}else{location.href="payment-result.html?reference="+encodeURIComponent(c.tx_ref)}}catch(e){msg(e.message,"err")}},onclose:(incomplete)=>{if(incomplete&&!finished)msg("Payment window closed. No payment was confirmed.","err")}})}catch(e){msg(e.message,"err")}finally{loading(false)}};
+function loading(on,label){
+  const b=$("pay");
+  if(on){b.dataset.label=b.innerHTML;b.disabled=true;b.innerHTML='<span class="spin"></span>'+label}
+  else{b.disabled=false;b.innerHTML=b.dataset.label||'<i class="fa-solid fa-lock"></i> Continue to secure payment'}
+}
+async function token(){
+  const {data,error}=await S.auth.getSession();
+  if(error||!data.session){location.href="login.html";throw new Error("Please sign in again.")}
+  return data.session.access_token
+}
+async function call(body){
+  const t=await token();
+  const r=await fetch(FN,{method:"POST",headers:{"Content-Type":"application/json","apikey":K,"Authorization":"Bearer "+t},body:JSON.stringify(body)});
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(d.error||"Payment request failed.");
+  return d;
+}
+async function boot(){
+  try{
+    cfg=await call({action:"config"});
+    $("price").textContent=money(cfg.amount,cfg.currency);
+    $("fee").textContent=money(cfg.amount,cfg.currency);
+    $("currency").textContent=String(cfg.currency||"NGN").toUpperCase()+" • TEST MODE";
+    if(Array.isArray(cfg.payments)&&cfg.payments.some(p=>p.status==="successful")){
+      $("pay").disabled=true;
+      $("pay").innerHTML='<i class="fa-solid fa-circle-check"></i> Registration fee already paid';
+      msg("Your DBH registration fee is already paid.","ok");
+    }
+  }catch(e){
+    msg(e.message||"Unable to load payment details.","err");
+    $("pay").disabled=true;
+  }
+}
+$("pay").onclick=async()=>{
+  loading(true,"Preparing secure checkout...");
+  try{
+    const d=await call({action:"init_checkout"});
+    const checkout=d.checkout;
+    if(!window.FlutterwaveCheckout)throw new Error("Flutterwave checkout library could not be loaded. Please reload and try again.");
+    let finished=false;
+    FlutterwaveCheckout({
+      ...checkout,
+      callback:async(payment)=>{
+        try{
+          finished=true;
+          msg("Payment received. DBH is verifying the transaction...","ok");
+          const reference=payment.tx_ref||checkout.tx_ref;
+          const transactionId=String(payment.transaction_id||payment.id||"");
+          const v=await call({action:"verify",reference,transaction_id:transactionId});
+          if(v.status==="successful"){
+            location.href="payment-result.html?reference="+encodeURIComponent(reference)+"&transaction_id="+encodeURIComponent(transactionId);
+          }else{
+            location.href="payment-result.html?reference="+encodeURIComponent(reference);
+          }
+        }catch(e){
+          msg(e.message||"Payment verification failed.","err");
+        }
+      },
+      onclose:(incomplete)=>{
+        if(incomplete&&!finished)msg("Payment window closed. No payment was confirmed.","err");
+      }
+    });
+  }catch(e){
+    msg(e.message||"Could not start Flutterwave checkout.","err");
+  }finally{
+    loading(false);
+  }
+};
 boot();
 </script>
 </body></html>

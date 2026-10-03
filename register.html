@@ -51,10 +51,24 @@ function msg(id,t,c){$(id).textContent=t;$(id).className='msg show '+c}
 function buttonLoading(btn,on,label){if(on){btn.dataset.original=btn.innerHTML;btn.disabled=true;btn.classList.add('loading');btn.innerHTML='<span class="spin"></span>'+label}else{btn.disabled=false;btn.classList.remove('loading');btn.innerHTML=btn.dataset.original||'<i class="fa-solid fa-paper-plane"></i> Send verification code'}}
 function withTimeout(p,ms,label){return Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(new Error(label)),ms))])}
 function hideLoader(){document.getElementById('loader').classList.add('hide')}
+async function checkRegistration(){
+  const email=$('email').value.trim().toLowerCase(),phone=$('phone').value.trim(),whatsapp=$('whatsapp').value.trim();
+  const r=await withTimeout(fetch(FN,{method:'POST',headers:{'Content-Type':'application/json','apikey':K},body:JSON.stringify({action:'check_registration',email,phone,whatsapp})}),12000,'We could not check your registration details. Please try again.');
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(d.error||'We could not check your registration details.');
+  return d;
+}
 async function sendCode(){
-  const btn=$('submit');buttonLoading(btn,true,'Sending code...');
+  const btn=$('submit');buttonLoading(btn,true,'Checking details...');
   try{
     const email=$('email').value.trim().toLowerCase();
+    const check=await checkRegistration();
+    if(!check.available){
+      $('error').innerHTML='<strong>This account is already registered.</strong><br>Please login instead to continue your DBH agent application.<br><br><a href="login.html" style="display:inline-block;background:#0b63ce;color:#fff;padding:9px 13px;border-radius:9px;text-decoration:none;font-weight:800">Go to Login <i class="fa-solid fa-arrow-right"></i></a>';
+      $('error').className='msg show err';
+      return;
+    }
+    buttonLoading(btn,true,'Sending code...');
     const {error}=await withTimeout(S.auth.signInWithOtp({email,options:{shouldCreateUser:true,data:{full_name:$('fullName').value.trim(),phone:$('phone').value.trim(),whatsapp:$('whatsapp').value.trim(),agent_registration:true}}}),15000,'The email service is taking too long. Please check your connection and try again.');
     if(error)throw error;
     sent=true;$('emailShown').textContent=email;$('otpBox').classList.add('show');$('stepLabel').textContent='STEP 2 OF 2';$('progress').style.width='100%';msg('success','Verification code sent. Check your email inbox or spam folder.','ok');$('otp').focus();

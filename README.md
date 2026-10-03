@@ -85,11 +85,11 @@ Approved agents can receive enquiries associated with their properties. Public l
 
 ## Payments
 
-The planned payment provider is **Flutterwave**.
+The payment provider is **Flutterwave**. The current agent registration checkout is connected to Flutterwave **v4 Sandbox/Test Mode** and uses the DBH-controlled registration fee from `agent_settings`.
 
 Payment status is separate from agent approval. A successful payment must not automatically approve an agent.
 
-The exact registration fee, subscription, listing fee, commission, direct-customer-payment rules, grace period, and enforcement policy remain configurable until DBH confirms them.
+The current registration fee is **$50 USD**. Payment is separate from verification and admin approval. The payment Edge Function uses `FLW_CLIENT_ID`, `FLW_CLIENT_SECRET`, and `FLW_ENCRYPTION_KEY` as server-side secrets. The webhook function is `dbh-flutterwave-webhook`; configure a Flutterwave webhook secret hash as `FLW_SECRET_HASH` before relying on webhook updates. Test mode uses Flutterwave's sandbox environment; switch to production credentials/endpoints only after DBH is ready for live payments.
 
 ## Account enforcement
 

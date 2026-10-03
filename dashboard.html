@@ -51,7 +51,6 @@
 <a id="propertiesNav" class="disabled" href="#" data-page="properties.html" aria-disabled="true"><i class="fa-solid fa-house"></i> My Properties <i class="fa-solid fa-lock lock"></i></a>
 <a id="addPropertyNav" class="disabled" href="#" data-page="add-property.html" aria-disabled="true"><i class="fa-solid fa-plus"></i> Add Property <i class="fa-solid fa-lock lock"></i></a>
 <a id="activityNav" class="disabled" href="#" data-page="activity.html" aria-disabled="true"><i class="fa-solid fa-chart-line"></i> Activity & Reports <i class="fa-solid fa-lock lock"></i></a>
-<a id="activityNav" class="disabled" href="#" data-page="activity.html" aria-disabled="true"><i class="fa-solid fa-chart-line"></i> Activity & Reports <i class="fa-solid fa-lock lock"></i></a>
 <a id="enquiriesNav" class="disabled" href="#" data-page="enquiries.html" aria-disabled="true"><i class="fa-solid fa-triangle-exclamation"></i> Complaints & Reports <i class="fa-solid fa-lock lock"></i></a>
 <a href="payment-result.html" data-page="payment-result.html"><i class="fa-solid fa-receipt"></i> Payment Receipt</a>
 <a href="agent-documents.html" data-page="agent-documents.html"><i class="fa-solid fa-file-shield"></i> Verification</a>
@@ -65,8 +64,8 @@
 <div><div class="eyebrow">AGENT DASHBOARD</div><h1 id="welcome">Welcome back</h1><div class="sub">Manage your DBH agent account, payment, verification and — once approved — your property marketplace tools.</div></div>
 </div>
 
-<div class="notice">
-<i class="fa-solid fa-circle-info"></i>
+<div class="notice" id="applicationNotice">
+<i class="fa-solid fa-circle-info" id="noticeIcon"></i>
 <div><b id="noticeTitle">Your registration application is in progress.</b><p id="noticeText">Registration payment and verification are separate stages. DBH Admin approval is required before agent tools are activated.</p></div>
 </div>
 
@@ -164,7 +163,7 @@ async function boot(){
     if(sessionError||!sessionData.session){location.href='login.html';return}
     const user=sessionData.session.user;
 
-    const {count:unreadCount,error:notificationError}=await S.from('notifications').select('id',{count:'exact',head:true}).eq('user_id',user.id).eq('is_read',false);
+    const {count:unreadCount,error:notificationError}=await S.from('dbh_notifications').select('id',{count:'exact',head:true}).eq('recipient_email',String(user.email||'').toLowerCase()).eq('is_read',false);
     if(!notificationError) $('notificationCount').textContent=String(unreadCount||0);
 
     const {data:app,error:appError}=await S.from('agent_applications').select('*').eq('user_id',user.id).order('created_at',{ascending:false}).limit(1).maybeSingle();
@@ -198,6 +197,14 @@ async function boot(){
     if(paymentError){console.error(paymentError);showMessage('Your payment record could not be loaded. Please refresh once.','warn')}
 
     const paid=payment?.status==='successful';
+    const applicationPendingAfterDecline=status==='pending';
+    const {data:declinedDocs,error:declinedError}=await S.from('agent_application_documents')
+      .select('id,document_type,message_type,admin_note,created_at')
+      .eq('application_id',app.id)
+      .eq('status','declined')
+      .order('created_at',{ascending:false});
+    if(declinedError) console.error(declinedError);
+    const hasDeclinedDocument=Array.isArray(declinedDocs)&&declinedDocs.length>0;
     const dismissed=app.payment_card_dismissed===true;
     const unlocked=paid&&verified;
     setToolAccess(unlocked);
@@ -222,7 +229,13 @@ async function boot(){
       showMessage('A previous payment attempt is pending. You can continue the secure Flutterwave checkout.','warn');
     }
 
-    if(status==='verified'){
+    if(hasDeclinedDocument || applicationPendingAfterDecline){
+      $('noticeIcon').className='fa-solid fa-circle-exclamation';
+      $('noticeIcon').style.color='#b91c1c';
+      $('noticeTitle').textContent=hasDeclinedDocument?'Document verification needs your attention.':'Your application is pending review.';
+      $('noticeText').textContent=hasDeclinedDocument?'One or more submitted verification documents were declined. Please open Notifications/Verification to review the administrator message and complete the requested replacement. Your verified status has been returned to Pending.':'Your application is currently pending DBH Admin review.';
+      $('applicationNotice').style.borderLeftColor='#dc2626';
+    }else if(status==='verified'){
       $('noticeTitle').textContent=paid?'Payment received and verification completed.':'Your application has been verified.';
       $('noticeText').textContent=paid?'Your remaining agent tools are now unlocked.':'Your application is verified. Complete the registration payment to unlock the remaining agent tools.';
     }else if(status==='approved'){

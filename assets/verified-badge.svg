@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <radialGradient id="badgeBlue" cx="58%" cy="42%" r="68%">
+      <stop offset="0%" stop-color="#28c8f5"/>
+      <stop offset="58%" stop-color="#10a9e8"/>
+      <stop offset="100%" stop-color="#087fd0"/>
+    </radialGradient>
+
+    <linearGradient id="edgeBlue" x1="0" y1="0" x2="0.9" y2="1">
+      <stop offset="0%" stop-color="#0751a7"/>
+      <stop offset="45%" stop-color="#073d91"/>
+      <stop offset="100%" stop-color="#031d72"/>
+    </linearGradient>
+
+    <linearGradient id="checkBlue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0786dc"/>
+      <stop offset="55%" stop-color="#049fe9"/>
+      <stop offset="100%" stop-color="#006fc8"/>
+    </linearGradient>
+
+    <linearGradient id="shieldWhite" x1="0" y1="0" x2="0.85" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="72%" stop-color="#f3f3f3"/>
+      <stop offset="100%" stop-color="#dedede"/>
+    </linearGradient>
+
+    <filter id="shieldShadow" x="-30%" y="-30%" width="170%" height="180%">
+      <feDropShadow dx="-7" dy="15" stdDeviation="13" flood-color="#000000" flood-opacity="0.28"/>
+    </filter>
+
+    <filter id="checkShadow" x="-30%" y="-30%" width="170%" height="180%">
+      <feDropShadow dx="0" dy="7" stdDeviation="6" flood-color="#004f9e" flood-opacity="0.38"/>
+    </filter>
+  </defs>
+
+  <!-- Main blue badge -->
+  <circle cx="512" cy="512" r="410" fill="url(#badgeBlue)" stroke="url(#edgeBlue)" stroke-width="7"/>
+
+  <!-- subtle lower rim -->
+  <path d="M205 665 A410 410 0 0 0 820 785 A410 410 0 0 0 930 565"
+        fill="none" stroke="#0053a9" stroke-width="5" opacity="0.35"/>
+
+  <!-- Shield -->
+  <path
+    d="M512 334
+       C484 334 455 358 422 369
+       C388 381 352 382 326 392
+       C311 398 304 409 305 426
+       L315 583
+       C319 651 352 712 405 758
+       C445 793 485 812 512 824
+       C539 812 579 793 619 758
+       C672 712 705 651 709 583
+       L719 426
+       C720 409 713 398 698 392
+       C672 382 636 381 602 369
+       C569 358 540 334 512 334 Z"
+    fill="url(#shieldWhite)"
+    stroke="#cfcfcf"
+    stroke-width="3"
+    filter="url(#shieldShadow)"/>
+
+  <!-- Shield left-side highlight -->
+  <path
+    d="M333 421
+       C365 410 397 411 431 398
+       C464 386 488 365 512 357
+       C489 375 465 395 449 416
+       C425 447 416 491 417 545
+       C419 624 448 692 502 758
+       C472 744 440 726 411 700
+       C365 659 341 605 338 549 Z"
+    fill="#ffffff"
+    opacity="0.24"/>
+
+  <!-- Check mark -->
+  <path
+    d="M416 510
+       C401 495 378 496 363 512
+       C348 528 349 552 365 567
+       L468 666
+       C486 683 514 681 531 662
+       L658 515
+       C674 497 673 473 655 458
+       C637 443 613 446 598 464
+       L488 592
+       L416 510 Z"
+    fill="url(#checkBlue)"
+    stroke="#0873c6"
+    stroke-width="3"
+    filter="url(#checkShadow)"/>
+
+  <!-- Check highlight -->
+  <path
+    d="M383 526
+       L475 614
+       C484 623 498 622 507 611
+       L628 472"
+    fill="none"
+    stroke="#35c9ff"
+    stroke-width="8"
+    stroke-linecap="round"
+    opacity="0.35"/>
+</svg>

@@ -122,8 +122,7 @@ async function hasPaid(){
   return ['successful','completed','paid'].includes(String(data?.status||'').toLowerCase());
 }
 async function continueNext(){
-  const paid=await hasPaid();
-  location.href=paid?'dashboard.html':'payment.html';
+  location.href='agent-document-view.html';
 }
 async function loadExisting(){
   const {data,error}=await S.from('agent_application_documents').select('id,document_type,status,admin_note,created_at').eq('application_id',app.id).order('created_at',{ascending:true});

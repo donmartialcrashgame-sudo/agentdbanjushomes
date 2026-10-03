@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Notifications | DBH Agent Portal</title>
+<link rel="icon" href="https://dbanjushomes-com.onrender.com/dbh-logo.jpg">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+<style>
+:root{--b:#0b63ce;--d:#062b52;--t:#0f172a;--m:#64748b;--l:#e2e8f0;--bg:#f5f9fe}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+.top{height:72px;background:#fff;border-bottom:1px solid var(--l);display:flex;align-items:center;justify-content:space-between;padding:0 5%;position:sticky;top:0;z-index:5}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--d);font-weight:900}.brand img{width:43px;height:43px;border-radius:11px;object-fit:cover}.brand small{display:block;color:var(--m);font-size:9px;letter-spacing:.12em}
+.btn{border:1px solid var(--l);background:#fff;color:var(--d);padding:10px 13px;border-radius:11px;font-weight:850;cursor:pointer}.primary{background:var(--b);border-color:var(--b);color:#fff}
+.wrap{max-width:980px;margin:auto;padding:34px 16px 70px}.hero{background:linear-gradient(135deg,var(--d),var(--b));color:#fff;border-radius:24px;padding:30px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;gap:20px}.eyebrow{font-size:9px;letter-spacing:.14em;font-weight:900;color:#bfdbfe}.hero h1{font-size:32px;margin:8px 0}.hero p{font-size:11px;color:#dbeafe;margin:0;line-height:1.6}.count{min-width:74px;height:74px;border-radius:50%;background:#ffffff18;border:1px solid #ffffff25;display:grid;place-items:center;text-align:center}.count b{font-size:24px;display:block}.count small{font-size:8px;color:#dbeafe}
+.toolbar{background:#fff;border:1px solid var(--l);border-radius:16px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.toolbar span{font-size:10px;color:var(--m)}
+.list{display:grid;gap:10px}.item{background:#fff;border:1px solid var(--l);border-radius:17px;padding:18px;display:grid;grid-template-columns:44px 1fr auto;gap:14px;align-items:start}.item.unread{border-left:4px solid var(--b);background:#fafdff}.ico{width:44px;height:44px;border-radius:13px;background:#eff6ff;color:var(--b);display:grid;place-items:center;font-size:17px}.item h3{margin:0;font-size:14px}.item p{margin:6px 0 0;color:var(--m);font-size:10px;line-height:1.6}.time{color:#94a3b8;font-size:9px;white-space:nowrap}.empty{background:#fff;border:1px dashed #bfd0e4;border-radius:18px;padding:45px 20px;text-align:center;color:var(--m)}.empty i{font-size:34px;color:#94a3b8;margin-bottom:12px}.empty h3{color:var(--t);margin:0 0 5px}.msg{display:none;margin:12px 0;padding:11px;border-radius:10px;font-size:10px}.msg.show{display:block}.err{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
+@media(max-width:620px){.top{padding:0 12px}.hero{padding:23px;border-radius:19px}.hero h1{font-size:27px}.item{grid-template-columns:40px 1fr}.time{grid-column:2}.count{min-width:62px;height:62px}.toolbar{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<header class="top"><a class="brand" href="dashboard.html"><img src="https://dbanjushomes-com.onrender.com/dbh-logo.jpg" alt="DBH"><div>D Banjus Homes Nig Ltd<small>AGENT NOTIFICATIONS</small></div></a><div><a class="btn" href="dashboard.html"><i class="fa-solid fa-arrow-left"></i> Dashboard</a></div></header>
+<main class="wrap">
+<section class="hero"><div><div class="eyebrow">DBH AGENT PORTAL</div><h1>Notifications</h1><p>Stay updated about your application, payment, verification, properties and account status.</p></div><div class="count"><div><b id="unread">0</b><small>UNREAD</small></div></div></section>
+<div class="toolbar"><span id="summary">Loading notifications...</span><button class="btn primary" id="readAll"><i class="fa-solid fa-check-double"></i> Mark all as read</button></div>
+<div id="msg" class="msg"></div><section class="list" id="list"></section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const U='https://cpgajlsyuieeengdnamy.supabase.co',K='sb_publishable_fbcJT-QGKyZg0tDkpbDkOQ_CcQf2ugW',S=window.supabase.createClient(U,K),$=id=>document.getElementById(id);
+function icon(type){type=String(type||'').toLowerCase();if(type.includes('payment'))return 'fa-credit-card';if(type.includes('verif')||type.includes('document'))return 'fa-file-shield';if(type.includes('property'))return 'fa-house';if(type.includes('security'))return 'fa-shield-halved';return 'fa-bell'}
+function esc(v){return String(v??'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[x]))}
+function ago(v){const d=new Date(v),s=Math.floor((Date.now()-d.getTime())/1000);if(s<60)return 'Just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';if(s<604800)return Math.floor(s/86400)+'d ago';return d.toLocaleDateString()}
+function msg(t){$('msg').textContent=t;$('msg').className='msg show err'}
+async function boot(){const {data:{session},error}=await S.auth.getSession();if(error||!session){location.href='login.html';return}const uid=session.user.id;const {data,error:e}=await S.from('notifications').select('id,title,message,type,link,is_read,created_at').eq('user_id',uid).order('created_at',{ascending:false}).limit(100);if(e){console.error(e);msg('Notifications could not be loaded. Please refresh.');return}const rows=data||[],unread=rows.filter(x=>!x.is_read).length;$('unread').textContent=unread;$('summary').textContent=rows.length?rows.length+' notification'+(rows.length===1?'':'s')+' • '+unread+' unread':'No notifications yet';$('list').innerHTML=rows.length?rows.map(n=>'<article class="item '+(!n.is_read?'unread':'')+'"><div class="ico"><i class="fa-solid '+icon(n.type)+'"></i></div><div><h3>'+esc(n.title||'DBH notification')+'</h3><p>'+esc(n.message||'')+'</p>'+(n.link?'<p><a href="'+esc(n.link)+'" style="color:#0b63ce;font-weight:800">Open related page <i class="fa-solid fa-arrow-up-right-from-square"></i></a></p>':'')+'</div><time class="time">'+esc(ago(n.created_at))+'</time></article>').join(''):'<div class="empty"><i class="fa-regular fa-bell-slash"></i><h3>No notifications yet</h3><p>DBH updates about your application will appear here.</p></div>'}
+$('readAll').onclick=async()=>{const b=$('readAll');b.disabled=true;const {error}=await S.from('notifications').update({is_read:true}).eq('user_id',(await S.auth.getUser()).data.user.id).eq('is_read',false);if(error){msg('Could not mark notifications as read.');b.disabled=false;return}await boot();b.disabled=false};boot();
+</script>
+</body></html>

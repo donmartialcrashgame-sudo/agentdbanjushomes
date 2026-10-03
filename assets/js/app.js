@@ -41,13 +41,39 @@
       if(shell) shell.insertBefore(side,shell.firstElementChild);
       else document.body.insertBefore(side,document.body.firstChild);
     }
+
     side.innerHTML=sidebarMarkup();
     const inLayout=!!side.closest('.shell,.layout');
     side.classList.toggle('dbh-floating-sidebar',!inLayout);
+
     if(!document.getElementById('dbhSharedSidebarStyle')){
       const style=document.createElement('style');
       style.id='dbhSharedSidebarStyle';
-      style.textContent='.dbh-floating-sidebar{position:fixed!important;left:0;top:72px;width:250px;height:calc(100vh - 72px);overflow:auto;background:#fff;border-right:1px solid #e2e8f0;padding:20px 14px;z-index:100;box-shadow:8px 0 25px rgba(6,43,82,.06)}.dbh-floating-sidebar .agent{background:linear-gradient(145deg,#062b52,#0b63ce);color:#fff;border-radius:18px;padding:15px;margin-bottom:17px}.dbh-floating-sidebar .agent strong,.dbh-floating-sidebar .agent small{display:block}.dbh-floating-sidebar .agent strong{font-size:13px}.dbh-floating-sidebar .agent small{font-size:9px;color:#bfdbfe;margin-top:4px}.dbh-floating-sidebar .avatar{width:43px;height:43px;border-radius:13px;background:#ffffff1c;display:grid;place-items:center;margin-bottom:10px}.dbh-floating-sidebar .status-row{display:flex;align-items:center;gap:8px;margin-top:10px}.dbh-floating-sidebar .verified-badge{display:none;width:34px;height:34px;object-fit:contain}.dbh-floating-sidebar .verified-badge.show{display:block}.dbh-floating-sidebar .nav{display:grid;gap:4px}.dbh-floating-sidebar .nav a{padding:12px;border-radius:11px;color:#475569;font-size:12px;font-weight:800;display:flex;align-items:center;gap:11px;text-decoration:none}.dbh-floating-sidebar .nav a.active,.dbh-floating-sidebar .nav a:hover{background:#eff6ff;color:#0b63ce}.dbh-floating-sidebar .nav a.disabled{opacity:.48;cursor:not-allowed}.dbh-floating-sidebar .nav .lock{margin-left:auto}.dbh-floating-sidebar~.wrap,.dbh-floating-sidebar~main{margin-left:250px}.dbh-mobile-toggle{display:none;position:fixed;left:12px;bottom:14px;width:46px;height:46px;border:0;border-radius:50%;background:#0b63ce;color:#fff;z-index:101;box-shadow:0 8px 25px rgba(6,43,82,.25)}@media(max-width:850px){.dbh-floating-sidebar{left:-270px!important;transition:left .2s}.dbh-floating-sidebar.open{left:0!important}.dbh-floating-sidebar~.wrap,.dbh-floating-sidebar~main{margin-left:0}.dbh-mobile-toggle{display:grid;place-items:center}}';
+      style.textContent=
+        /* These rules are intentionally scoped to the shared sidebar.
+           Some pages use the generic class names .status/.verified-badge
+           for property cards, so never let page styles resize the sidebar
+           badge or position the agent status like a property-card badge. */
+        '#dbhSidebar .status{position:static!important;left:auto!important;top:auto!important;right:auto!important;bottom:auto!important;display:inline-flex!important;align-items:center!important;width:auto!important;height:auto!important;min-height:0!important;padding:5px 9px!important;border-radius:999px!important;background:rgba(255,255,255,.14)!important;color:#fff!important;font-size:9px!important;font-weight:900!important;line-height:1.2!important;text-transform:uppercase!important;box-shadow:none!important;white-space:nowrap!important}'+
+        '#dbhSidebar .verified-badge{display:none!important;width:32px!important;height:32px!important;max-width:32px!important;max-height:32px!important;min-width:32px!important;min-height:32px!important;object-fit:contain!important;position:static!important;margin:0!important;padding:0!important;vertical-align:middle!important}'+
+        '#dbhSidebar .verified-badge.show{display:block!important}'+
+        '#dbhSidebar .status-row{display:flex!important;align-items:center!important;gap:8px!important;margin-top:10px!important;position:static!important}'+
+        '#dbhSidebar .agent .avatar{width:43px;height:43px;border-radius:13px;background:#ffffff1c;display:grid;place-items:center;margin-bottom:10px}'+
+        '#dbhSidebar .agent strong,#dbhSidebar .agent small{position:static!important;display:block!important}'+
+        '.dbh-floating-sidebar{position:fixed!important;left:0;top:72px;width:250px;height:calc(100vh - 72px);overflow:auto;background:#fff;border-right:1px solid #e2e8f0;padding:20px 14px;z-index:100;box-shadow:8px 0 25px rgba(6,43,82,.06)}'+
+        '.dbh-floating-sidebar .agent{background:linear-gradient(145deg,#062b52,#0b63ce);color:#fff;border-radius:18px;padding:15px;margin-bottom:17px}'+
+        '.dbh-floating-sidebar .agent strong,.dbh-floating-sidebar .agent small{display:block}'+
+        '.dbh-floating-sidebar .agent strong{font-size:13px}'+
+        '.dbh-floating-sidebar .agent small{font-size:9px;color:#bfdbfe;margin-top:4px}'+
+        '.dbh-floating-sidebar .status-row{display:flex;align-items:center;gap:8px;margin-top:10px}'+
+        '.dbh-floating-sidebar .nav{display:grid;gap:4px}'+
+        '.dbh-floating-sidebar .nav a{padding:12px;border-radius:11px;color:#475569;font-size:12px;font-weight:800;display:flex;align-items:center;gap:11px;text-decoration:none}'+
+        '.dbh-floating-sidebar .nav a.active,.dbh-floating-sidebar .nav a:hover{background:#eff6ff;color:#0b63ce}'+
+        '.dbh-floating-sidebar .nav a.disabled{opacity:.48;cursor:not-allowed}'+
+        '.dbh-floating-sidebar .nav .lock{margin-left:auto}'+
+        '.dbh-floating-sidebar~.wrap,.dbh-floating-sidebar~main{margin-left:250px}'+
+        '.dbh-mobile-toggle{display:none;position:fixed;left:12px;bottom:14px;width:46px;height:46px;border:0;border-radius:50%;background:#0b63ce;color:#fff;z-index:101;box-shadow:0 8px 25px rgba(6,43,82,.25)}'+
+        '@media(max-width:850px){.dbh-floating-sidebar{left:-270px!important;transition:left .2s}.dbh-floating-sidebar.open{left:0!important}.dbh-floating-sidebar~.wrap,.dbh-floating-sidebar~main{margin-left:0}.dbh-mobile-toggle{display:grid;place-items:center}}';
       document.head.appendChild(style);
     }
 

@@ -187,40 +187,43 @@ $('file1').addEventListener('change',e=>{$('fileName1').textContent=e.target.fil
 $('file2').addEventListener('change',e=>{$('fileName2').textContent=e.target.files[0]?.name||'No document selected.'});
 $('submit').addEventListener('click',async()=>{
   if(!app||!currentUser){showMessage('Please wait while your application loads.','err');return}
-  const t1=$('type1').value,t2=$('type2').value,f1=$('file1').files[0],f2=$('file2').files[0];
+  const t1=$('type1').value,t2=$('type2').value;
   if(!t1||!t2){showMessage('Please select a document type for both documents.','err');return}
   if(t1===t2){showMessage('Please choose two different document types.','err');return}
   const hasDeclined=existing.some(d=>String(d.status||'').toLowerCase()==='declined');
   if(existing.length>=2&&!hasDeclined){lockDocuments();await continueNext();return}
-  if(existing.length>=2&&hasDeclined){
-    const declinedSlots=existing.map((d,i)=>String(d.status||'').toLowerCase()==='declined'?i+1:null).filter(Boolean);
-    for(const slot of declinedSlots){
-      const type=$('type'+slot).value,file=$('file'+slot).files[0];
-      if(!file)throw new Error('Please choose a replacement file for declined Document '+slot+'.');
-    }
+
+  const slotsToReplace=hasDeclined
+    ? existing.map((d,i)=>String(d.status||'').toLowerCase()==='declined'?i+1:null).filter(Boolean)
+    : [1,2];
+
+  for(const slot of slotsToReplace){
+    const file=$('file'+slot).files[0];
+    if(!file){showMessage('Please choose a replacement file for declined Document '+slot+'.','err');return}
   }
+
   setBusy(true,hasDeclined?'Replacing declined document...':'Submitting documents...');
   try{
-    await uploadOne(t1,f1,1);
-    try{await uploadOne(t2,f2,2)}catch(secondError){
-      showMessage('Document 1 was uploaded, but Document 2 could not be submitted. The page will remain available so the second document can be completed.','err');
-      throw secondError;
+    for(const slot of slotsToReplace){
+      const type=$('type'+slot).value;
+      const file=$('file'+slot).files[0];
+      await uploadOne(type,file,slot);
     }
     await loadExisting();
     const stillDeclined=existing.some(d=>String(d.status||'').toLowerCase()==='declined');
     if(stillDeclined){
       setBusy(false);
-      showMessage('Your replacement document was submitted for review. The declined document has been reopened and is now Pending.','ok');
+      showMessage('Your replacement document was submitted for review. The declined document is now Pending.','ok');
       lockDocuments();
     }else{
       lockDocuments();
-      showMessage('The replacement document was submitted successfully. Moving to the next step...','ok');
+      showMessage('Your document submission is complete. Moving to the next step...','ok');
       setTimeout(continueNext,900);
     }
   }catch(e){
     console.error(e);
-    if(!document.getElementById('msg').classList.contains('show')||!document.getElementById('msg').classList.contains('err'))showMessage(e.message||'Unable to submit documents.','err');
-    if(!$('submit').disabled && !hasDeclined)setBusy(false);
+    showMessage(e.message||'Unable to submit documents.','err');
+    setBusy(false);
   }
 });
 $('back').addEventListener('click',()=>location.href='agent-onboarding.html');

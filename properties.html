@@ -64,76 +64,37 @@
 </script>
 <script>
 const S=window.supabase.createClient('https://cpgajlsyuieeengdnamy.supabase.co','sb_publishable_fbcJT-QGKyZg0tDkpbDkOQ_CcQf2ugW');
-const $=id=>document.getElementById(id);let user=null,rows=[],activityMap={};
-const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-const money=(p)=>{const c=p.currency||'NGN';const s={NGN:'₦',USD:'$',GBP:'£',EUR:'€',CAD:'CA$'}[c]||c+' ';return s+Number(p.price||0).toLocaleString()};
-function statusLabel(s){return String(s||'pending').replaceAll('_',' ')}
-function imageFor(p){const imgs=(p.property_images||[]).slice().sort((a,b)=>(Number(a.sort_order)||0)-(Number(b.sort_order)||0));return imgs.find(x=>x.is_cover)?.image_url||imgs[0]?.image_url||'https://dbanjushomes-com.onrender.com/dbh-logo.jpg'}
-function render(){const q=$('search').value.trim().toLowerCase(),sf=$('statusFilter').value,tf=$('typeFilter').value;
-const list=rows.filter(p=>{const hay=[p.title,p.property_code,p.city,p.area,p.state,p.address].filter(Boolean).join(' ').toLowerCase();const st=p.verification_status||'pending';return(!q||hay.includes(q))&&(sf==='all'||st===sf)&&(tf==='all'||p.property_type===tf)});
-$('count').textContent=list.length+' propert'+(list.length===1?'y':'ies');
-$('grid').innerHTML=list.length?list.map(p=>{const st=p.verification_status||'pending';const a=activityMap[p.id]||{};return '<article class="property"><div class="photo"><img loading="lazy" src="'+esc(imageFor(p))+'" alt="'+esc(p.title||'Property image')+'"><span class="status '+esc(st)+'">'+esc(statusLabel(st))+'</span><span class="code">'+esc(p.property_code||'DBH PROPERTY')+'</span></div><div class="content"><h2 class="title" title="'+esc(p.title)+'">'+esc(p.title||'Untitled property')+'</h2><div class="location"><i class="fa-solid fa-location-dot"></i> '+esc([p.area,p.city,p.state].filter(Boolean).join(', ')||'Location not supplied')+'</div><div class="price">'+money(p)+'</div><div class="meta"><span><i class="fa-solid fa-bed"></i> '+Number(p.bedrooms||0)+' beds</span><span><i class="fa-solid fa-bath"></i> '+Number(p.bathrooms||0)+' baths</span><span><i class="fa-solid fa-eye"></i> '+Number(a.views||0)+' views</span></div><div class="cardactions"><a class="btn outline" href="add-property.html?id='+encodeURIComponent(p.id)+'"><i class="fa-solid fa-pen"></i>Edit</a><a class="btn primary" href="activity.html?property='+encodeURIComponent(p.id)+'"><i class="fa-solid fa-chart-line"></i>Activity</a></div>'+((['verified','approved'].includes(String(st).toLowerCase())&&p.payment_status!=='successful')?'<a class="btn primary" style="width:100%;justify-content:center;margin-top:8px;background:#15803d" href="property-payment.html?property_id='+encodeURIComponent(p.id)+'"><i class="fa-solid fa-credit-card"></i>Pay '+esc(p.payment_currency||'NGN')+' '+Number(p.payment_amount||0).toLocaleString()+'</a>':'')</div></article>'}).join(''):'';
-if(list.length){$('empty').style.display='none'}else if(rows.length){$('empty').style.display='block';$('empty').querySelector('h3').textContent='No matching properties';$('empty').querySelector('p').textContent='Try another search or change the status or property type filter.'}else $('empty').style.display='block'}
-function timeout(p,ms,label){return Promise.race([p,new Promise((_,reject)=>setTimeout(()=>reject(new Error(label)),ms))])}
-async function auth(){try{const r=await timeout(S.auth.getSession(),8000,'Supabase session check timed out.');if(r.error||!r.data||!r.data.session){location.href='login.html';return null}user=r.data.session.user;return user}catch(e){console.error(e);const loading=$('loading');if(loading)loading.outerHTML='<div class="error"><i class="fa-solid fa-triangle-exclamation"></i> '+esc(e.message||'Session check failed.')+'<br><button id="retryProperties" class="btn outline" style="margin-top:10px">Retry</button></div>';const retry=$('retryProperties');if(retry)retry.onclick=()=>location.reload();return null}}
-async function load(){
-  if(!user)return;
-  const loading=$('loading');
-  try{
-    loading.innerHTML='<div class="spinner"></div><strong style="display:block;color:var(--navy);margin-bottom:5px">Loading your properties</strong><span>Checking your DBH property records...</span>';
-    const result=await timeout(S.from('properties').select('id,title,property_code,property_type,price,currency,state,city,area,address,bedrooms,bathrooms,is_published,verification_status,payment_status,payment_amount,payment_currency,created_at').eq('created_by',user.id).order('created_at',{ascending:false}),12000,'Property database request timed out.');
-    if(result.error)throw result.error;
-    rows=result.data||[];
-    $('total').textContent=rows.length;
-    $('published').textContent=rows.filter(p=>p.is_published===true).length;
-    $('pending').textContent=rows.filter(p=>(p.verification_status||'pending')==='pending').length;
-    activityMap={};
-    $('views').textContent='0';
-    if(rows.length){
-      loading.innerHTML='<div class="spinner"></div><strong style="display:block;color:var(--navy);margin-bottom:5px">Preparing property photos</strong><span>Your property records are ready.</span>';
-      const ids=rows.map(p=>p.id);
-      try{
-        const ir=await timeout(S.from('property_images').select('property_id,image_url,sort_order,is_cover').in('property_id',ids).order('sort_order',{ascending:true}),8000,'Property image lookup timed out.');
-        if(!ir.error){
-          const by={};
-          (ir.data||[]).forEach(x=>{(by[x.property_id]||(by[x.property_id]=[])).push(x)});
-          rows=rows.map(p=>({...p,property_images:by[p.id]||[]}));
-        }else{
-          rows=rows.map(p=>({...p,property_images:[]}));
-        }
-      }catch(imageError){
-        console.warn('Property image lookup failed; using fallback images.',imageError);
-        rows=rows.map(p=>({...p,property_images:[]}));
-      }
-    }
-    loading.remove();
-    render();
-  }catch(e){
-    console.error('Properties load failed:',e);
-    loading.outerHTML='<div class="error"><i class="fa-solid fa-triangle-exclamation"></i> <strong>Could not load your properties.</strong><br><small>'+esc(e.message||'Unknown error')+'</small><br><button id="retryProperties" class="btn outline" style="margin-top:10px"><i class="fa-solid fa-rotate-right"></i> Retry</button></div>';
-    $('retryProperties').onclick=()=>location.reload();
-  }
+const $=function(id){return document.getElementById(id)};
+let user=null,rows=[],activityMap={};
+function esc(v){return String(v==null?'':v).split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;').split('"').join('&quot;').split("'").join('&#39;')}
+function money(p){const c=p.currency||'NGN',symbols={NGN:'₦',USD:'$',GBP:'£',EUR:'€',CAD:'CA$'};return(symbols[c]||c+' ')+Number(p.price||0).toLocaleString()}
+function statusLabel(s){return String(s||'pending').split('_').join(' ')}
+function imageFor(p){const imgs=Array.isArray(p.property_images)?p.property_images:[],cover=imgs.find(function(x){return x&&x.is_cover===true});return(cover&&cover.image_url)||(imgs[0]&&imgs[0].image_url)||'https://dbanjushomes-com.onrender.com/dbh-logo.jpg'}
+function render(){
+ const q=$('search').value.trim().toLowerCase(),sf=$('statusFilter').value,tf=$('typeFilter').value;
+ const list=rows.filter(function(p){const hay=[p.title,p.property_code,p.city,p.area,p.state,p.address].filter(Boolean).join(' ').toLowerCase(),st=String(p.verification_status||'pending').toLowerCase();return(!q||hay.includes(q))&&(sf==='all'||st===sf)&&(tf==='all'||p.property_type===tf)});
+ $('count').textContent=list.length+' propert'+(list.length===1?'y':'ies');
+ if(!list.length){$('grid').innerHTML='';$('empty').style.display='block';$('empty').querySelector('h3').textContent=rows.length?'No matching properties':'No properties yet';return}
+ $('empty').style.display='none';
+ $('grid').innerHTML=list.map(function(p){const st=String(p.verification_status||'pending').toLowerCase(),a=activityMap[p.id]||{},payReady=(st==='verified'||st==='approved')&&p.payment_status!=='successful';return '<article class="property"><div class="photo"><img loading="lazy" src="'+esc(imageFor(p))+'" alt="'+esc(p.title||'Property image')+'"><span class="status '+esc(st)+'">'+esc(statusLabel(st))+'</span><span class="code">'+esc(p.property_code||'DBH PROPERTY')+'</span></div><div class="content"><h2 class="title">'+esc(p.title||'Untitled property')+'</h2><div class="location"><i class="fa-solid fa-location-dot"></i> '+esc([p.area,p.city,p.state].filter(Boolean).join(', ')||'Location not supplied')+'</div><div class="price">'+money(p)+'</div><div class="meta"><span><i class="fa-solid fa-bed"></i> '+Number(p.bedrooms||0)+' beds</span><span><i class="fa-solid fa-bath"></i> '+Number(p.bathrooms||0)+' baths</span><span><i class="fa-solid fa-eye"></i> '+Number(a.views||0)+' views</span></div><div class="cardactions"><a class="btn outline" href="add-property.html?id='+encodeURIComponent(p.id)+'"><i class="fa-solid fa-pen"></i>Edit</a><a class="btn primary" href="activity.html?property='+encodeURIComponent(p.id)+'"><i class="fa-solid fa-chart-line"></i>Activity</a></div>'+(payReady?'<a class="btn primary" style="width:100%;justify-content:center;margin-top:8px;background:#15803d" href="property-payment.html?property_id='+encodeURIComponent(p.id)+'"><i class="fa-solid fa-credit-card"></i>Pay '+esc(p.payment_currency||'NGN')+' '+Number(p.payment_amount||0).toLocaleString()+'</a>':'')+'</div></article>'}).join('')
 }
-
-$('search').addEventListener('input',render);$('statusFilter').addEventListener('change',render);$('typeFilter').addEventListener('change',render);
-$('logout').onclick=async()=>{await S.auth.signOut();location.href='login.html'};
-(async()=>{
-  const u=await auth();
-  if(!u)return;
-  try{
-    const a=await timeout(S.from('agent_applications').select('status,session_status').eq('user_id',u.id).maybeSingle(),8000,'Agent verification check timed out.');
-    if(a.error)throw a.error;
-    const status=String(a.data?.status||'').toLowerCase().replaceAll('_',' ');
-    if(a.data?.session_status==='banned'){location.href='dashboard.html';return}
-    if(!['verified','approved'].includes(status)){location.href='dashboard.html';return}
-    await load();
-  }catch(e){
-    console.error(e);
-    const loading=$('loading');
-    if(loading)loading.outerHTML='<div class="error"><i class="fa-solid fa-triangle-exclamation"></i> <strong>Could not verify your agent account.</strong><br><small>'+esc(e.message||'Verification check failed.')+'</small><br><button id="retryProperties" class="btn outline" style="margin-top:10px">Retry</button></div>';
-    const retry=$('retryProperties');if(retry)retry.onclick=()=>location.reload();
-  }
-})();
+function timeout(p,ms,label){return Promise.race([p,new Promise(function(_,reject){setTimeout(function(){reject(new Error(label))},ms)})])}
+async function auth(){try{const r=await timeout(S.auth.getSession(),10000,'Supabase session check timed out.');if(r.error)throw r.error;if(!r.data||!r.data.session){location.href='login.html';return null}user=r.data.session.user;return user}catch(e){console.error(e);const l=$('loading');if(l)l.outerHTML='<div class="error"><strong>Could not start your session.</strong><br><small>'+esc(e.message)+'</small><br><button id="retryProperties" class="btn outline">Retry</button></div>';const b=$('retryProperties');if(b)b.onclick=function(){location.reload()};return null}}
+async function load(){
+ try{
+  const result=await timeout(S.from('properties').select('id,title,property_code,property_type,price,currency,state,city,area,address,bedrooms,bathrooms,is_published,verification_status,payment_status,payment_amount,payment_currency,created_at').eq('created_by',user.id).order('created_at',{ascending:false}),15000,'Property database request timed out.');
+  if(result.error)throw result.error;
+  rows=result.data||[];
+  $('total').textContent=rows.length;
+  $('published').textContent=rows.filter(function(p){return p.is_published===true}).length;
+  $('pending').textContent=rows.filter(function(p){const s=String(p.verification_status||'pending').toLowerCase();return s==='pending'||s==='unverified'}).length;
+  $('views').textContent='0';
+  if(rows.length){try{const ids=rows.map(function(p){return p.id}),ir=await timeout(S.from('property_images').select('property_id,image_url,sort_order,is_cover').in('property_id',ids).order('sort_order',{ascending:true}),10000,'Property image lookup timed out.'),by={};if(ir.error)throw ir.error;(ir.data||[]).forEach(function(x){(by[x.property_id]||(by[x.property_id]=[])).push(x)});rows=rows.map(function(p){return Object.assign({},p,{property_images:by[p.id]||[]})})}catch(e){console.warn('Property images unavailable:',e);rows=rows.map(function(p){return Object.assign({},p,{property_images:[]})})}}
+  $('loading').remove();render();
+ }catch(e){console.error('Properties load failed:',e);const l=$('loading');if(l)l.outerHTML='<div class="error"><strong>Could not load your properties.</strong><br><small>'+esc(e.message)+'</small><br><button id="retryProperties" class="btn outline">Retry</button></div>';const b=$('retryProperties');if(b)b.onclick=function(){location.reload()}}
+}
+$('search').addEventListener('input',render);$('statusFilter').addEventListener('change',render);$('typeFilter').addEventListener('change',render);$('logout').onclick=async function(){await S.auth.signOut();location.href='login.html'};
+(async function(){const u=await auth();if(u)await load()})();
 </script>
 </body>
 </html>

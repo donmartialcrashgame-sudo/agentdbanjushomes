@@ -80,10 +80,16 @@
       });
     }
 
+    const overlay=document.getElementById('mobileOverlay');
+    function closeSidebar(){side.classList.remove('open');if(overlay)overlay.classList.remove('show')}
+    if(overlay && !overlay.dataset.wired){
+      overlay.dataset.wired='1';
+      overlay.addEventListener('click',closeSidebar);
+    }
     document.addEventListener('click',function(e){
       if(window.innerWidth<=900 && side.classList.contains('open') &&
          !side.contains(e.target) && !menu?.contains(e.target)){
-        side.classList.remove('open');
+        closeSidebar();
       }
     });
 

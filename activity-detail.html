@@ -9,13 +9,192 @@
 <section class="panel"><h2>Activity timeline</h2><div class="muted">Every recorded interaction for this property.</div><div id="timeline" class="timeline"><div class="empty">Loading activity...</div></div></section>
 </main></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="assets/js/app.js"></script><script>
-const S=window.supabase.createClient('https://cpgajlsyuieeengdnamy.supabase.co','sb_publishable_fbcJT-QGKyZg0tDkpbDkOQ_CcQf2ugW');const $=id=>document.getElementById(id);
-async function auth(){const {data}=await S.auth.getSession();if(!data.session){location.href='login.html';return null}const u=data.session.user;const {data:a}=await S.from('agent_applications').select('full_name,session_status').eq('user_id',u.id).maybeSingle();if(a?.session_status==='banned'){location.href='dashboard.html';return null}if($('agentName'))$('agentName').textContent=a?.full_name||u.user_metadata?.full_name||u.user_metadata?.name||'DBH Agent';if($('agentEmail'))$('agentEmail').textContent=u.email||'';return u}
-function esc(v){return String(v??'').split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;').split('"').join('&quot;').split("'").join('&#39;')}
-function fmt(d){return d?new Date(d).toLocaleString():'—'}
-function chart(acts){const w=900,h=300,p=35;let buckets=Array(12).fill(0);acts.forEach(a=>{const age=Math.max(0,Math.floor((Date.now()-new Date(a.created_at).getTime())/86400000));buckets[Math.min(11,age)]+=1});buckets=buckets.reverse();let max=Math.max(...buckets,1),pts=buckets.map((v,i)=>[p+i*((w-p*2)/11),h-p-(v/max)*(h-p*2)]);let path=pts.map((q,i)=>(i?'L':'M')+q[0].toFixed(1)+' '+q[1].toFixed(1)).join(' ');let area=path+' L '+pts[pts.length-1][0]+' '+(h-p)+' L '+pts[0][0]+' '+(h-p)+' Z';let dots=pts.map(q=>'<circle class="dot" cx="'+q[0]+'" cy="'+q[1]+'" r="5"></circle>').join('');$('chart').innerHTML='<svg viewBox="0 0 '+w+' '+h" preserveAspectRatio="none"><line class="gridline" x1="'+p+'" y1="'+h*.25+'" x2="'+(w-p)+'" y2="'+h*.25+'"/><line class="gridline" x1="'+p+'" y1="'+h*.5+'" x2="'+(w-p)+'" y2="'+h*.5+'"/><line class="gridline" x1="'+p+'" y1="'+h*.75+'" x2="'+(w-p)+'" y2="'+h*.75+'"/><path class="area" d="'+area+'"></path><path class="line" d="'+path+'"></path>'+dots+'</svg>'}
-async function load(){const u=await auth();if(!u)return;const id=new URLSearchParams(location.search).get('property');if(!id){location.href='activity.html';return}const {data:p,error}=await S.from('properties').select('id,title,property_code,area,city,state,created_at').eq('id',id).eq('created_by',u.id).maybeSingle();if(error||!p){$('title').textContent='Property not found';$('code').textContent='This property does not belong to your account.';return}$('title').textContent=p.title||'Untitled Property';$('code').textContent=(p.property_code||'Property')+' • '+[p.area,p.city,p.state].filter(Boolean).join(', ');const {data:acts}=await S.from('agent_property_activity').select('action,created_at').eq('agent_id',u.id).eq('property_id',id).order('created_at',{ascending:false});const all=acts||[],views=all.filter(x=>x.action==='view').length,calls=all.filter(x=>x.action==='phone').length,wa=all.filter(x=>x.action==='whatsapp').length;$('views').textContent=views;$('calls').textContent=calls;$('wa').textContent=wa;const score=Math.min(100,views*2+calls*10+wa*10);$('score').textContent=score+'%';const setTrend=(id,n)=>{const el=$(id);el.textContent=n>0?'▲ '+n+' interactions':'▼ 0 interactions';el.className='trend '+(n>0?'up':'down')};setTrend('viewTrend',views);setTrend('callTrend',calls);setTrend('waTrend',wa);chart(all);const icons={view:'fa-eye',phone:'fa-phone',whatsapp:'fa-whatsapp',contact:'fa-user',share:'fa-share-nodes'};
-function actionLabel(v){return String(v||'activity').split('_').join(' ').split(' ').map(function(word){return word?word.charAt(0).toUpperCase()+word.slice(1):word}).join(' ')}
-$('timeline').innerHTML=all.length?all.map(function(a,i){return '<div class="event" style="animation-delay:'+(i*.04)+'s"><i class="'+(a.action==='whatsapp'?'fa-brands ':'fa-solid ')+(icons[a.action]||'fa-bolt')+'"></i><div><b>'+esc(actionLabel(a.action))+'</b><p>Customer activity was recorded on this property.</p></div><time>'+fmt(a.created_at)+'</time></div>'}).join(''):'<div class="empty">No activity has been recorded for this property yet.</div>'}
-$('logout').onclick=async()=>{await S.auth.signOut();location.href='login.html'};load();
+const S = window.supabase.createClient(
+  'https://cpgajlsyuieeengdnamy.supabase.co',
+  'sb_publishable_fbcJT-QGKyZg0tDkOQ_CcQf2ugW'
+);
+const $ = (id) => document.getElementById(id);
+
+async function auth() {
+  const result = await S.auth.getSession();
+  const session = result.data && result.data.session;
+  if (!session) {
+    location.href = 'login.html';
+    return null;
+  }
+  const user = session.user;
+  const appResult = await S.from('agent_applications')
+    .select('full_name,session_status')
+    .eq('user_id', user.id)
+    .maybeSingle();
+  const app = appResult.data;
+  if (app && app.session_status === 'banned') {
+    location.href = 'dashboard.html';
+    return null;
+  }
+  const nameEl = $('agentName');
+  const emailEl = $('agentEmail');
+  if (nameEl) {
+    nameEl.textContent =
+      (app && app.full_name) ||
+      (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name)) ||
+      'DBH Agent';
+  }
+  if (emailEl) emailEl.textContent = user.email || '';
+  return user;
+}
+
+function esc(value) {
+  return String(value == null ? '' : value)
+    .split('&').join('&amp;')
+    .split('<').join('&lt;')
+    .split('>').join('&gt;')
+    .split('"').join('&quot;')
+    .split("'").join('&#39;');
+}
+
+function fmt(value) {
+  return value ? new Date(value).toLocaleString() : '—';
+}
+
+function actionLabel(value) {
+  const words = String(value || 'activity').split('_').join(' ').split(' ');
+  return words.map(function (word) {
+    return word ? word.charAt(0).toUpperCase() + word.slice(1) : '';
+  }).join(' ');
+}
+
+function drawChart(activities) {
+  const width = 900;
+  const height = 300;
+  const pad = 35;
+  const buckets = Array(12).fill(0);
+
+  activities.forEach(function (item) {
+    const time = new Date(item.created_at).getTime();
+    const age = Math.max(0, Math.floor((Date.now() - time) / 86400000));
+    buckets[Math.min(11, age)] += 1;
+  });
+
+  buckets.reverse();
+  const max = Math.max.apply(null, buckets.concat([1]));
+  const points = buckets.map(function (value, index) {
+    const x = pad + index * ((width - pad * 2) / 11);
+    const y = height - pad - (value / max) * (height - pad * 2);
+    return [x, y];
+  });
+
+  const path = points.map(function (point, index) {
+    return (index === 0 ? 'M' : 'L') + point[0].toFixed(1) + ' ' + point[1].toFixed(1);
+  }).join(' ');
+
+  const last = points[points.length - 1];
+  const first = points[0];
+  const area = path + ' L ' + last[0] + ' ' + (height - pad) +
+    ' L ' + first[0] + ' ' + (height - pad) + ' Z';
+
+  const dots = points.map(function (point) {
+    return '<circle class="dot" cx="' + point[0] + '" cy="' + point[1] + '" r="5"></circle>';
+  }).join('');
+
+  $('chart').innerHTML =
+    '<svg viewBox="0 0 ' + width + ' ' + height + '" preserveAspectRatio="none">' +
+    '<line class="gridline" x1="' + pad + '" y1="' + height * .25 + '" x2="' + (width - pad) + '" y2="' + height * .25 + '"/>' +
+    '<line class="gridline" x1="' + pad + '" y1="' + height * .5 + '" x2="' + (width - pad) + '" y2="' + height * .5 + '"/>' +
+    '<line class="gridline" x1="' + pad + '" y1="' + height * .75 + '" x2="' + (width - pad) + '" y2="' + height * .75 + '"/>' +
+    '<path class="area" d="' + area + '"></path>' +
+    '<path class="line" d="' + path + '"></path>' + dots +
+    '</svg>';
+}
+
+function setTrend(id, count) {
+  const el = $(id);
+  if (!el) return;
+  el.textContent = count > 0 ? '▲ ' + count + ' interactions' : '▼ 0 interactions';
+  el.className = 'trend ' + (count > 0 ? 'up' : 'down');
+}
+
+async function load() {
+  const user = await auth();
+  if (!user) return;
+
+  const propertyId = new URLSearchParams(location.search).get('property');
+  if (!propertyId) {
+    location.href = 'activity.html';
+    return;
+  }
+
+  const propertyResult = await S.from('properties')
+    .select('id,title,property_code,area,city,state,created_at')
+    .eq('id', propertyId)
+    .eq('created_by', user.id)
+    .maybeSingle();
+
+  const property = propertyResult.data;
+  if (propertyResult.error || !property) {
+    $('title').textContent = 'Property not found';
+    $('code').textContent = 'This property does not belong to your account.';
+    return;
+  }
+
+  $('title').textContent = property.title || 'Untitled Property';
+  $('code').textContent =
+    (property.property_code || 'Property') + ' • ' +
+    [property.area, property.city, property.state].filter(Boolean).join(', ');
+
+  const activityResult = await S.from('agent_property_activity')
+    .select('action,created_at')
+    .eq('agent_id', user.id)
+    .eq('property_id', propertyId)
+    .order('created_at', { ascending: false });
+
+  const activities = activityResult.data || [];
+  const views = activities.filter(function (item) { return item.action === 'view'; }).length;
+  const calls = activities.filter(function (item) { return item.action === 'phone'; }).length;
+  const whatsapp = activities.filter(function (item) { return item.action === 'whatsapp'; }).length;
+
+  $('views').textContent = views;
+  $('calls').textContent = calls;
+  $('wa').textContent = whatsapp;
+  $('score').textContent = Math.min(100, views * 2 + calls * 10 + whatsapp * 10) + '%';
+
+  setTrend('viewTrend', views);
+  setTrend('callTrend', calls);
+  setTrend('waTrend', whatsapp);
+  drawChart(activities);
+
+  const icons = {
+    view: 'fa-eye',
+    phone: 'fa-phone',
+    whatsapp: 'fa-whatsapp',
+    contact: 'fa-user',
+    share: 'fa-share-nodes'
+  };
+
+  if (!activities.length) {
+    $('timeline').innerHTML =
+      '<div class="empty">No activity has been recorded for this property yet.</div>';
+    return;
+  }
+
+  $('timeline').innerHTML = activities.map(function (item, index) {
+    const icon = icons[item.action] || 'fa-bolt';
+    const family = item.action === 'whatsapp' ? 'fa-brands' : 'fa-solid';
+    return '<div class="event" style="animation-delay:' + (index * 0.04) + 's">' +
+      '<i class="' + family + ' ' + icon + '"></i>' +
+      '<div><b>' + esc(actionLabel(item.action)) + '</b>' +
+      '<p>Customer activity was recorded on this property.</p></div>' +
+      '<time>' + fmt(item.created_at) + '</time></div>';
+  }).join('');
+}
+
+const logout = $('logout');
+if (logout) {
+  logout.onclick = async function () {
+    await S.auth.signOut();
+    location.href = 'login.html';
+  };
+}
+
+load();
 </script></body></html>

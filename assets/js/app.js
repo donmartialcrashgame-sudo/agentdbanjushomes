@@ -150,6 +150,25 @@
         });
       }
     };
+    async function loadAgentProfile(){
+      try{
+        if(!window.supabase||!window.supabase.createClient) return;
+        const client=window.supabase.createClient('https://cpgajlsyuieeengdnamy.supabase.co','sb_publishable_fbcJT-QGKyZg0tDkpbDkOQ_CcQf2ugW');
+        const sessionResult=await client.auth.getSession();
+        const session=sessionResult&&sessionResult.data&&sessionResult.data.session;
+        if(!session) return;
+        const uid=session.user.id;
+        const q=await client.from('agent_applications').select('full_name,email,status,session_status').eq('user_id',uid).maybeSingle();
+        const a=q&&q.data;
+        const nameEl=document.getElementById('name'),emailEl=document.getElementById('email');
+        if(nameEl) nameEl.textContent=(a&&a.full_name)||session.user.user_metadata?.full_name||session.user.email?.split('@')[0]||'DBH Agent';
+        if(emailEl) emailEl.textContent=(a&&a.email)||session.user.email||'';
+        if(statusEl) statusEl.textContent=(a&&a.status)||((a&&a.session_status)||'PENDING');
+        syncVerificationBadge();
+      }catch(err){ console.warn('DBH sidebar profile load failed:',err); }
+    }
+    loadAgentProfile();
+
     if(statusEl && window.MutationObserver){
       new MutationObserver(syncVerificationBadge).observe(statusEl,{childList:true,subtree:true,characterData:true});
     }

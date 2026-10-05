@@ -153,7 +153,7 @@
     async function loadAgentProfile(){
       try{
         if(!window.supabase||!window.supabase.createClient) return;
-        const client=window.supabase.createClient('https://cpgajlsyuieeengdnamy.supabase.co','sb_publishable_fbcJT-QGKyZg0tDkpbDkOQ_CcQf2ugW');
+        const client=window.DBHSupabaseClient||(window.DBHSupabaseClient=window.supabase.createClient('https://cpgajlsyuieeengdnamy.supabase.co','sb_publishable_fbcJT-QGKyZg0tDkpbDkOQ_CcQf2ugW'));
         const sessionResult=await client.auth.getSession();
         const session=sessionResult&&sessionResult.data&&sessionResult.data.session;
         if(!session) return;

@@ -27,16 +27,30 @@
 .access-card{display:none;margin-top:20px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:18px;padding:18px}.access-card.show{display:flex;align-items:center;gap:14px}.access-card>i{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#dcfce7;color:var(--green);font-size:20px}.access-card b{font-size:12px}.access-card p{margin:4px 0 0;color:#166534;font-size:10px;line-height:1.5}
 @media(max-width:900px){.shell{grid-template-columns:1fr}.side{position:fixed;z-index:40;left:-275px;top:72px;width:260px;transition:.25s;box-shadow:10px 0 35px #0002}.side.open{left:0}.grid{grid-template-columns:1fr 1fr}.tools{grid-template-columns:1fr}.main{padding:22px 16px}.payment{grid-template-columns:1fr}.price{text-align:left}}
 @media(max-width:550px){.top{padding:0 12px}.brand div{font-size:12px}.grid{grid-template-columns:1fr}.welcome{display:block}h1{font-size:27px}.payment{padding:22px;border-radius:19px}.payment h2{font-size:23px}.price strong{font-size:33px}.top-actions .bell{display:none}}
+
+/* Long animated dashboard experience */
+.hero-dashboard{position:relative;overflow:hidden;min-height:285px;margin-bottom:18px;border-radius:26px;padding:34px 38px;background:linear-gradient(120deg,#031d39 0%,#062b52 45%,#0b63ce 100%);color:#fff;display:flex;align-items:center;justify-content:space-between;box-shadow:0 25px 65px rgba(6,43,82,.18);isolation:isolate}.hero-dashboard:before,.hero-dashboard:after{content:"";position:absolute;border-radius:50%;pointer-events:none;z-index:-1}.hero-dashboard:before{width:360px;height:360px;right:-100px;top:-170px;background:rgba(255,255,255,.08);animation:heroDrift 8s ease-in-out infinite}.hero-dashboard:after{width:260px;height:260px;left:34%;bottom:-210px;background:rgba(96,165,250,.15);animation:heroDrift 10s ease-in-out infinite reverse}.hero-copy{max-width:690px;position:relative;z-index:2}.hero-kicker{display:inline-flex;align-items:center;gap:7px;font-size:9px;letter-spacing:.14em;font-weight:900;color:#bfdbfe}.hero-copy h2{font-size:35px;line-height:1.08;letter-spacing:-.045em;margin:12px 0 10px;max-width:620px}.hero-copy p{margin:0;color:#dbeafe;font-size:12px;line-height:1.75;max-width:600px}.hero-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:20px}.hero-btn{display:inline-flex;align-items:center;gap:8px;padding:11px 15px;border-radius:12px;background:#fff;color:#062b52;font-size:10px;font-weight:900;transition:.2s}.hero-btn:hover{transform:translateY(-2px);box-shadow:0 10px 25px rgba(0,0,0,.15)}.hero-btn.ghost{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:#fff}.hero-orbit{width:280px;height:220px;position:relative;flex:0 0 280px}.hero-house{position:absolute;width:84px;height:84px;left:98px;top:68px;border-radius:25px;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.22);display:grid;place-items:center;font-size:34px;box-shadow:0 20px 50px rgba(0,0,0,.18);backdrop-filter:blur(10px);animation:houseFloat 4s ease-in-out infinite}.orbit{position:absolute;border:1px solid rgba(191,219,254,.25);border-radius:50%;left:30px;top:15px;width:220px;height:190px}.orbit-a{animation:orbitSpin 14s linear infinite}.orbit-b{width:170px;height:150px;left:55px;top:35px;border-color:rgba(255,255,255,.14);animation:orbitSpin 10s linear infinite reverse}.float-dot{position:absolute;width:9px;height:9px;border-radius:50%;background:#fff;box-shadow:0 0 18px rgba(255,255,255,.8)}.float-dot.one{left:32px;top:90px}.float-dot.two{right:27px;top:40px}.float-dot.three{right:48px;bottom:25px}.quick-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px}.quick-card{background:#fff;border:1px solid var(--line);border-radius:17px;padding:15px;display:flex;align-items:center;gap:11px;box-shadow:0 8px 24px rgba(15,23,42,.035);transition:.22s}.quick-card:hover{transform:translateY(-3px);border-color:#bfdbfe;box-shadow:0 15px 30px rgba(11,99,206,.08)}.quick-icon{width:39px;height:39px;flex:0 0 39px;border-radius:12px;background:#eff6ff;color:#0b63ce;display:grid;place-items:center}.quick-icon.green{background:#f0fdf4;color:#15803d}.quick-icon.orange{background:#fff7ed;color:#ea580c}.quick-card b{display:block;font-size:10px}.quick-card span{display:block;color:var(--muted);font-size:8px;margin-top:3px}.quick-card>i:last-child{margin-left:auto;color:#94a3b8;font-size:10px}.section-divider{height:1px;background:linear-gradient(90deg,transparent,#dbeafe,transparent);margin:28px 0}
+@keyframes heroDrift{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(-18px,15px,0)}}@keyframes houseFloat{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-8px) rotate(1deg)}}@keyframes orbitSpin{to{transform:rotate(360deg)}}
+@media(max-width:900px){.hero-dashboard{min-height:320px;padding:27px}.hero-orbit{position:absolute;right:-55px;bottom:-25px;opacity:.45}.hero-copy{max-width:100%}.quick-row{grid-template-columns:1fr}.quick-card{min-height:55px}}
+@media(max-width:550px){.hero-dashboard{padding:24px;min-height:350px;border-radius:21px}.hero-copy h2{font-size:28px}.hero-copy p{font-size:11px}.hero-orbit{transform:scale(.78);transform-origin:right bottom;right:-75px;bottom:-40px}.hero-btn{padding:11px 13px}}
+@media(prefers-reduced-motion:reduce){.hero-dashboard:before,.hero-dashboard:after,.hero-house,.orbit{animation:none!important}.hero-btn,.quick-card{transition:none!important}}
+
+.top{height:76px!important;padding:0 30px!important;box-shadow:0 3px 20px rgba(6,43,82,.035);backdrop-filter:blur(12px)}.brand{gap:11px!important}.brand-logo{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;background:#f1f7ff;border:1px solid #dbeafe;box-shadow:0 6px 18px rgba(11,99,206,.08)}.brand img{width:38px!important;height:38px!important;border-radius:10px!important}.brand-copy strong{display:block;font-size:13px;line-height:1.1}.brand-copy small{display:block;margin-top:4px;font-size:8px!important;letter-spacing:.15em!important}.top-centre{display:flex;align-items:center;gap:9px}.live-pill{display:inline-flex;align-items:center;gap:7px;background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;border-radius:99px;padding:7px 10px;font-size:8px;font-weight:900}.live-pill i{width:6px;height:6px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 4px #dcfce7;animation:headerPulse 2s infinite}.top-date{color:#94a3b8;font-size:9px;font-weight:800}.profile-chip{height:40px;border:1px solid var(--line);background:#fff;border-radius:12px;padding:4px 9px 4px 5px;display:flex;align-items:center;gap:7px;color:var(--deep);cursor:pointer}.profile-chip:hover{background:var(--soft);border-color:#bfdbfe}.profile-chip>span:first-child{width:30px;height:30px;border-radius:9px;background:#eff6ff;color:var(--blue);display:grid;place-items:center}.profile-name{max-width:105px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px;font-weight:900}.menu-btn{display:none}.logout{color:#64748b}@keyframes headerPulse{50%{box-shadow:0 0 0 5px #dcfce7}}@media(max-width:900px){.top{padding:0 16px!important}.top-centre{display:none}.menu-btn{display:grid!important}.profile-name{display:none}.profile-chip{padding:4px}.logout{display:none}}@media(max-width:550px){.brand-copy strong{font-size:11px}.brand-logo{width:40px;height:40px}.brand img{width:34px!important;height:34px!important}.bell{display:grid!important}}
 </style>
 </head>
 <body>
 <header class="top">
-<a class="brand" href="index.html"><img src="https://dbanjushomes-com.onrender.com/dbh-logo.jpg" alt="DBH"><div>D Banjus Homes Nig Ltd<small>AGENT PORTAL</small></div></a>
-<div class="top-actions">
-<a class="icon bell" aria-label="Notifications" href="notifications.html"><i class="fa-regular fa-bell"></i><span class="dot" id="notificationCount">0</span></a>
-<button class="icon" id="dbhMenu" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
-<button class="icon" id="logout" aria-label="Sign out"><i class="fa-solid fa-right-from-bracket"></i></button>
-</div>
+  <a class="brand" href="dashboard.html">
+    <span class="brand-logo"><img src="https://dbanjushomes-com.onrender.com/dbh-logo.jpg" alt="DBH"></span>
+    <span class="brand-copy"><strong>D Banjus Homes</strong><small>AGENT WORKSPACE</small></span>
+  </a>
+  <div class="top-centre"><span class="live-pill"><i></i> Agent workspace</span><span class="top-date" id="topDate">Today</span></div>
+  <div class="top-actions">
+    <a class="icon bell" aria-label="Notifications" href="notifications.html" title="Notifications"><i class="fa-regular fa-bell"></i><span class="dot" id="notificationCount">0</span></a>
+    <button class="icon menu-btn" id="dbhMenu" aria-label="Open navigation"><i class="fa-solid fa-bars"></i></button>
+    <button class="profile-chip" id="headerProfile" type="button" aria-label="Agent profile"><span id="headerAvatar"><i class="fa-solid fa-user"></i></span><span class="profile-name" id="headerName">Agent</span></button>
+    <button class="icon logout" id="logout" aria-label="Sign out" title="Sign out"><i class="fa-solid fa-right-from-bracket"></i></button>
+  </div>
 </header>
 
 <div class="shell">
@@ -70,6 +84,29 @@
 <i class="fa-solid fa-unlock-keyhole"></i>
 <div><b>Agent tools unlocked</b><p>Your registration payment is successful and your application is verified. The remaining agent tools are now available.</p></div>
 </div>
+
+<section class="hero-dashboard">
+  <div class="hero-copy">
+    <span class="hero-kicker"><i class="fa-solid fa-sparkles"></i> DBH AGENT CENTRE</span>
+    <h2>Your property business, all in one place.</h2>
+    <p>Track your listings, verification, customer activity and account progress from one professional workspace.</p>
+    <div class="hero-actions">
+      <a href="add-property.html" class="hero-btn"><i class="fa-solid fa-plus"></i> Add a property</a>
+      <a href="properties.html" class="hero-btn ghost"><i class="fa-solid fa-house"></i> View properties</a>
+    </div>
+  </div>
+  <div class="hero-orbit" aria-hidden="true">
+    <div class="orbit orbit-a"></div><div class="orbit orbit-b"></div>
+    <div class="hero-house"><i class="fa-solid fa-house"></i></div>
+    <span class="float-dot one"></span><span class="float-dot two"></span><span class="float-dot three"></span>
+  </div>
+</section>
+
+<section class="quick-row">
+  <div class="quick-card"><div class="quick-icon"><i class="fa-solid fa-chart-line"></i></div><div><b>Business overview</b><span>Monitor your DBH activity</span></div><i class="fa-solid fa-arrow-right"></i></div>
+  <div class="quick-card"><div class="quick-icon green"><i class="fa-solid fa-shield-check"></i></div><div><b>Trust & verification</b><span>Keep your profile verified</span></div><i class="fa-solid fa-arrow-right"></i></div>
+  <div class="quick-card"><div class="quick-icon orange"><i class="fa-solid fa-bolt"></i></div><div><b>Fast actions</b><span>Manage your listings quickly</span></div><i class="fa-solid fa-arrow-right"></i></div>
+</section>
 
 <section class="grid">
 <div class="card stat"><i class="fa-solid fa-house"></i><b id="propertiesCount">0</b><span>Approved properties</span></div>
@@ -147,6 +184,8 @@ async function boot(){
     $('verifyStat').textContent=status;
     $('welcome').textContent='Welcome back, '+fullName.trim().split(/\s+/)[0];
     $('verifiedBadge').classList.toggle('show',verified);
+    if($('headerName')) $('headerName').textContent=fullName.trim().split(/\s+/)[0];
+    if($('topDate')) $('topDate').textContent=new Intl.DateTimeFormat('en-NG',{weekday:'short',day:'numeric',month:'short'}).format(new Date());
 
     const {data:settings,error:settingsError}=await S.from('agent_settings').select('*').eq('id',true).maybeSingle();
     if(!settingsError&&settings){

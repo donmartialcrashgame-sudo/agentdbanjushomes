@@ -67,6 +67,16 @@
       '@keyframes dbhAvatarFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}'+
       '@keyframes dbhPulse{0%,100%{box-shadow:0 0 0 3px rgba(255,255,255,.1),0 0 8px rgba(245,158,11,.3)}50%{box-shadow:0 0 0 4px rgba(255,255,255,.1),0 0 15px rgba(245,158,11,.7)}}'+
       '@keyframes dbhBadgeIn{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}'+
+      '#dbhSidebar .nav a:hover i:first-child{animation:dbhIconPop .45s ease both!important}'+
+      '#dbhSidebar .nav a.active i:first-child{animation:dbhIconFloat 2.4s ease-in-out infinite!important}'+
+      '.top .iconbtn i,.top .icon i,.top-actions .icon i,.top-actions .bell i{transition:transform .2s ease,color .2s ease!important}'+
+      '.top .iconbtn:hover i,.top .icon:hover i,.top-actions .icon:hover i,.top-actions .bell:hover i{transform:translateY(-2px) scale(1.08)!important}'+
+      '.btn i,.paybtn i,.dismissbtn i,.hero-btn i,.quick-icon i,.staticon i,.head-icon i,.ico i,.empty i{transition:transform .25s ease!important}'+
+      '.btn:hover i,.paybtn:hover i,.dismissbtn:hover i,.hero-btn:hover i,.quick-card:hover .quick-icon i,.stat:hover .staticon i,.setting-card:hover .head-icon i,.item:hover .ico i{transform:translateY(-2px) scale(1.08)!important}'+
+      '.pagehead .eyebrow,.page-head .eyebrow,.welcome .eyebrow{animation:dbhEyebrow 2.8s ease-in-out infinite!important}'+
+      '@keyframes dbhIconPop{0%{transform:scale(1)}45%{transform:scale(1.2) rotate(-4deg)}100%{transform:scale(1)}}'+
+      '@keyframes dbhIconFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}'+
+      '@keyframes dbhEyebrow{0%,100%{opacity:.82}50%{opacity:1;letter-spacing:.17em}}'+
       '@media(max-width:900px){#dbhSidebar{position:fixed!important;z-index:100!important;left:-275px!important;top:72px!important;width:260px!important;height:calc(100vh - 72px)!important;transition:left .28s cubic-bezier(.2,.8,.2,1)!important;box-shadow:12px 0 35px rgba(0,0,0,.16)!important}#dbhSidebar.open{left:0!important}.dbh-sidebar-overlay.show{display:block!important}.dbh-floating-sidebar~.wrap,.dbh-floating-sidebar~main{margin-left:0!important}}'+
       '@media(prefers-reduced-motion:reduce){#dbhSidebar *,#dbhSidebar *:before,#dbhSidebar *:after{animation:none!important;transition:none!important}}';
     document.head.appendChild(style);

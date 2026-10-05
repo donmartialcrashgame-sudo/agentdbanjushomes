@@ -44,6 +44,25 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/js/app.js"></script>
 <script>
+(function(){
+  function wireMenu(){
+    const side=document.getElementById('dbhSidebar'), overlay=document.getElementById('mobileOverlay'), menu=document.getElementById('dbhMenu');
+    if(!side||!menu)return;
+    if(menu.dataset.wired==='1')return;
+    menu.dataset.wired='1';
+    menu.addEventListener('click',function(e){
+      e.preventDefault();
+      side.classList.toggle('open');
+      if(overlay) overlay.classList.toggle('show',side.classList.contains('open'));
+    });
+    if(overlay) overlay.addEventListener('click',function(){
+      side.classList.remove('open'); overlay.classList.remove('show');
+    });
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wireMenu);else wireMenu();
+})();
+</script>
+<script>
 const S=window.supabase.createClient('https://cpgajlsyuieeengdnamy.supabase.co','sb_publishable_fbcJT-QGKyZg0tDkpbDkOQ_CcQf2ugW');
 const $=id=>document.getElementById(id);let user=null,rows=[],activityMap={};
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -56,7 +75,7 @@ $('count').textContent=list.length+' propert'+(list.length===1?'y':'ies');
 $('grid').innerHTML=list.length?list.map(p=>{const st=p.verification_status||'pending';const a=activityMap[p.id]||{};return '<article class="property"><div class="photo"><img loading="lazy" src="'+esc(imageFor(p))+'" alt="'+esc(p.title||'Property image')+'"><span class="status '+esc(st)+'">'+esc(statusLabel(st))+'</span><span class="code">'+esc(p.property_code||'DBH PROPERTY')+'</span></div><div class="content"><h2 class="title" title="'+esc(p.title)+'">'+esc(p.title||'Untitled property')+'</h2><div class="location"><i class="fa-solid fa-location-dot"></i> '+esc([p.area,p.city,p.state].filter(Boolean).join(', ')||'Location not supplied')+'</div><div class="price">'+money(p)+'</div><div class="meta"><span><i class="fa-solid fa-bed"></i> '+Number(p.bedrooms||0)+' beds</span><span><i class="fa-solid fa-bath"></i> '+Number(p.bathrooms||0)+' baths</span><span><i class="fa-solid fa-eye"></i> '+Number(a.views||0)+' views</span></div><div class="cardactions"><a class="btn outline" href="add-property.html?id='+encodeURIComponent(p.id)+'"><i class="fa-solid fa-pen"></i>Edit</a><a class="btn primary" href="activity.html?property='+encodeURIComponent(p.id)+'"><i class="fa-solid fa-chart-line"></i>Activity</a></div>'+((['verified','approved'].includes(String(st).toLowerCase())&&p.payment_status!=='successful')?'<a class="btn primary" style="width:100%;justify-content:center;margin-top:8px;background:#15803d" href="property-payment.html?property_id='+encodeURIComponent(p.id)+'"><i class="fa-solid fa-credit-card"></i>Pay '+esc(p.payment_currency||'NGN')+' '+Number(p.payment_amount||0).toLocaleString()+'</a>':'')</div></article>'}).join(''):'';
 if(list.length){$('empty').style.display='none'}else if(rows.length){$('empty').style.display='block';$('empty').querySelector('h3').textContent='No matching properties';$('empty').querySelector('p').textContent='Try another search or change the status or property type filter.'}else $('empty').style.display='block'}
 function timeout(p,ms,label){return Promise.race([p,new Promise((_,reject)=>setTimeout(()=>reject(new Error(label)),ms))])}
-async function auth(){try{const r=await timeout(S.auth.getSession(),8000,'Supabase session check timed out.');if(r.error||!r.data||!r.data.session){location.href='login.html';return null}user=r.data.session.user;return user}catch(e){console.error(e);$('loading').outerHTML='<div class="error"><i class="fa-solid fa-triangle-exclamation"></i> '+esc(e.message)+'<br><button id="retryProperties" class="btn outline" style="margin-top:10px">Retry</button></div>';$('retryProperties').onclick=()=>location.reload();return null}}
+async function auth(){try{const r=await timeout(S.auth.getSession(),8000,'Supabase session check timed out.');if(r.error||!r.data||!r.data.session){location.href='login.html';return null}user=r.data.session.user;return user}catch(e){console.error(e);const loading=$('loading');if(loading)loading.outerHTML='<div class="error"><i class="fa-solid fa-triangle-exclamation"></i> '+esc(e.message||'Session check failed.')+'<br><button id="retryProperties" class="btn outline" style="margin-top:10px">Retry</button></div>';const retry=$('retryProperties');if(retry)retry.onclick=()=>location.reload();return null}}
 async function load(){
   if(!user)return;
   const loading=$('loading');
@@ -98,7 +117,23 @@ async function load(){
 
 $('search').addEventListener('input',render);$('statusFilter').addEventListener('change',render);$('typeFilter').addEventListener('change',render);
 $('logout').onclick=async()=>{await S.auth.signOut();location.href='login.html'};
-(async()=>{const u=await auth();if(u)await load()})();
+(async()=>{
+  const u=await auth();
+  if(!u)return;
+  try{
+    const a=await timeout(S.from('agent_applications').select('status,session_status').eq('user_id',u.id).maybeSingle(),8000,'Agent verification check timed out.');
+    if(a.error)throw a.error;
+    const status=String(a.data?.status||'').toLowerCase().replaceAll('_',' ');
+    if(a.data?.session_status==='banned'){location.href='dashboard.html';return}
+    if(!['verified','approved'].includes(status)){location.href='dashboard.html';return}
+    await load();
+  }catch(e){
+    console.error(e);
+    const loading=$('loading');
+    if(loading)loading.outerHTML='<div class="error"><i class="fa-solid fa-triangle-exclamation"></i> <strong>Could not verify your agent account.</strong><br><small>'+esc(e.message||'Verification check failed.')+'</small><br><button id="retryProperties" class="btn outline" style="margin-top:10px">Retry</button></div>';
+    const retry=$('retryProperties');if(retry)retry.onclick=()=>location.reload();
+  }
+})();
 </script>
 </body>
 </html>

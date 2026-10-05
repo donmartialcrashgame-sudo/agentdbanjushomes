@@ -40,24 +40,7 @@
 </header>
 
 <div class="shell">
-<aside class="side" id="dbhSidebar">
-<div class="agent">
-<div class="avatar"><i class="fa-solid fa-user-tie"></i></div>
-<strong id="name">Loading...</strong><small id="email">Loading...</small>
-<div class="status-row"><div class="status" id="status">PENDING</div><img id="verifiedBadge" class="verified-badge" src="assets/images/verified-badge.svg" alt="Verified agent badge" title="Verified agent"></div>
-</div>
-<nav class="nav" id="agentNav">
-<a href="dashboard.html" data-page="dashboard.html"><i class="fa-solid fa-gauge-high"></i> Overview</a>
-<a id="propertiesNav" class="disabled" href="#" data-page="properties.html" aria-disabled="true"><i class="fa-solid fa-house"></i> My Properties <i class="fa-solid fa-lock lock"></i></a>
-<a id="addPropertyNav" class="disabled" href="#" data-page="add-property.html" aria-disabled="true"><i class="fa-solid fa-plus"></i> Add Property <i class="fa-solid fa-lock lock"></i></a>
-<a id="activityNav" class="disabled" href="#" data-page="activity.html" aria-disabled="true"><i class="fa-solid fa-chart-line"></i> Activity & Reports <i class="fa-solid fa-lock lock"></i></a>
-<a id="enquiriesNav" class="disabled" href="#" data-page="enquiries.html" aria-disabled="true"><i class="fa-solid fa-triangle-exclamation"></i> Complaints & Reports <i class="fa-solid fa-lock lock"></i></a>
-<a href="payment-result.html" data-page="payment-result.html"><i class="fa-solid fa-receipt"></i> Payment Receipt</a>
-<a href="agent-documents.html" data-page="agent-documents.html"><i class="fa-solid fa-file-shield"></i> Verification</a>
-<a href="notifications.html" data-page="notifications.html"><i class="fa-regular fa-bell"></i> Notifications</a>
-<a href="settings.html" data-page="settings.html"><i class="fa-solid fa-gear"></i> Settings</a>
-</nav>
-</aside>
+
 
 <main class="main">
 <div class="welcome">
@@ -133,22 +116,7 @@ function setButtonLoading(button,on,label){
   else{button.disabled=false;button.innerHTML=button.dataset.original||label}
 }
 function setToolAccess(open){
-  const links=[$('propertiesNav'),$('addPropertyNav'),$('activityNav'),$('enquiriesNav')];
-  links.forEach(link=>{
-    if(open){
-      link.classList.remove('disabled');
-      link.classList.add('unlocked');
-      link.setAttribute('href',link.dataset.page);
-      link.removeAttribute('aria-disabled');
-      const lock=link.querySelector('.lock');
-      if(lock) lock.remove();
-    }else{
-      link.classList.add('disabled');
-      link.classList.remove('unlocked');
-      link.setAttribute('href','#');
-      link.setAttribute('aria-disabled','true');
-    }
-  });
+  if(window.DBHAgentSidebar) window.DBHAgentSidebar.setAccess(open);
   ['propertyTool','addTool','enquiryTool'].forEach(id=>$(id).classList.toggle('locked',!open));
   $('accessCard').classList.toggle('show',open);
   $('toolState').textContent=open?'UNLOCKED':'LOCKED';

@@ -56,10 +56,10 @@ const S=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY),$=id=>document.g
 function show(text,type='ok'){const e=$('message');e.textContent=text;e.className='message show '+type}
 function loading(btn,on,label){if(on){btn.dataset.old=btn.innerHTML;btn.disabled=true;btn.innerHTML='<span class="spin"></span>'+label}else{btn.disabled=false;btn.innerHTML=btn.dataset.old||label}}
 function val(id){return $(id).value.trim()}
-function setForm(app,user){currentApp=app;snapshot={fullName:app.full_name||user.user_metadata?.full_name||'',email:app.email||user.email||'',phone:app.phone||user.phone||'',whatsapp:app.whatsapp||'',businessName:app.business_name||'',businessType:app.business_type||'',state:app.state||'',city:app.city||'',address:app.address||'',bio:app.bio||''};$('fullName').value=snapshot.fullName;$('email').value=snapshot.email;$('phone').value=snapshot.phone;$('whatsapp').value=snapshot.whatsapp;$('businessName').value=snapshot.businessName;$('businessType').value=snapshot.businessType;$('state').value=snapshot.state;$('city').value=snapshot.city;$('address').value=snapshot.address;$('bio').value=snapshot.bio}
+function setForm(app,user){currentApp=app;snapshot={fullName:app.full_name||user.user_metadata?.full_name||'',email:app.email||user.email||'',phone:app.phone||user.phone||'',whatsapp:app.whatsapp_number||'',businessName:app.business_name||'',businessType:app.business_type||'',state:app.state||'',city:app.city||'',address:app.address||'',bio:app.bio||''};$('fullName').value=snapshot.fullName;$('email').value=snapshot.email;$('phone').value=snapshot.phone;$('whatsapp').value=snapshot.whatsapp;$('businessName').value=snapshot.businessName;$('businessType').value=snapshot.businessType;$('state').value=snapshot.state;$('city').value=snapshot.city;$('address').value=snapshot.address;$('bio').value=snapshot.bio}
 async function load(){
  const {data,error}=await S.auth.getSession();if(error||!data.session){location.href='login.html';return}currentUser=data.session.user;
- const q=await S.from('agent_applications').select('id,full_name,email,phone,whatsapp,business_name,business_type,state,city,address,bio,status,session_status,created_at').eq('user_id',currentUser.id).order('created_at',{ascending:false}).limit(1).maybeSingle();
+ const q=await S.from('agent_applications').select('id,full_name,email,phone,whatsapp_number,business_name,business_type,state,city,address,bio,status,session_status,created_at').eq('user_id',currentUser.id).order('created_at',{ascending:false}).limit(1).maybeSingle();
  if(q.error){console.error(q.error);show('We could not load your provider settings. Please refresh the page.','err');return}
  if(!q.data){location.href='agent-onboarding.html';return}
  setForm(q.data,currentUser);
@@ -70,8 +70,8 @@ async function load(){
 async function saveProfile(){
  const btn=$('saveProfile');loading(btn,true,'Saving profile...');
  try{
-  const updates={full_name:val('fullName'),phone:val('phone'),whatsapp:val('whatsapp'),business_name:val('businessName'),business_type:val('businessType'),state:val('state'),city:val('city'),address:val('address'),bio:val('bio')};
-  if(!updates.full_name||!updates.phone||!updates.whatsapp){show('Full name, phone number and WhatsApp number are required.','err');loading(btn,false,'Save profile');return}
+  const updates={full_name:val('fullName'),phone:val('phone'),whatsapp_number:val('whatsapp'),business_name:val('businessName'),business_type:val('businessType'),state:val('state'),city:val('city'),address:val('address'),bio:val('bio')};
+  if(!updates.full_name||!updates.phone||!updates.whatsapp_number){show('Full name, phone number and WhatsApp number are required.','err');loading(btn,false,'Save profile');return}
   const {error}=await S.from('agent_applications').update(updates).eq('id',currentApp.id).eq('user_id',currentUser.id);
   if(error)throw error;
   snapshot={...snapshot,...Object.fromEntries(Object.entries(updates).map(([k,v])=>[k==='full_name'?'fullName':k==='business_name'?'businessName':k==='business_type'?'businessType':k,v]))};

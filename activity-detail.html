@@ -42,10 +42,10 @@
 <section class="panel"><h2>Activity timeline</h2><div class="muted">Every recorded interaction for this property.</div><div id="timeline" class="timeline"><div class="empty">Loading activity...</div></div></section>
 </main></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="assets/js/app.js"></script><script>
-const S = window.supabase.createClient(
+const S = window.DBHSupabaseClient || (window.DBHSupabaseClient = window.supabase.createClient(
   'https://cpgajlsyuieeengdnamy.supabase.co',
   'sb_publishable_fbcJT-QGKyZg0tDkpbDkOQ_CcQf2ugW'
-);
+));
 const $ = (id) => document.getElementById(id);
 
 async function auth() {

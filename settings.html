@@ -84,7 +84,7 @@ async function saveProfile(){
  const btn=$('saveProfile');loading(btn,true,'Saving profile...');
  try{
   const years=val('yearsExperience');
-  if(years!==''&&(!/^\\d+$/.test(years)||Number(years)>60)){throw new Error('Years of experience must be a whole number from 0 to 60.')}
+  if(years!==''&&(!/^\d+$/.test(years)||Number(years)>60)){throw new Error('Years of experience must be a whole number from 0 to 60.')}
   const payload={action:'save_agent_profile',full_name:val('fullName'),phone:val('phone'),whatsapp_number:val('whatsapp'),business_name:val('businessName'),business_type:val('businessType'),state:val('state'),city:val('city'),address:val('address'),bio:val('bio'),years_experience:years,license_number:val('licenseNumber'),social_links:socialPayload()};
   if(!payload.full_name||!payload.phone||!payload.whatsapp_number)throw new Error('Full name, phone number and WhatsApp number are required.');
   await profileAction(payload);

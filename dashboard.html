@@ -36,6 +36,23 @@
 @media(prefers-reduced-motion:reduce){.hero-dashboard:before,.hero-dashboard:after,.hero-house,.orbit{animation:none!important}.hero-btn,.quick-card{transition:none!important}}
 
 .top{height:76px!important;padding:0 30px!important;box-shadow:0 3px 20px rgba(6,43,82,.035);backdrop-filter:blur(12px)}.brand{gap:11px!important}.brand-logo{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;background:#f1f7ff;border:1px solid #dbeafe;box-shadow:0 6px 18px rgba(11,99,206,.08)}.brand img{width:38px!important;height:38px!important;border-radius:10px!important}.brand-copy strong{display:block;font-size:13px;line-height:1.1}.brand-copy small{display:block;margin-top:4px;font-size:8px!important;letter-spacing:.15em!important}.top-centre{display:flex;align-items:center;gap:9px}.live-pill{display:inline-flex;align-items:center;gap:7px;background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;border-radius:99px;padding:7px 10px;font-size:8px;font-weight:900}.live-pill i{width:6px;height:6px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 4px #dcfce7;animation:headerPulse 2s infinite}.top-date{color:#94a3b8;font-size:9px;font-weight:800}.profile-chip{height:40px;border:1px solid var(--line);background:#fff;border-radius:12px;padding:4px 9px 4px 5px;display:flex;align-items:center;gap:7px;color:var(--deep);cursor:pointer}.profile-chip:hover{background:var(--soft);border-color:#bfdbfe}.profile-chip>span:first-child{width:30px;height:30px;border-radius:9px;background:#eff6ff;color:var(--blue);display:grid;place-items:center}.profile-name{max-width:105px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px;font-weight:900}.menu-btn{display:none}.logout{color:#64748b}@keyframes headerPulse{50%{box-shadow:0 0 0 5px #dcfce7}}@media(max-width:900px){.top{padding:0 16px!important}.top-centre{display:none}.menu-btn{display:grid!important}.profile-name{display:none}.profile-chip{padding:4px}.logout{display:none}}@media(max-width:550px){.brand-copy strong{font-size:11px}.brand-logo{width:40px;height:40px}.brand img{width:34px!important;height:34px!important}.bell{display:grid!important}}
+
+/* Responsive workspace refinement */
+body{overflow-x:hidden;background:#f5f8fc}.shell{grid-template-columns:250px minmax(0,1fr);min-width:0;width:100%}.main{width:100%;min-width:0;max-width:1500px;padding:clamp(20px,2.2vw,34px);margin:0 auto}
+.welcome h1{font-size:clamp(26px,2.5vw,36px);line-height:1.12;color:#092e57}.welcome .sub{max-width:760px;font-size:12px}
+.notice{box-shadow:0 5px 18px #12385b06}.payment{grid-template-columns:minmax(0,1fr) auto;gap:24px;border:1px solid #0d5eb9;box-shadow:0 18px 42px #062b5217}.payment h2{font-size:clamp(22px,2.4vw,29px);line-height:1.16}.payment p{max-width:720px}.price{min-width:140px}
+.metrics-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.metric-card{display:flex;align-items:center;gap:14px;min-width:0;min-height:110px;box-shadow:0 8px 24px #16395a07;transition:transform .18s,border-color .18s,box-shadow .18s}.metric-card:hover{transform:translateY(-2px);border-color:#c6dcf5;box-shadow:0 14px 28px #16395a0d}.metric-card.stat i{flex:0 0 44px;width:44px;height:44px;margin:0;border-radius:13px;font-size:16px}.metric-card>div{min-width:0}.metric-card b{display:block;font-size:clamp(21px,2vw,28px);line-height:1.1;color:#102f52;overflow-wrap:anywhere}.metric-card span{font-size:10px;line-height:1.4}
+.section-head>div p{margin:5px 0 0}.section-link{font-size:10px;font-weight:900;color:#0b63ce;white-space:nowrap}.section-link i{margin-left:5px}.recent-section{margin-top:30px}
+.activity-panel{overflow:hidden;background:#fff;border:1px solid #e2e8f0;border-radius:17px;box-shadow:0 8px 26px #16395a06}.activity-row{display:grid;grid-template-columns:40px minmax(0,1fr) auto;align-items:center;gap:13px;padding:14px 17px;border-bottom:1px solid #eef2f7;min-width:0}.activity-row:last-child{border-bottom:0}.activity-icon{width:38px;height:38px;border-radius:12px;background:#eef6ff;color:#0b63ce;display:grid;place-items:center}.activity-copy{min-width:0}.activity-copy strong{display:block;color:#183957;font-size:11px;line-height:1.45;overflow-wrap:anywhere}.activity-copy span{display:block;color:#8291a4;font-size:9px;margin-top:3px}.activity-time{font-size:9px;color:#7b8da2;white-space:nowrap}.activity-empty{display:flex;align-items:center;gap:13px;padding:19px;color:#7b8da2}.activity-empty>i{width:40px;height:40px;flex-shrink:0;border-radius:12px;background:#f0f6fd;color:#527ca6;display:grid;place-items:center}.activity-empty strong{display:block;font-size:11px;color:#244461}.activity-empty span{display:block;font-size:10px;margin-top:3px;line-height:1.5}
+.tools{grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch}.tool{display:block;min-width:0;color:inherit;text-decoration:none;box-shadow:0 8px 24px #16395a06;transition:transform .18s,border-color .18s,box-shadow .18s}.tool:hover{transform:translateY(-3px);border-color:#c6dcf5;box-shadow:0 15px 32px #16395a10}.tool.locked{opacity:.7;cursor:not-allowed;pointer-events:none;box-shadow:none;background:#fbfcfe}.tool-link{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:15px;padding-top:12px;border-top:1px solid #eef2f7;font-size:10px;font-weight:900;color:#0b63ce}.tool-link i{font-size:11px}.quick-card{min-width:0;text-decoration:none;color:inherit;border-radius:15px}.quick-card:focus-visible,.tool:focus-visible,.hero-btn:focus-visible,.section-link:focus-visible{outline:3px solid #93c5fd;outline-offset:3px}.quick-card[aria-disabled="true"]{pointer-events:none;opacity:.55}
+.payment-actions{align-items:center}.paybtn,.dismissbtn{min-height:43px;justify-content:center;font-size:11px}#headerAvatar img{display:block;width:30px;height:30px;object-fit:cover;border-radius:9px}
+@media(min-width:1500px){.main{padding:36px 40px}}
+@media(max-width:1200px){.shell{grid-template-columns:240px minmax(0,1fr)}.main{padding:24px}.metrics-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.tools{grid-template-columns:repeat(2,minmax(0,1fr))}.hero-dashboard{padding:28px}.hero-copy h2{font-size:31px}.quick-row{grid-template-columns:repeat(3,minmax(0,1fr))}.quick-card{padding:13px;gap:9px}}
+@media(max-width:900px){.shell{display:block;min-height:calc(100vh - 72px)}.main{padding:24px 22px 40px}.menu-btn{display:grid!important}.top{padding:0 18px!important}.top-centre{display:none}.hero-dashboard{min-height:280px;padding:26px}.hero-orbit{right:-35px;bottom:-55px;opacity:.35}.hero-copy{max-width:100%}.quick-row{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.quick-card{padding:12px;align-items:flex-start}.quick-card>i:last-child{display:none}.tools{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:680px){.top{height:68px!important;padding:0 12px!important}.brand-logo{width:39px;height:39px}.brand img{width:33px!important;height:33px!important}.brand-copy strong{font-size:11px}.brand-copy small{font-size:7px!important}.top-actions{gap:6px}.top-actions .icon,.profile-chip{width:37px;height:37px;min-width:37px}.profile-name{display:none}.main{padding:18px 13px 34px}.welcome{display:block;margin-bottom:17px}.welcome h1{font-size:27px}.welcome .sub{font-size:11px}.notice{padding:13px;gap:10px;margin-bottom:15px}.notice>i{font-size:16px}.notice b{font-size:11px}.notice p{font-size:10px}.payment{padding:19px;grid-template-columns:1fr;gap:15px;border-radius:19px;margin-bottom:17px}.payment h2{font-size:23px}.payment p{font-size:11px}.payment .price{text-align:left;min-width:0;padding-top:14px;border-top:1px solid #ffffff25}.price strong{font-size:30px}.payment-actions{display:grid;grid-template-columns:1fr 1fr}.paybtn,.dismissbtn{padding:11px 9px;font-size:10px;white-space:normal;text-align:center}.hero-dashboard{padding:23px;min-height:300px;border-radius:20px}.hero-copy h2{font-size:27px;max-width:100%}.hero-copy p{font-size:11px;max-width:100%}.hero-orbit{right:-75px;bottom:-55px;opacity:.24;transform:scale(.78);transform-origin:right bottom}.hero-actions{gap:8px}.hero-btn{font-size:10px;padding:11px 12px}.quick-row{grid-template-columns:1fr;gap:8px;margin-bottom:17px}.quick-card{min-height:61px;padding:12px;align-items:center}.quick-card>i:last-child{display:block}.metrics-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.metric-card{padding:12px;gap:9px;min-height:91px;border-radius:14px}.metric-card.stat i{width:34px;height:34px;flex-basis:34px;font-size:13px;border-radius:10px}.metric-card b{font-size:22px}.metric-card span{font-size:9px}.section{margin-top:24px}.section-head{align-items:flex-start;gap:10px}.section-head h2{font-size:16px}.unlock-note{font-size:8px}.tools{grid-template-columns:1fr;gap:10px}.tool{padding:16px}.activity-row{grid-template-columns:34px minmax(0,1fr);gap:10px;padding:12px}.activity-icon{width:34px;height:34px}.activity-time{grid-column:2;white-space:normal}.section-link{font-size:9px}.activity-empty{padding:15px}}
+@media(max-width:390px){.main{padding-inline:10px}.brand-copy strong{font-size:10px}.top-actions{gap:4px}.top-actions .icon,.profile-chip{width:34px;height:34px;min-width:34px}.payment-actions{grid-template-columns:1fr}.metrics-grid{gap:7px}.metric-card{padding:10px;display:block}.metric-card.stat i{margin-bottom:10px}.metric-card b{font-size:21px}.hero-dashboard{padding:19px;min-height:320px}.hero-actions{display:grid;grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.live-pill i,.hero-dashboard:before,.hero-dashboard:after,.hero-house,.orbit,.quick-card,.metric-card,.tool{animation:none!important;transition:none!important}}
+
 </style>
 </head>
 <body>
@@ -91,8 +108,8 @@
     <h2>Your property business, all in one place.</h2>
     <p>Track your listings, verification, customer activity and account progress from one professional workspace.</p>
     <div class="hero-actions">
-      <a href="add-property.html" class="hero-btn"><i class="fa-solid fa-plus"></i> Add a property</a>
-      <a href="properties.html" class="hero-btn ghost"><i class="fa-solid fa-house"></i> View properties</a>
+      <a href="#" data-href="add-property.html" id="addPropertyHero" class="hero-btn" aria-disabled="true"><i class="fa-solid fa-plus"></i> Add a property</a>
+      <a href="#" data-href="properties.html" id="browsePropertiesHero" class="hero-btn ghost" aria-disabled="true"><i class="fa-solid fa-house"></i> View properties</a>
     </div>
   </div>
   <div class="hero-orbit" aria-hidden="true">
@@ -102,32 +119,36 @@
   </div>
 </section>
 
-<section class="quick-row">
-  <div class="quick-card"><div class="quick-icon"><i class="fa-solid fa-chart-line"></i></div><div><b>Business overview</b><span>Monitor your DBH activity</span></div><i class="fa-solid fa-arrow-right"></i></div>
-  <div class="quick-card"><div class="quick-icon green"><i class="fa-solid fa-shield-check"></i></div><div><b>Trust & verification</b><span>Keep your profile verified</span></div><i class="fa-solid fa-arrow-right"></i></div>
-  <div class="quick-card"><div class="quick-icon orange"><i class="fa-solid fa-bolt"></i></div><div><b>Fast actions</b><span>Manage your listings quickly</span></div><i class="fa-solid fa-arrow-right"></i></div>
+<section class="quick-row" aria-label="Quick links">
+  <a class="quick-card gated-link" id="quickProperties" data-href="activity.html" href="#" aria-disabled="true"><div class="quick-icon"><i class="fa-solid fa-chart-line"></i></div><div><b>Business activity</b><span>Review listing views and enquiries</span></div><i class="fa-solid fa-arrow-right"></i></a>
+  <a class="quick-card" id="quickVerification" href="agent-documents.html"><div class="quick-icon green"><i class="fa-solid fa-shield-halved"></i></div><div><b>Trust & verification</b><span>Review your documents and status</span></div><i class="fa-solid fa-arrow-right"></i></a>
+  <a class="quick-card gated-link" id="quickAdd" data-href="add-property.html" href="#" aria-disabled="true"><div class="quick-icon orange"><i class="fa-solid fa-plus"></i></div><div><b>List a property</b><span>Add photos and property details</span></div><i class="fa-solid fa-arrow-right"></i></a>
 </section>
 
-<section class="grid">
-<div class="card stat"><i class="fa-solid fa-house"></i><b id="propertiesCount">0</b><span>Approved properties</span></div>
-<div class="card stat"><i class="fa-solid fa-eye"></i><b id="viewsCount">0</b><span>Property views</span></div>
-<div class="card stat"><i class="fa-solid fa-comments"></i><b id="enquiriesCount">0</b><span>Customer enquiries</span></div>
-<div class="card stat"><i class="fa-solid fa-shield-halved"></i><b id="verifyStat">Pending</b><span>Verification status</span></div>
+<section class="grid metrics-grid" aria-label="Account metrics">
+<div class="card stat metric-card"><i class="fa-solid fa-house"></i><div><b id="propertiesCount">—</b><span>My properties</span></div></div>
+<div class="card stat metric-card"><i class="fa-solid fa-eye"></i><div><b id="viewsCount">—</b><span>Total property views</span></div></div>
+<div class="card stat metric-card"><i class="fa-solid fa-comments"></i><div><b id="enquiriesCount">—</b><span>Contact actions</span></div></div>
+<div class="card stat metric-card"><i class="fa-solid fa-shield-halved"></i><div><b id="verifyStat">Pending</b><span>Verification status</span></div></div>
+</section>
+<section class="section recent-section" aria-labelledby="recentHeading">
+  <div class="section-head"><div><h2 id="recentHeading">Recent listing activity</h2><p class="sub">Latest recorded views and contact actions on your properties.</p></div><a class="section-link" href="activity.html" data-requires-access="true">View activity <i class="fa-solid fa-arrow-right"></i></a></div>
+  <div class="activity-panel" id="recentActivity" aria-live="polite"><div class="activity-empty"><i class="fa-solid fa-chart-line"></i><div><strong>Loading your activity</strong><span>Your latest property activity will appear here.</span></div></div></div>
 </section>
 
 <section class="section">
 <div class="section-head"><h2>Agent tools</h2><span class="unlock-note" id="toolState">LOCKED</span></div>
 <div class="tools">
-<div class="tool" id="propertyTool"><i class="fa-solid fa-house"></i><h3>My Properties</h3><p>Manage your property listings after your account is unlocked.</p></div>
-<div class="tool" id="addTool"><i class="fa-solid fa-cloud-arrow-up"></i><h3>Add Property</h3><p>Upload property details, images and supporting documents.</p></div>
-<div class="tool" id="enquiryTool"><i class="fa-solid fa-comments"></i><h3>Customer Enquiries</h3><p>View and respond to customers interested in your listings.</p></div>
+<a class="tool" id="propertyTool" data-href="properties.html" href="#" aria-disabled="true"><i class="fa-solid fa-house"></i><h3>My Properties</h3><p>View and manage properties submitted from your agent account.</p><span class="tool-link">Open properties <i class="fa-solid fa-arrow-right"></i></span></a>
+<a class="tool" id="addTool" data-href="add-property.html" href="#" aria-disabled="true"><i class="fa-solid fa-cloud-arrow-up"></i><h3>Add Property</h3><p>Submit property details, images and supporting documents for review.</p><span class="tool-link">Create listing <i class="fa-solid fa-arrow-right"></i></span></a>
+<a class="tool" id="enquiryTool" data-href="enquiries.html" href="#" aria-disabled="true"><i class="fa-solid fa-comments"></i><h3>Customer Enquiries</h3><p>Review customer interest and manage property-related conversations.</p><span class="tool-link">Open enquiries <i class="fa-solid fa-arrow-right"></i></span></a>
 </div>
 </section>
 </main>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/js/app.js"></script>
+<script src="assets/js/app.js?v=20261009-dashboard-responsive2"></script>
 <script>
 const SUPABASE_URL='https://cpgajlsyuieeengdnamy.supabase.co';
 const SUPABASE_KEY='sb_publishable_fbcJT-QGKyZg0tDkpbDkOQ_CcQf2ugW';
@@ -154,12 +175,52 @@ function setButtonLoading(button,on,label){
 }
 function setToolAccess(open){
   if(window.DBHAgentSidebar) window.DBHAgentSidebar.setAccess(open);
-  ['propertyTool','addTool','enquiryTool'].forEach(id=>$(id).classList.toggle('locked',!open));
+  ['propertyTool','addTool','enquiryTool','quickProperties','quickAdd'].forEach(id=>{
+    const el=$(id);if(!el)return;
+    el.classList.toggle('locked',!open);
+    if(el.dataset.href){
+      if(open){el.href=el.dataset.href;el.removeAttribute('aria-disabled')}
+      else{el.href='#';el.setAttribute('aria-disabled','true')}
+    }
+  });
+  document.querySelectorAll('[data-requires-access="true"]').forEach(el=>{
+    if(open){el.href=el.dataset.href||'activity.html';el.removeAttribute('aria-disabled')}
+    else{el.dataset.href=el.getAttribute('href')||'activity.html';el.href='#';el.setAttribute('aria-disabled','true')}
+  });
+  const add=$('addPropertyHero');if(add){add.href=open?'add-property.html':'#';add.setAttribute('aria-disabled',open?'false':'true')}
+  const browse=$('browsePropertiesHero');if(browse){browse.href=open?'properties.html':'#';browse.setAttribute('aria-disabled',open?'false':'true')}
   $('accessCard').classList.toggle('show',open);
   $('toolState').textContent=open?'UNLOCKED':'LOCKED';
   $('toolState').style.color=open?'#15803d':'#b45309';
   $('toolState').style.background=open?'#f0fdf4':'#fffbeb';
   $('toolState').style.borderColor=open?'#bbf7d0':'#fde68a';
+}
+
+function countText(id,count){const el=$(id);if(el)el.textContent=typeof count==='number'?count.toLocaleString('en-NG'):'—'}
+function formatActivityTime(value){if(!value)return '';const d=new Date(value);if(Number.isNaN(d.getTime()))return '';return new Intl.DateTimeFormat('en-NG',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}).format(d)}
+function safeText(value){return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
+async function loadDashboardMetrics(userId){
+  const [props,views,contacts,recent]=await Promise.all([
+    S.from('properties').select('id',{count:'exact',head:true}).eq('created_by',userId),
+    S.from('agent_property_activity').select('id',{count:'exact',head:true}).eq('agent_id',userId).eq('action','view'),
+    S.from('agent_property_activity').select('id',{count:'exact',head:true}).eq('agent_id',userId).in('action',['contact','phone','whatsapp']),
+    S.from('agent_property_activity').select('id,action,created_at,property_id,properties(title,property_code)').eq('agent_id',userId).order('created_at',{ascending:false}).limit(5)
+  ]);
+  countText('propertiesCount',props.error?null:(props.count||0));
+  countText('viewsCount',views.error?null:(views.count||0));
+  countText('enquiriesCount',contacts.error?null:(contacts.count||0));
+  const panel=$('recentActivity');if(!panel)return;
+  if(recent.error||!recent.data?.length){
+    panel.innerHTML='<div class="activity-empty"><i class="fa-solid fa-chart-line"></i><div><strong>No recent listing activity</strong><span>When customers view or contact you about a listing, the activity will appear here.</span></div></div>';
+    return;
+  }
+  const meta={view:{icon:'fa-eye',title:'Property viewed'},contact:{icon:'fa-comments',title:'Customer contacted you'},phone:{icon:'fa-phone',title:'Customer tapped call'},whatsapp:{icon:'fa-brands fa-whatsapp',title:'Customer opened WhatsApp'},save:{icon:'fa-bookmark',title:'Property saved'}};
+  panel.innerHTML=recent.data.map(row=>{
+    const action=meta[row.action]||{icon:'fa-circle-check',title:'Property activity'};
+    const p=Array.isArray(row.properties)?row.properties[0]:row.properties;
+    const title=p?.title||p?.property_code||'Your property listing';
+    return '<div class="activity-row"><span class="activity-icon"><i class="fa-solid '+action.icon+'"></i></span><div class="activity-copy"><strong>'+safeText(action.title)+': '+safeText(title)+'</strong><span>'+safeText(p?.property_code||'DBH property')+'</span></div><time class="activity-time" datetime="'+safeText(row.created_at||'')+'">'+safeText(formatActivityTime(row.created_at))+'</time></div>';
+  }).join('');
 }
 
 async function boot(){
@@ -176,15 +237,21 @@ async function boot(){
     if(!app){location.href='agent-onboarding.html';return}
 
     const fullName=app.full_name||user.user_metadata?.full_name||'DBH Agent';
-    $('name').textContent=fullName;
-    $('email').textContent=app.email||user.email||'';
+    if($('name')) $('name').textContent=fullName;
+    if($('email')) $('email').textContent=app.email||user.email||'';
+    if($('headerAvatar')&&app.profile_photo_url){
+      const photo=document.createElement('img');photo.src=app.profile_photo_url;photo.alt=fullName+' profile photo';photo.onerror=()=>{photo.remove();$('headerAvatar').innerHTML='<i class="fa-solid fa-user"></i>'};
+      $('headerAvatar').replaceChildren(photo);
+    }
+    loadDashboardMetrics(user.id).catch(err=>console.warn('Dashboard metrics unavailable:',err));
     const status=cleanStatus(app.status);
     const verified=status==='verified'||status==='approved';
-    $('status').textContent=status.toUpperCase();
-    $('verifyStat').textContent=status;
+    if($('status')) $('status').textContent=status.toUpperCase();
+    if($('verifyStat')) $('verifyStat').textContent=status;
     $('welcome').textContent='Welcome back, '+fullName.trim().split(/\s+/)[0];
-    $('verifiedBadge').classList.toggle('show',verified);
+    if($('verifiedBadge')) $('verifiedBadge').classList.toggle('show',verified);
     if($('headerName')) $('headerName').textContent=fullName.trim().split(/\s+/)[0];
+    if($('headerProfile')) $('headerProfile').onclick=()=>{location.href='settings.html'};
     if($('topDate')) $('topDate').textContent=new Intl.DateTimeFormat('en-NG',{weekday:'short',day:'numeric',month:'short'}).format(new Date());
 
     const {data:settings,error:settingsError}=await S.from('agent_settings').select('*').eq('id',true).maybeSingle();
@@ -200,7 +267,7 @@ async function boot(){
       }
     }
 
-    const {data:payment,error:paymentError}=await S.from('agent_payment_records').select('status,paid_at,reference,amount,currency,created_at').eq('user_id',user.id).eq('payment_type','registration_fee').order('created_at',{ascending:false}).limit(1).maybeSingle();
+    const {data:payment,error:paymentError}=await S.from('agent_payment_records').select('status,paid_at,reference,amount,currency,created_at').eq('user_id',user.id).in('payment_type',['registration_fee','agent_fee']).order('created_at',{ascending:false}).limit(1).maybeSingle();
     if(paymentError){console.error(paymentError);showMessage('Your payment record could not be loaded. Please refresh once.','warn')}
 
     const paid=payment?.status==='successful';

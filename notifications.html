@@ -14,8 +14,8 @@
 .btn{border:1px solid var(--l);background:#fff;color:var(--d);padding:10px 13px;border-radius:11px;font-weight:850;cursor:pointer}.primary{background:var(--b);border-color:var(--b);color:#fff}
 .wrap{max-width:980px;margin:auto;padding:34px 16px 70px}.hero{background:linear-gradient(135deg,var(--d),var(--b));color:#fff;border-radius:24px;padding:30px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;gap:20px}.eyebrow{font-size:9px;letter-spacing:.14em;font-weight:900;color:#bfdbfe}.hero h1{font-size:32px;margin:8px 0}.hero p{font-size:11px;color:#dbeafe;margin:0;line-height:1.6}.count{min-width:74px;height:74px;border-radius:50%;background:#ffffff18;border:1px solid #ffffff25;display:grid;place-items:center;text-align:center}.count b{font-size:24px;display:block}.count small{font-size:8px;color:#dbeafe}
 .toolbar{background:#fff;border:1px solid var(--l);border-radius:16px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.toolbar span{font-size:10px;color:var(--m)}
-.list{display:grid;gap:10px}.item{background:#fff;border:1px solid var(--l);border-radius:17px;padding:18px;display:grid;grid-template-columns:44px 1fr auto;gap:14px;align-items:start}.item.unread{border-left:4px solid var(--b);background:#fafdff}.ico{width:44px;height:44px;border-radius:13px;background:#eff6ff;color:var(--b);display:grid;place-items:center;font-size:17px}.item h3{margin:0;font-size:14px}.item p{margin:6px 0 0;color:var(--m);font-size:10px;line-height:1.6}.time{color:#94a3b8;font-size:9px;white-space:nowrap}.empty{background:#fff;border:1px dashed #bfd0e4;border-radius:18px;padding:45px 20px;text-align:center;color:var(--m)}.empty i{font-size:34px;color:#94a3b8;margin-bottom:12px}.empty h3{color:var(--t);margin:0 0 5px}.msg{display:none;margin:12px 0;padding:11px;border-radius:10px;font-size:10px}.msg.show{display:block}.err{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
-@media(max-width:620px){.top{padding:0 12px}.hero{padding:23px;border-radius:19px}.hero h1{font-size:27px}.item{grid-template-columns:40px 1fr}.time{grid-column:2}.count{min-width:62px;height:62px}.toolbar{align-items:flex-start;flex-direction:column}}
+.list{display:grid;gap:10px}.item{background:#fff;border:1px solid var(--l);border-radius:17px;padding:18px;display:grid;grid-template-columns:44px 1fr auto;gap:14px;align-items:start}.item.unread{border-left:4px solid var(--b);background:#fafdff}.ico{width:44px;height:44px;border-radius:13px;background:#eff6ff;color:var(--b);display:grid;place-items:center;font-size:17px}.item h3{margin:0;font-size:14px}.item p{margin:6px 0 0;color:var(--m);font-size:10px;line-height:1.6}.time{color:#94a3b8;font-size:9px;white-space:nowrap}.empty{background:#fff;border:1px dashed #bfd0e4;border-radius:18px;padding:45px 20px;text-align:center;color:var(--m)}.empty i{font-size:34px;color:#94a3b8;margin-bottom:12px}.empty h3{color:var(--t);margin:0 0 5px}.msg{display:none;margin:12px 0;padding:11px;border-radius:10px;font-size:10px}.msg.show{display:block}.err{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}.mark-read{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:7px 10px;background:#eff6ff;border:1px solid #dbeafe;border-radius:9px;color:#155eaa;font-size:10px;font-weight:800;cursor:pointer}.mark-read:disabled{opacity:.6;cursor:wait}.broadcast-label{display:inline-block;color:#6b7b90;margin-top:8px;font-size:9px}.item>div:nth-child(2){min-width:0;overflow-wrap:anywhere}.item a{overflow-wrap:anywhere}
+@media(max-width:620px){.top{padding:0 12px}.hero{padding:21px;border-radius:19px}.hero h1{font-size:27px}.hero p{max-width:32ch}.item{grid-template-columns:38px minmax(0,1fr);gap:10px;padding:14px}.item>div:nth-child(2){min-width:0}.ico{width:38px;height:38px}.item h3{font-size:13px;line-height:1.4;overflow-wrap:anywhere}.item p{font-size:11px;overflow-wrap:anywhere}.time{grid-column:2;white-space:normal}.count{min-width:62px;height:62px}.toolbar{align-items:flex-start;flex-direction:column}.toolbar button{width:100%;justify-content:center}.wrap{padding:22px 12px 45px}}
 @keyframes dbhNIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}@keyframes dbhFloat{50%{transform:translateY(14px) rotate(5deg)}}.hero{position:relative;overflow:hidden;box-shadow:0 20px 45px rgba(11,99,206,.18)}.hero:after{content:"";position:absolute;width:230px;height:230px;border:1px solid #ffffff22;border-radius:50%;right:30px;top:-130px;animation:dbhFloat 6s ease-in-out infinite}.hero>*{position:relative;z-index:1}.item{animation:dbhNIn .4s both;transition:.2s}.item:hover{transform:translateY(-3px);box-shadow:0 16px 32px rgba(6,43,82,.11)}.ico{transition:.2s}.item:hover .ico{transform:scale(1.08) rotate(-3deg)}.toolbar{box-shadow:0 10px 25px rgba(6,43,82,.06)}@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}</style>
 </head>
 <body>
@@ -32,7 +32,56 @@ function icon(type){type=String(type||'').toLowerCase();if(type.includes('paymen
 function esc(v){return String(v??'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[x]))}
 function ago(v){const d=new Date(v),s=Math.floor((Date.now()-d.getTime())/1000);if(s<60)return 'Just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';if(s<604800)return Math.floor(s/86400)+'d ago';return d.toLocaleDateString()}
 function msg(t){$('msg').textContent=t;$('msg').className='msg show err'}
-async function boot(){const {data:{session},error}=await S.auth.getSession();if(error||!session){location.href='login.html';return}const uid=session.user.id;const {data,error:e}=await S.from('notifications').select('id,title,message,type,link,is_read,created_at').eq('user_id',uid).order('created_at',{ascending:false}).limit(100);if(e){console.error(e);msg('Notifications could not be loaded. Please refresh.');return}const rows=data||[],unread=rows.filter(x=>!x.is_read).length;$('unread').textContent=unread;$('summary').textContent=rows.length?rows.length+' notification'+(rows.length===1?'':'s')+' • '+unread+' unread':'No notifications yet';$('list').innerHTML=rows.length?rows.map(n=>'<article class="item '+(!n.is_read?'unread':'')+'"><div class="ico"><i class="fa-solid '+icon(n.type)+'"></i></div><div><h3>'+esc(n.title||'DBH notification')+'</h3><p>'+esc(n.message||'')+'</p>'+(n.link?'<p><a href="'+esc(n.link)+'" style="color:#0b63ce;font-weight:800">Open related page <i class="fa-solid fa-arrow-up-right-from-square"></i></a></p>':'')+'</div><time class="time">'+esc(ago(n.created_at))+'</time></article>').join(''):'<div class="empty"><i class="fa-regular fa-bell-slash"></i><h3>No notifications yet</h3><p>DBH updates about your application will appear here.</p></div>'}
-$('readAll').onclick=async()=>{const b=$('readAll');b.disabled=true;const {error}=await S.from('notifications').update({is_read:true}).eq('user_id',(await S.auth.getUser()).data.user.id).eq('is_read',false);if(error){msg('Could not mark notifications as read.');b.disabled=false;return}await boot();b.disabled=false};boot();
+let currentUserEmail='';
+function renderRows(rows){
+  const unread=rows.filter(n=>!n.is_read&&String(n.recipient_email||'').toLowerCase()!=='*').length;
+  $('unread').textContent=String(unread);
+  $('summary').textContent=rows.length?rows.length+' notification'+(rows.length===1?'':'s')+' • '+unread+' unread':'No notifications yet';
+  $('list').innerHTML=rows.length?rows.map(n=>{
+    const isBroadcast=String(n.recipient_email||'').trim()==='*';
+    const markButton=!n.is_read&&!isBroadcast?'<button class="mark-read" type="button" data-mark-read="'+esc(n.id)+'" aria-label="Mark notification as read"><i class="fa-solid fa-check"></i> Mark read</button>':'';
+    const link=n.link?'<p><a href="'+esc(n.link)+'" style="color:#0b63ce;font-weight:800">Open related page <i class="fa-solid fa-arrow-up-right-from-square"></i></a></p>':'';
+    return '<article class="item '+(!n.is_read?'unread':'')+'"><div class="ico"><i class="fa-solid '+icon(n.type)+'"></i></div><div><h3>'+esc(n.title||(isBroadcast?'DBH announcement':'DBH notification'))+'</h3><p>'+esc(n.message||'')+'</p>'+link+(isBroadcast?'<small class="broadcast-label"><i class="fa-solid fa-bullhorn"></i> DBH announcement</small>':'')+markButton+'</div><time class="time">'+esc(ago(n.created_at))+'</time></article>';
+  }).join(''):'<div class="empty"><i class="fa-regular fa-bell-slash"></i><h3>No notifications yet</h3><p>DBH updates about your application, payments and account will appear here.</p></div>';
+}
+async function loadNotifications(){
+  const cols='id,recipient_email,title,message,type,link,is_read,created_at';
+  const [personal,global]=await Promise.all([
+    S.from('dbh_notifications').select(cols).eq('recipient_email',currentUserEmail).order('created_at',{ascending:false}).limit(100),
+    S.from('dbh_notifications').select(cols).eq('recipient_email','*').order('created_at',{ascending:false}).limit(100)
+  ]);
+  if(personal.error){console.error('Personal notifications:',personal.error);msg('We could not load your notifications. Please refresh and sign in again.');return}
+  if(global.error)console.warn('DBH announcements could not be loaded:',global.error);
+  const deduped=new Map();
+  [...(personal.data||[]),...(global.data||[])].forEach(n=>deduped.set(n.id,n));
+  const rows=[...deduped.values()].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+  renderRows(rows);
+}
+async function boot(){
+  try{
+    const {data,error}=await S.auth.getSession();
+    const session=data?.session;
+    if(error||!session){location.href='login.html';return}
+    currentUserEmail=String(session.user?.email||'').trim().toLowerCase();
+    if(!currentUserEmail){msg('Your sign-in session has no email address. Please sign in again.');return}
+    await loadNotifications();
+  }catch(error){console.error('Notification load failed:',error);msg('Notifications could not be loaded. Please refresh and try again.')}
+}
+$('list').addEventListener('click',async event=>{
+  const button=event.target.closest('[data-mark-read]');
+  if(!button)return;
+  button.disabled=true;
+  const id=button.getAttribute('data-mark-read');
+  const {error}=await S.from('dbh_notifications').update({is_read:true}).eq('id',id).eq('recipient_email',currentUserEmail).select('id');
+  if(error){console.error('Mark notification read failed:',error);msg('Could not mark this notification as read. Please try again.');button.disabled=false;return}
+  await loadNotifications();
+});
+$('readAll').onclick=async()=>{
+  const b=$('readAll');b.disabled=true;
+  const {error}=await S.from('dbh_notifications').update({is_read:true}).eq('recipient_email',currentUserEmail).eq('is_read',false).select('id');
+  if(error){console.error('Mark all read failed:',error);msg('Could not mark your notifications as read. Please try again.');b.disabled=false;return}
+  await loadNotifications();b.disabled=false;
+};
+boot();
 </script>
 </body></html>

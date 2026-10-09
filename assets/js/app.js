@@ -9,7 +9,7 @@
     ['payment-result.html','fa-file-invoice-dollar','Payment Receipts',''],
     ['agent-documents.html','fa-id-card','Verification',''],
     ['notifications.html','fa-bell','Notifications',''],
-    ['settings.html','fa-sliders','Settings','']
+    ['settings.html','fa-user-gear','My Profile & Settings','']
   ];
 
   function sidebarMarkup(){

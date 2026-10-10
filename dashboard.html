@@ -148,7 +148,7 @@ body{overflow-x:hidden;background:#f5f8fc}.shell{grid-template-columns:250px min
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/js/app.js?v=20261009-dashboard-responsive2"></script>
+<script src="assets/js/app.js?v=20261010-dashboard-usd-fee"></script>
 <script>
 const SUPABASE_URL='https://cpgajlsyuieeengdnamy.supabase.co';
 const SUPABASE_KEY='sb_publishable_fbcJT-QGKyZg0tDkpbDkOQ_CcQf2ugW';
@@ -258,7 +258,98 @@ async function boot(){
     if(!settingsError&&settings){
       const currency=String(settings.currency||'NGN').toUpperCase();
       $('price').textContent=formatMoney(settings.registration_fee,currency);
-      $('currency').textContent=currency+' • '+(settings.fee_enabled===false?'DISABLED':'CURRENT FEE');
+      $('currency').textContent=(settings.registration_fee_usd?'
+
+    const {data:payment,error:paymentError}=await S.from('agent_payment_records').select('status,paid_at,reference,amount,currency,payment_type,metadata,created_at').eq('user_id',user.id).in('payment_type',['registration_fee','agent_fee']).order('created_at',{ascending:false}).limit(1).maybeSingle();
+    if(paymentError){console.error(paymentError);showMessage('Your payment record could not be loaded. Please refresh once.','warn')}
+
+    const paid=payment?.status==='successful'&&String(payment?.metadata?.environment||'').toLowerCase()==='live';
+    const applicationPendingAfterDecline=status==='pending';
+    const {data:declinedDocs,error:declinedError}=await S.from('agent_application_documents')
+      .select('id,document_type,message_type,admin_note,created_at')
+      .eq('application_id',app.id)
+      .eq('status','declined')
+      .order('created_at',{ascending:false});
+    if(declinedError) console.error(declinedError);
+    const hasDeclinedDocument=Array.isArray(declinedDocs)&&declinedDocs.length>0;
+    const dismissed=app.payment_card_dismissed===true;
+    const unlocked=paid&&verified;
+    setToolAccess(unlocked);
+
+    if(paid){
+      $('noticeTitle').textContent=unlocked?'Payment received and verification completed.':'Registration payment received.';
+      $('noticeText').textContent=unlocked?'Your remaining agent tools are now unlocked.':'Your payment is recorded successfully. Complete verification so DBH can unlock the remaining agent tools.';
+      if(dismissed){
+        $('paymentCard').classList.add('hidden');
+      }else{
+        $('paymentCard').classList.remove('hidden');
+        $('paymentTitle').textContent='Registration fee paid successfully';
+        $('paymentText').textContent='Your payment has been recorded. You can cancel/hide this payment card from your dashboard; hiding it does not cancel or refund the payment.';
+        $('pay').removeAttribute('href');
+        $('pay').style.pointerEvents='none';
+        $('pay').style.opacity='.65';
+        $('pay').innerHTML='<i class="fa-solid fa-circle-check"></i><span>Payment successful</span>';
+      }
+    }else if(payment?.status==='pending'){
+      $('pay').href='payment.html';
+      $('pay').innerHTML='<i class="fa-solid fa-clock"></i><span>Continue payment</span>';
+      showMessage('A previous payment attempt is pending. You can continue the secure Flutterwave checkout.','warn');
+    }
+
+    if(hasDeclinedDocument || applicationPendingAfterDecline){
+      $('noticeIcon').className='fa-solid fa-circle-exclamation';
+      $('noticeIcon').style.color='#b91c1c';
+      $('noticeTitle').textContent=hasDeclinedDocument?'Document verification needs your attention.':'Your application is pending review.';
+      $('noticeText').textContent=hasDeclinedDocument?'One or more submitted verification documents were declined. Please open Notifications/Verification to review the administrator message and complete the requested replacement. Your verified status has been returned to Pending.':'Your application is currently pending DBH Admin review.';
+      $('applicationNotice').style.borderLeftColor='#dc2626';
+    }else if(status==='verified'){
+      $('noticeTitle').textContent=paid?'Payment received and verification completed.':'Your application has been verified.';
+      $('noticeText').textContent=paid?'Your remaining agent tools are now unlocked.':'Your application is verified. Complete the registration payment to unlock the remaining agent tools.';
+    }else if(status==='approved'){
+      $('noticeTitle').textContent=paid?'Your agent application is approved and active.':'Your application is approved.';
+      $('noticeText').textContent=paid?'Your remaining agent tools are now unlocked.':'Complete the registration payment to continue activation.';
+    }else if(status==='rejected'){
+      $('noticeTitle').textContent='Your application was not approved.';
+      $('noticeText').textContent='Please check your notifications or contact DBH Admin for the next step.';
+    }else if(status==='needs information'){
+      $('noticeTitle').textContent='More information is required.';
+      $('noticeText').textContent='Please check your verification area for the information or documents requested by DBH Admin.';
+    }else if(status==='suspended'){
+      $('noticeTitle').textContent='Your agent account is suspended.';
+      $('noticeText').textContent='Agent tools remain unavailable while the account is suspended. Contact DBH Admin for the reason and next steps.';
+      setToolAccess(false);
+    }
+
+    $('dismissPayment').onclick=async()=>{
+      if(!paid){showMessage('The payment card can only be hidden after a successful registration payment.','warn');return}
+      if(!confirm('Hide the successful registration payment card from your dashboard? This does not cancel or refund the payment.')) return;
+      const btn=$('dismissPayment');
+      setButtonLoading(btn,true,'Hiding...');
+      const {data,error}=await S.rpc('dismiss_agent_payment_card');
+      if(error||data!==true){
+        console.error(error);
+        showMessage('We could not hide the payment card. Please try again.','err');
+        setButtonLoading(btn,false,'Cancel / Hide');
+        return;
+      }
+      $('paymentCard').classList.add('hidden');
+    };
+  }catch(error){
+    console.error('Dashboard error:',error);
+    showMessage('Something went wrong while loading the dashboard. Please refresh and try again.','err');
+  }
+}
+
+$('logout').onclick=async()=>{
+  const button=$('logout');
+  setButtonLoading(button,true,'Signing out...');
+  try{await S.auth.signOut();location.href='index.html'}catch(error){console.error(error);setButtonLoading(button,false,'')}
+};
+
+boot();
+</script>
+</body>
+</html>+Number(settings.registration_fee_usd).toFixed(2)+' target · ':'')+currency+' • '+(settings.fee_enabled===false?'DISABLED':'CURRENT FEE');
       if(settings.fee_enabled===false){
         $('pay').removeAttribute('href');
         $('pay').style.pointerEvents='none';
@@ -266,6 +357,112 @@ async function boot(){
         $('pay').innerHTML='<i class="fa-solid fa-ban"></i><span>Registration payment disabled</span>';
       }
     }
+    try{
+      const {data:priceConfig,error:priceConfigError}=await S.functions.invoke('dbh-agent-payment',{body:{action:'config'}});
+      if(!priceConfigError&&priceConfig?.success){
+        $('price').textContent=formatMoney(priceConfig.amount,'NGN');
+        const modeLabel=priceConfig.environment==='live'?'LIVE MODE — REAL PAYMENT':'TEST MODE — NO REAL MONEY';
+        const rateLabel=Number(priceConfig.exchange_rate)>0?' · ₦'+Number(priceConfig.exchange_rate).toLocaleString('en-NG',{maximumFractionDigits:4})+' / USD':'';
+        $('currency').textContent='
+
+    const {data:payment,error:paymentError}=await S.from('agent_payment_records').select('status,paid_at,reference,amount,currency,created_at').eq('user_id',user.id).in('payment_type',['registration_fee','agent_fee']).order('created_at',{ascending:false}).limit(1).maybeSingle();
+    if(paymentError){console.error(paymentError);showMessage('Your payment record could not be loaded. Please refresh once.','warn')}
+
+    const paid=payment?.status==='successful';
+    const applicationPendingAfterDecline=status==='pending';
+    const {data:declinedDocs,error:declinedError}=await S.from('agent_application_documents')
+      .select('id,document_type,message_type,admin_note,created_at')
+      .eq('application_id',app.id)
+      .eq('status','declined')
+      .order('created_at',{ascending:false});
+    if(declinedError) console.error(declinedError);
+    const hasDeclinedDocument=Array.isArray(declinedDocs)&&declinedDocs.length>0;
+    const dismissed=app.payment_card_dismissed===true;
+    const unlocked=paid&&verified;
+    setToolAccess(unlocked);
+
+    if(paid){
+      $('noticeTitle').textContent=unlocked?'Payment received and verification completed.':'Registration payment received.';
+      $('noticeText').textContent=unlocked?'Your remaining agent tools are now unlocked.':'Your payment is recorded successfully. Complete verification so DBH can unlock the remaining agent tools.';
+      if(dismissed){
+        $('paymentCard').classList.add('hidden');
+      }else{
+        $('paymentCard').classList.remove('hidden');
+        $('paymentTitle').textContent='Registration fee paid successfully';
+        $('paymentText').textContent='Your payment has been recorded. You can cancel/hide this payment card from your dashboard; hiding it does not cancel or refund the payment.';
+        $('pay').removeAttribute('href');
+        $('pay').style.pointerEvents='none';
+        $('pay').style.opacity='.65';
+        $('pay').innerHTML='<i class="fa-solid fa-circle-check"></i><span>Payment successful</span>';
+      }
+    }else if(payment?.status==='pending'){
+      $('pay').href='payment.html';
+      $('pay').innerHTML='<i class="fa-solid fa-clock"></i><span>Continue payment</span>';
+      showMessage('A previous payment attempt is pending. You can continue the secure Flutterwave checkout.','warn');
+    }
+
+    if(hasDeclinedDocument || applicationPendingAfterDecline){
+      $('noticeIcon').className='fa-solid fa-circle-exclamation';
+      $('noticeIcon').style.color='#b91c1c';
+      $('noticeTitle').textContent=hasDeclinedDocument?'Document verification needs your attention.':'Your application is pending review.';
+      $('noticeText').textContent=hasDeclinedDocument?'One or more submitted verification documents were declined. Please open Notifications/Verification to review the administrator message and complete the requested replacement. Your verified status has been returned to Pending.':'Your application is currently pending DBH Admin review.';
+      $('applicationNotice').style.borderLeftColor='#dc2626';
+    }else if(status==='verified'){
+      $('noticeTitle').textContent=paid?'Payment received and verification completed.':'Your application has been verified.';
+      $('noticeText').textContent=paid?'Your remaining agent tools are now unlocked.':'Your application is verified. Complete the registration payment to unlock the remaining agent tools.';
+    }else if(status==='approved'){
+      $('noticeTitle').textContent=paid?'Your agent application is approved and active.':'Your application is approved.';
+      $('noticeText').textContent=paid?'Your remaining agent tools are now unlocked.':'Complete the registration payment to continue activation.';
+    }else if(status==='rejected'){
+      $('noticeTitle').textContent='Your application was not approved.';
+      $('noticeText').textContent='Please check your notifications or contact DBH Admin for the next step.';
+    }else if(status==='needs information'){
+      $('noticeTitle').textContent='More information is required.';
+      $('noticeText').textContent='Please check your verification area for the information or documents requested by DBH Admin.';
+    }else if(status==='suspended'){
+      $('noticeTitle').textContent='Your agent account is suspended.';
+      $('noticeText').textContent='Agent tools remain unavailable while the account is suspended. Contact DBH Admin for the reason and next steps.';
+      setToolAccess(false);
+    }
+
+    $('dismissPayment').onclick=async()=>{
+      if(!paid){showMessage('The payment card can only be hidden after a successful registration payment.','warn');return}
+      if(!confirm('Hide the successful registration payment card from your dashboard? This does not cancel or refund the payment.')) return;
+      const btn=$('dismissPayment');
+      setButtonLoading(btn,true,'Hiding...');
+      const {data,error}=await S.rpc('dismiss_agent_payment_card');
+      if(error||data!==true){
+        console.error(error);
+        showMessage('We could not hide the payment card. Please try again.','err');
+        setButtonLoading(btn,false,'Cancel / Hide');
+        return;
+      }
+      $('paymentCard').classList.add('hidden');
+    };
+  }catch(error){
+    console.error('Dashboard error:',error);
+    showMessage('Something went wrong while loading the dashboard. Please refresh and try again.','err');
+  }
+}
+
+$('logout').onclick=async()=>{
+  const button=$('logout');
+  setButtonLoading(button,true,'Signing out...');
+  try{await S.auth.signOut();location.href='index.html'}catch(error){console.error(error);setButtonLoading(button,false,'')}
+};
+
+boot();
+</script>
+</body>
+</html>+Number(priceConfig.target_usd||50).toFixed(2)+' USD target'+rateLabel+' · '+modeLabel;
+        if(priceConfig.fee_enabled===false){
+          $('pay').removeAttribute('href');
+          $('pay').style.pointerEvents='none';
+          $('pay').style.opacity='.6';
+          $('pay').innerHTML='<i class="fa-solid fa-ban"></i><span>Registration payment disabled</span>';
+        }
+      }else if(priceConfigError){console.warn('Could not refresh USD/NGN registration price:',priceConfigError)}
+    }catch(priceError){console.warn('Could not refresh USD/NGN registration price:',priceError)}
 
     const {data:payment,error:paymentError}=await S.from('agent_payment_records').select('status,paid_at,reference,amount,currency,created_at').eq('user_id',user.id).in('payment_type',['registration_fee','agent_fee']).order('created_at',{ascending:false}).limit(1).maybeSingle();
     if(paymentError){console.error(paymentError);showMessage('Your payment record could not be loaded. Please refresh once.','warn')}

@@ -18,9 +18,11 @@ const meta=r.metadata&&typeof r.metadata==="object"?r.metadata:{};
 const isRegistration=r.payment_type==="registration_fee";
 const env=String(meta.environment||"").toLowerCase()==="live"?"LIVE PAYMENT":"TEST MODE — NOT A REAL PAYMENT";
 const fx=Number(meta.fx_rate_usd_ngn||0),target=Number(meta.pricing_target_usd||0);
-const pricingNote=isRegistration?(target>0?'<div class="date">}catch(e){console.error(e);$("loading").innerHTML='<i class="fa-solid fa-triangle-exclamation" style="font-size:34px;color:#dc2626"></i><p>'+(e.message||"Unable to load receipts.")+'</p><a class="view" href="dashboard.html">Return to dashboard</a>'}}
-boot();
-</script></body></html>+target.toFixed(2)+' USD target</div>':'')+(fx>0?'<div class="date">FX ₦'+fx.toLocaleString("en-NG",{maximumFractionDigits:4})+' / USD</div>':'')+(meta.environment?'<div class="date">'+env+'</div>':''):"";
+const pricingNote=isRegistration
+  ?(target>0?'<div class="date">$'+target.toFixed(2)+' USD target</div>':"")
+   +(fx>0?'<div class="date">FX ₦'+fx.toLocaleString("en-NG",{maximumFractionDigits:4})+' / USD</div>':"")
+   +(meta.environment?'<div class="date">'+env+'</div>':"")
+  :"";
 return '<tr><td><div class="date">'+new Date(r.paid_at||r.created_at).toLocaleString()+'</div></td><td><div class="ref">'+String(r.reference||"—")+'</div>'+pricingNote+'</td><td><b>'+(r.property_title||(isRegistration?"Agent Registration Fee":"DBH Property"))+'</b>'+(r.property_code?'<div class="date">'+r.property_code+'</div>':"")+'</td><td><b>'+money(r.amount,r.currency)+'</b></td><td>'+statusBadge(r.status)+'</td><td><a class="view" href="view-receipt.html?id='+encodeURIComponent(r.id)+(r.property_id?'&property_id='+encodeURIComponent(r.property_id):"")+'"><i class="fa-solid fa-eye"></i> View receipt</a></td></tr>'
 }).join("")}catch(e){console.error(e);$("loading").innerHTML='<i class="fa-solid fa-triangle-exclamation" style="font-size:34px;color:#dc2626"></i><p>'+(e.message||"Unable to load receipts.")+'</p><a class="view" href="dashboard.html">Return to dashboard</a>'}}
 boot();

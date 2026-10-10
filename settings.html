@@ -69,7 +69,7 @@
 </div><p class="social-modal-foot"><i class="fa-solid fa-shield-halved"></i> DBH never asks for your social password. Authorization happens on the provider's own website.</p></section></div>
 <script>
 const SUPABASE_URL='https://cpgajlsyuieeengdnamy.supabase.co',SUPABASE_KEY='sb_publishable_fbcJT-QGKyZg0tDkpbDkOQ_CcQf2ugW',PROFILE_FN=SUPABASE_URL+'/functions/v1/dbh-agent-registration';
-const S=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY),$=id=>document.getElementById(id);let currentUser=null,currentApp=null,snapshot=null;
+const S=window.DBHSupabaseClient||(window.DBHSupabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY)),$=id=>document.getElementById(id);let currentUser=null,currentApp=null,snapshot=null;
 function show(text,type='ok'){const e=$('message');e.textContent=text;e.className='message show '+type}
 function loading(btn,on,label){if(on){btn.dataset.old=btn.innerHTML;btn.disabled=true;btn.innerHTML='<span class="spin"></span>'+label}else{btn.disabled=false;btn.innerHTML=btn.dataset.old||label}}
 function val(id){return $(id).value.trim()}
@@ -150,8 +150,8 @@ async function connectSocialAccount(key){
  try{
   const {data:sessionData,error:sessionError}=await S.auth.getSession();
   if(sessionError||!sessionData.session)throw new Error('Your DBH session expired. Please sign in again.');
-  const {data,error}=await S.auth.linkIdentity({provider:cfg.provider,options:{scopes:cfg.scopes,redirectTo:'https://dbanjushomes.online/settings.html?social_link='+encodeURIComponent(key)}});
-  if(error){const message=String(error.message||'');if(/manual linking is disabled/i.test(message))throw new Error('Social linking is disabled in Supabase Auth. Enable manual identity linking in Authentication settings, then try again.');throw error;}
+  const {data,error}=await S.auth.linkIdentity({provider:cfg.provider,options:{scopes:cfg.scopes,redirectTo:location.origin+location.pathname+'?social_link='+encodeURIComponent(key)}});
+  if(error){const message=String(error.message||'');if(/manual linking is disabled/i.test(message)||/404/.test(message))throw new Error('Supabase Auth is refusing identity linking because Manual Linking is disabled for this project (the server log confirms manual_linking_disabled). Enable Authentication → Sign In / Providers → Enable Manual Linking, save, then retry.');throw error;}
   if(!data?.url)throw new Error('Supabase did not return the provider authorization URL. Check that '+cfg.label+' is enabled and manual identity linking is enabled in Supabase Auth.');
   location.href=data.url;
  }catch(e){show(e.message||'Could not start account linking.','err');button.disabled=false;button.innerHTML=previous}

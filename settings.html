@@ -90,14 +90,15 @@ function paintSocialConnections(){
 async function connectSocialAccount(key){
  const cfg=DBH_OAUTH_PROVIDERS[key];if(!cfg)return;
  const button=$('connect'+key[0].toUpperCase()+key.slice(1));
- const previous=button.innerHTML;button.disabled=true;button.textContent='Opening…';
+ const previous=button.innerHTML;button.disabled=true;button.textContent='Checking…';
  try{
   const {data:sessionData,error:sessionError}=await S.auth.getSession();
   if(sessionError||!sessionData.session)throw new Error('Your DBH session expired. Please sign in again.');
-  // Supabase's signInWithOAuth creates/signs into an auth identity; it does not, by itself, link it to the currently signed-in agent.
-  // Until a trusted server callback uses a provider-specific linking flow and persists the identity, do not claim this is connected.
-  throw new Error('The '+cfg.label+' OAuth provider is configured in Supabase, but DBH account linking is not yet implemented on the server. I have left the connection unmarked to protect your existing account.');
- }catch(e){show(e.message||'Could not start account authorization.','err');button.disabled=false;button.innerHTML=previous}
+  // No safe link flow can be completed until the backend implements provider token exchange,
+  // account ownership binding and a trusted callback. Keep this action explicitly disabled.
+  show(cfg.label+' is listed as available, but secure linking still needs its backend callback. Your DBH sign-in will not be changed.','err');
+ }catch(e){show(e.message||'Could not check the account connection.','err')}
+ finally{button.disabled=false;button.innerHTML=previous}
 }
 
 function setForm(app,user){currentApp=app;snapshot={fullName:app.full_name||user.user_metadata?.full_name||'',email:app.email||user.email||'',phone:app.phone||user.phone||'',whatsapp:app.whatsapp_number||'',businessName:app.business_name||'',businessType:app.business_type||'',state:app.state||'',city:app.city||'',address:app.address||'',bio:app.bio||'',yearsExperience:app.years_experience??'',licenseNumber:app.license_number||'',social:app.social_links&&typeof app.social_links==='object'?app.social_links:{},profilePhoto:app.profile_photo_url||''};$('fullName').value=snapshot.fullName;$('email').value=snapshot.email;$('phone').value=snapshot.phone;$('whatsapp').value=snapshot.whatsapp;$('businessName').value=snapshot.businessName;$('businessType').value=snapshot.businessType;$('state').value=snapshot.state;$('city').value=snapshot.city;$('address').value=snapshot.address;$('bio').value=snapshot.bio;$('yearsExperience').value=snapshot.yearsExperience;$('licenseNumber').value=snapshot.licenseNumber;$('socialInstagram').value=snapshot.social.instagram||'';$('socialFacebook').value=snapshot.social.facebook||'';$('socialX').value=typeof snapshot.social.x==='string'?snapshot.social.x:'';$('socialLinkedin').value=snapshot.social.linkedin||'';$('socialTiktok').value=snapshot.social.tiktok||'';$('socialYoutube').value=snapshot.social.youtube||'';$('socialWebsite').value=snapshot.social.website||'';if(snapshot.profilePhoto){$('profilePhotoPreview').src=snapshot.profilePhoto;$('photoStatus').textContent='Your saved profile photo is shown above.'}if($('publicProfileLink')){$('publicProfileLink').href='https://dbanjushomes.online/view-agent.html?id='+encodeURIComponent(user.id);const approved=['approved','verified'].includes(String(app.status||'').toLowerCase());$('publicProfileLink').setAttribute('aria-disabled',approved?'false':'true');$('publicProfileLink').title=approved?'Open your public DBH profile':'Your public profile becomes available after DBH approval or verification'}}

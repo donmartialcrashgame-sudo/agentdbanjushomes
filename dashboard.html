@@ -282,10 +282,13 @@ async function boot(){
       }else if(priceConfigError){console.warn('Could not refresh USD/NGN registration price:',priceConfigError)}
     }catch(priceError){console.warn('Could not refresh USD/NGN registration price:',priceError)}
 
-    const {data:payment,error:paymentError}=await S.from('agent_payment_records').select('status,paid_at,reference,amount,currency,payment_type,metadata,created_at').eq('user_id',user.id).in('payment_type',['registration_fee','agent_fee']).order('created_at',{ascending:false}).limit(1).maybeSingle();
+    const {data:paymentRows,error:paymentError}=await S.from('agent_payment_records').select('status,paid_at,reference,amount,currency,payment_type,metadata,created_at').eq('user_id',user.id).in('payment_type',['registration_fee','agent_fee']).order('created_at',{ascending:false}).limit(20);
     if(paymentError){console.error(paymentError);showMessage('Your payment record could not be loaded. Please refresh once.','warn')}
+    const paymentList=paymentRows||[];
+    const livePaidPayment=paymentList.find(p=>p.status==='successful'&&String(p.metadata?.environment||'').toLowerCase()==='live');
+    const payment=livePaidPayment||paymentList[0]||null;
+    const paid=!!livePaidPayment;
 
-    const paid=payment?.status==='successful'&&String(payment?.metadata?.environment||'').toLowerCase()==='live';
     const applicationPendingAfterDecline=status==='pending';
     const {data:declinedDocs,error:declinedError}=await S.from('agent_application_documents')
       .select('id,document_type,message_type,admin_note,created_at')

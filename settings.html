@@ -116,10 +116,11 @@ function paintSocialConnections(){
 
 async function finishSocialIdentityLink(){
  const params=new URLSearchParams(location.search);
- const key=params.get('social_link');
+ const hashParams=new URLSearchParams(String(location.hash||'').replace(/^#/,'').replace(/^\//,''));
+ const key=params.get('social_link')||hashParams.get('social_link');
  if(!key||!DBH_OAUTH_PROVIDERS[key])return;
  try{
-  const providerError=params.get('error_description')||params.get('error');
+  const providerError=params.get('error_description')||params.get('error')||hashParams.get('error_description')||hashParams.get('error');
   if(providerError)throw new Error('The '+DBH_OAUTH_PROVIDERS[key].label+' authorization was not completed: '+providerError);
   const {data,error}=await S.auth.getUser();
   if(error||!data.user)throw new Error('Your DBH session could not be verified after provider authorization. Sign in again and retry.');
@@ -149,7 +150,7 @@ async function connectSocialAccount(key){
  try{
   const {data:sessionData,error:sessionError}=await S.auth.getSession();
   if(sessionError||!sessionData.session)throw new Error('Your DBH session expired. Please sign in again.');
-  const {data,error}=await S.auth.linkIdentity({provider:cfg.provider,options:{scopes:cfg.scopes,redirectTo:location.origin+location.pathname+'?social_link='+encodeURIComponent(key)}});
+  const {data,error}=await S.auth.linkIdentity({provider:cfg.provider,options:{scopes:cfg.scopes,redirectTo:'https://dbanjushomes.online/settings.html?social_link='+encodeURIComponent(key)}});
   if(error){const message=String(error.message||'');if(/manual linking is disabled/i.test(message))throw new Error('Social linking is disabled in Supabase Auth. Enable manual identity linking in Authentication settings, then try again.');throw error;}
   if(!data?.url)throw new Error('Supabase did not return the provider authorization URL. Check that '+cfg.label+' is enabled and manual identity linking is enabled in Supabase Auth.');
   location.href=data.url;

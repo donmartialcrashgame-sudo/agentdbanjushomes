@@ -94,28 +94,9 @@ async function connectSocialAccount(key){
  try{
   const {data:sessionData,error:sessionError}=await S.auth.getSession();
   if(sessionError||!sessionData.session)throw new Error('Your DBH session expired. Please sign in again.');
-  // This is an OAuth sign-in flow, not a guaranteed account-link operation. Do not overwrite the existing DBH auth session.
-  const callback=location.origin+location.pathname+'?social_callback='+encodeURIComponent(key);
-  const {data,error}=await S.auth.signInWithOAuth({provider:cfg.provider,options:{scopes:cfg.scopes,redirectTo:callback,skipBrowserRedirect:true,queryParams:key==='twitter'?{force_login:'true'}:undefined}});
-  if(error)throw error;
-  if(!data?.url)throw new Error('Supabase did not return an authorization URL. Confirm that '+cfg.label+' is enabled under Supabase Authentication providers.');
-  // Keep the DBH dashboard session intact; finish this separate provider authorization in a popup.
-  const popup=window.open(data.url,'dbh-'+key+'-connect','width=600,height=720,noopener,noreferrer');
-  if(!popup)throw new Error('The authorization window was blocked. Allow pop-ups for DBH and try again.');
-  show('Complete the authorization in the provider window. DBH will not mark the account connected until the callback is verified.','ok');
-  const started=Date.now();
-  const poll=setInterval(async()=>{
-   if(Date.now()-started>120000){clearInterval(poll);button.disabled=false;button.innerHTML=previous;return}
-   try{
-    const {data:cb,error:cbError}=await S.from('agent_social_connections').select('provider,provider_user_id,username,connected_at,status').eq('user_id',currentUser.id).eq('provider',key).maybeSingle();
-    if(!cbError&&cb&&['connected','verified'].includes(String(cb.status||'').toLowerCase())){
-      clearInterval(poll);
-      // Connection row must be created by a trusted callback/server, never by this browser.
-      currentApp.social_links={...(currentApp.social_links||{}),connections:{...getSavedConnections(),[key]:{connected:true,username:cb.username||null,provider_user_id:cb.provider_user_id,connected_at:cb.connected_at}}};
-      paintSocialConnections();button.disabled=false;button.innerHTML=previous;show(cfg.label+' successfully connected to DBH.','ok');
-    }
-   }catch(_){}
-  },2500);
+  // Supabase's signInWithOAuth creates/signs into an auth identity; it does not, by itself, link it to the currently signed-in agent.
+  // Until a trusted server callback uses a provider-specific linking flow and persists the identity, do not claim this is connected.
+  throw new Error('The '+cfg.label+' OAuth provider is configured in Supabase, but DBH account linking is not yet implemented on the server. I have left the connection unmarked to protect your existing account.');
  }catch(e){show(e.message||'Could not start account authorization.','err');button.disabled=false;button.innerHTML=previous}
 }
 

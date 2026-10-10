@@ -42,7 +42,7 @@ async function boot(){
   $("targetUsd").textContent=money(cfg.target_usd,"USD")+" target";
   $("fxRate").textContent="₦"+Number(cfg.exchange_rate).toLocaleString("en-NG",{minimumFractionDigits:2,maximumFractionDigits:4})+" per $1";
   const rateDate=cfg.fx_rate_date?new Date(cfg.fx_rate_date+"T12:00:00Z").toLocaleDateString("en-NG",{day:"numeric",month:"short",year:"numeric"}):"date unavailable";
-  const checkedAt=cfg.fx_updated_at?new Date(cfg.fx_updated_at).toLocaleString("en-NG",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}):"refresh time unavailable";
+  const checkedAt=cfg.fx_checked_at?new Date(cfg.fx_checked_at).toLocaleString("en-NG",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}):"refresh time unavailable";
   $("fxSource").textContent=String(cfg.fx_source||"Daily USD/NGN reference")+" · effective "+rateDate+" · checked "+checkedAt+" · round up to next ₦100";
   $("envMode").textContent=envLabel;
   if(cfg.fee_enabled===false){

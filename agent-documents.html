@@ -75,7 +75,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/js/app.js"></script>
+<script src="assets/js/app.js?v=20261010-payment-gate1"></script>
 <script>
 const SUPABASE_URL='https://cpgajlsyuieeengdnamy.supabase.co';
 const SUPABASE_KEY='sb_publishable_fbcJT-QGKyZg0tDkpbDkOQ_CcQf2ugW';
@@ -138,9 +138,9 @@ function lockDocuments(){
   }
 }
 async function hasPaid(){
-  const {data,error}=await S.from('agent_payment_records').select('status').eq('application_id',app.id).eq('payment_type','registration_fee').order('created_at',{ascending:false}).limit(1).maybeSingle();
-  if(error)return false;
-  return ['successful','completed','paid'].includes(String(data?.status||'').toLowerCase());
+  const {data,error}=await S.functions.invoke('dbh-agent-payment',{body:{action:'access_status'}});
+  if(error)throw new Error('We could not confirm your registration payment. Please try again from the payment page.');
+  return data?.success===true&&data?.has_paid===true;
 }
 async function continueNext(){
   location.href='agent-document-view.html';
@@ -238,6 +238,8 @@ async function boot(){
     if(ae)throw ae;
     if(!a)throw new Error('Agent application not found.');
     app=a;
+    const paymentConfirmed=await hasPaid();
+    if(!paymentConfirmed){location.replace('payment.html');return;}
     await Promise.all([loadFee(),loadExisting()]);
   }catch(e){
     showMessage(e.message||'Unable to load your verification page.','err');

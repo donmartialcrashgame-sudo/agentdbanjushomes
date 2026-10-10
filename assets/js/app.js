@@ -125,7 +125,7 @@
 
     const page=(location.pathname.split('/').pop()||'dashboard.html').toLowerCase();
     document.querySelectorAll('#dbhSidebar nav a[data-page]').forEach(function(a){
-      a.classList.toggle('active',a.dataset.page===page);
+      a.classList.toggle('active',a.dataset.page===page||(page==='view-receipt.html'&&a.dataset.page==='payment-result.html'));
     });
 
     const statusEl=document.getElementById('status');

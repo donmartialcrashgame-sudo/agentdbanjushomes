@@ -29,7 +29,8 @@ async function boot(){
  try{
   const {data}=await S.auth.getUser();
   if(!data.user){location.href="login.html";return}
-  const {data:app}=await S.from("agent_applications").select("full_name,email,status").eq("user_id",data.user.id).order("created_at",{ascending:false}).limit(1).maybeSingle();
+  const {data:app}=await S.from("agent_applications").select("full_name,email,status,current_step,onboarding_completed_at").eq("user_id",data.user.id).order("created_at",{ascending:false}).limit(1).maybeSingle();
+  if(app && !app.onboarding_completed_at && Number(app.current_step||1)<6){location.replace("agent-onboarding.html");return;}
   if(app){$("name").textContent=app.full_name||"DBH Agent";$("email").textContent=app.email||data.user.email||"";$("status").textContent=String(app.status||"pending").replaceAll("_"," ").toUpperCase()}
   const {count}=await S.from("dbh_notifications").select("id",{count:"exact",head:true}).eq("recipient_email",String(data.user.email||"").toLowerCase()).eq("is_read",false);
   $("notificationCount").textContent=String(count||0);

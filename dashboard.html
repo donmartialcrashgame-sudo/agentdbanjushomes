@@ -56,6 +56,23 @@ body{overflow-x:hidden;background:#f5f8fc}.shell{grid-template-columns:250px min
 
 /* Final dashboard layout guard: prevent cards, code labels and navigation from escaping their containers. */
 html,body{width:100%;max-width:100%;overflow-x:clip}body{min-width:0}.shell{grid-template-columns:250px minmax(0,1fr);min-width:0}.shell>.main{min-width:0;width:100%;max-width:none}.main *{min-width:0}.welcome,.notice,.payment,.hero-dashboard,.quick-row,.metrics-grid,.section,.activity-panel,.tools{max-width:100%}.payment>*{min-width:0}.payment p,.notice p,.tool p,.hero-copy p{overflow-wrap:anywhere}.payment-actions{min-width:0}.paybtn,.dismissbtn{max-width:100%;white-space:normal;line-height:1.35;text-align:center}.price strong{overflow-wrap:anywhere}.quick-card,.tool,.card,.activity-row{min-width:0;overflow-wrap:anywhere}.tool h3,.activity-copy strong{overflow-wrap:anywhere}#dbhSidebar{min-width:0;overscroll-behavior:contain}#dbhSidebar .nav a{min-width:0}#dbhSidebar .nav a span{min-width:0;overflow-wrap:anywhere}#dbhSidebar a[aria-disabled="true"]{cursor:not-allowed}@media(max-width:900px){.shell{display:block!important;min-height:calc(100vh - 68px)}#dbhSidebar{top:68px!important;height:calc(100dvh - 68px)!important;max-height:calc(100dvh - 68px)!important}.main{padding:22px 16px 38px!important}.payment{grid-template-columns:minmax(0,1fr)!important}.payment .price{min-width:0;text-align:left}.hero-dashboard{min-width:0}.hero-copy{min-width:0}.quick-row,.tools{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:620px){.main{padding:17px 12px 30px!important}.quick-row,.tools{grid-template-columns:minmax(0,1fr)}.metrics-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.payment-actions{grid-template-columns:minmax(0,1fr)}.payment-actions>*{width:100%}.activity-row{grid-template-columns:34px minmax(0,1fr)}.activity-time{grid-column:2;white-space:normal}}@media(max-width:360px){.main{padding-inline:9px!important}.metrics-grid{grid-template-columns:minmax(0,1fr)}.hero-actions{display:grid;grid-template-columns:minmax(0,1fr)}}
+
+/* Compact registration prompt; dashboard content remains visible behind it. */
+.payment-modal-backdrop[hidden]{display:none!important}
+.payment-modal-backdrop{position:fixed;inset:0;z-index:2000;display:grid;place-items:center;padding:18px;background:rgba(2,14,32,.62);backdrop-filter:blur(8px);animation:dbhModalFade .2s ease both}
+.payment.payment-modal{width:min(100%,560px);max-height:min(90dvh,720px);overflow:auto;grid-template-columns:minmax(0,1fr) auto;gap:20px;padding:25px;border:1px solid rgba(191,219,254,.5);border-radius:22px;margin:0;box-shadow:0 30px 90px rgba(2,14,32,.35);animation:dbhModalPop .25s cubic-bezier(.2,.8,.2,1) both}
+.payment-modal h2{font-size:clamp(21px,3vw,27px);line-height:1.15;margin:8px 0 10px}
+.payment-modal p{font-size:11px;line-height:1.7}
+.payment-modal .price{min-width:130px;text-align:right;align-self:center}
+.payment-modal .price strong{font-size:clamp(25px,4vw,33px);white-space:nowrap}
+.payment-modal .price small{display:block;max-width:145px;line-height:1.5}
+.payment-modal .payment-actions{margin-top:15px}
+.payment-modal .paybtn{min-height:43px;padding:12px 16px}
+@keyframes dbhModalFade{from{opacity:0}to{opacity:1}}
+@keyframes dbhModalPop{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:560px){.payment-modal-backdrop{padding:12px}.payment.payment-modal{grid-template-columns:1fr;padding:21px;border-radius:19px;gap:14px}.payment-modal .price{text-align:left;min-width:0;border-top:1px solid #ffffff30;padding-top:12px}.payment-modal .price strong{font-size:29px}.payment-modal .price small{max-width:none}.payment-modal .payment-actions{display:flex}.payment-modal .paybtn{width:100%;justify-content:center}}
+@media(prefers-reduced-motion:reduce){.payment-modal-backdrop,.payment.payment-modal{animation:none!important}}
+
 </style>
 </head>
 <body>
@@ -86,19 +103,20 @@ html,body{width:100%;max-width:100%;overflow-x:clip}body{min-width:0}.shell{grid
 <div><b id="noticeTitle">Your registration application is in progress.</b><p id="noticeText">Registration payment and verification are separate stages. DBH Admin approval is required before agent tools are activated.</p></div>
 </div>
 
-<section class="payment" id="paymentCard">
+<div class="payment-modal-backdrop" id="paymentBackdrop" hidden>
+<section class="payment payment-modal" id="paymentCard">
 <div>
 <div class="label">REGISTRATION PAYMENT</div>
 <h2 id="paymentTitle">Complete your DBH registration</h2>
 <p id="paymentText">Pay the current registration fee securely through Flutterwave. After successful payment, you can hide this payment card from your dashboard.</p>
 <div class="payment-actions">
 <a class="paybtn" id="pay" href="payment.html"><i class="fa-solid fa-lock"></i><span>Pay registration fee</span></a>
-<button class="dismissbtn" id="dismissPayment" type="button"><i class="fa-solid fa-xmark"></i><span>Cancel / Hide</span></button>
 </div>
 <div id="msg" class="msg"></div>
 </div>
 <div class="price"><strong id="price">—</strong><small id="currency">Loading fee...</small></div>
 </section>
+</div>
 
 <div class="access-card" id="accessCard">
 <i class="fa-solid fa-unlock-keyhole"></i>
@@ -262,7 +280,7 @@ async function boot(){
     if(!settingsError&&settings){
       const currency=String(settings.currency||'NGN').toUpperCase();
       $('price').textContent=formatMoney(settings.registration_fee,currency);
-      $('currency').textContent='$'+Number(settings.registration_fee_usd||50).toFixed(2)+' USD target · '+currency;
+      $('currency').textContent='One-time agent registration fee · '+currency;
       if(settings.fee_enabled===false){
         $('pay').removeAttribute('href');
         $('pay').style.pointerEvents='none';
@@ -274,9 +292,7 @@ async function boot(){
       const {data:priceConfig,error:priceConfigError}=await S.functions.invoke('dbh-agent-payment',{body:{action:'config'}});
       if(!priceConfigError&&priceConfig?.success){
         $('price').textContent=formatMoney(priceConfig.amount,'NGN');
-        const modeLabel=priceConfig.environment==='live'?'LIVE MODE — REAL PAYMENT':'TEST MODE — NO REAL MONEY';
-        const rateLabel=Number(priceConfig.exchange_rate)>0?' · ₦'+Number(priceConfig.exchange_rate).toLocaleString('en-NG',{maximumFractionDigits:4})+' / USD':'';
-        $('currency').textContent='$'+Number(priceConfig.target_usd||50).toFixed(2)+' USD target'+rateLabel+' · '+modeLabel;
+        $('currency').textContent='One-time agent registration fee · NGN';
         if(priceConfig.fee_enabled===false){
           $('pay').removeAttribute('href');
           $('pay').style.pointerEvents='none';
@@ -289,9 +305,10 @@ async function boot(){
     const {data:paymentRows,error:paymentError}=await S.from('agent_payment_records').select('status,paid_at,reference,amount,currency,payment_type,metadata,created_at').eq('user_id',user.id).in('payment_type',['registration_fee','agent_fee']).order('created_at',{ascending:false}).limit(20);
     if(paymentError){console.error(paymentError);showMessage('Your payment record could not be loaded. Please refresh once.','warn')}
     const paymentList=paymentRows||[];
-    const livePaidPayment=paymentList.find(p=>String(p.status||'').toLowerCase()==='successful'&&String(p.metadata?.environment||'').toLowerCase()==='live');
-    const payment=livePaidPayment||paymentList[0]||null;
-    const paid=!!livePaidPayment;
+    const paidStatuses=['successful','completed','paid','approved'];
+    const approvedPayment=paymentList.find(p=>paidStatuses.includes(String(p.status||'').trim().toLowerCase()));
+    const payment=approvedPayment||paymentList[0]||null;
+    const paid=!!approvedPayment;
     const sessionState=String(app.session_status||'active').toLowerCase();
     const suspended=['banned','suspended','disabled','inactive'].includes(sessionState)||status==='suspended';
 
@@ -311,9 +328,9 @@ async function boot(){
       $('noticeTitle').textContent=unlocked?'Registration payment and verification complete.':suspended?'Registration payment received, but account access is paused.':'Registration payment received.';
       $('noticeText').textContent=unlocked?'Your registration payment is confirmed and your application is verified. Your agent tools are unlocked.':suspended?'Your registration fee is recorded, but this account is currently restricted. Check Notifications or contact DBH Admin.':'Your registration payment is confirmed. Complete your required identity documents and wait for DBH Admin verification before property tools are unlocked.';
       if(dismissed){
-        $('paymentCard').classList.add('hidden');
+        $('paymentBackdrop').hidden=true;
       }else{
-        $('paymentCard').classList.remove('hidden');
+        $('paymentBackdrop').hidden=false;
         $('paymentTitle').textContent='Registration fee paid successfully';
         $('paymentText').textContent=unlocked?'Your payment and verification are complete. You can hide this card.':suspended?'Your payment is recorded. Contact DBH Admin about your account restriction.':'Your payment is recorded. Continue to document verification; payment alone does not approve your agent account.';
         if(unlocked){
@@ -334,11 +351,18 @@ async function boot(){
         }
       }
     }else if(String(payment?.status||'').toLowerCase()==='pending'){
+      $('paymentBackdrop').hidden=false;
+      $('paymentTitle').textContent='Complete your registration payment';
+      $('paymentText').textContent='Pay the one-time ₦100,000 registration fee to continue. Your agent tools become available after payment is recorded and DBH Admin verifies your application.';
       $('pay').href='payment.html';
       $('pay').style.pointerEvents='auto';
       $('pay').style.opacity='1';
       $('pay').innerHTML='<i class="fa-solid fa-clock"></i><span>Continue payment</span>';
       showMessage('A previous payment attempt is pending. Open the secure checkout to continue or verify its status.','warn');
+    }else if(!paid&&!suspended){
+      $('paymentBackdrop').hidden=false;
+      $('price').textContent='₦100,000';
+      $('currency').textContent='One-time agent registration fee · NGN';
     }
 
     if(hasDeclinedDocument || applicationPendingAfterDecline){
@@ -369,20 +393,6 @@ async function boot(){
       setToolAccess(false);
     }
 
-    $('dismissPayment').onclick=async()=>{
-      if(!paid){showMessage('The payment card can only be hidden after a successful registration payment.','warn');return}
-      if(!confirm('Hide the successful registration payment card from your dashboard? This does not cancel or refund the payment.')) return;
-      const btn=$('dismissPayment');
-      setButtonLoading(btn,true,'Hiding...');
-      const {data,error}=await S.rpc('dismiss_agent_payment_card');
-      if(error||data!==true){
-        console.error(error);
-        showMessage('We could not hide the payment card. Please try again.','err');
-        setButtonLoading(btn,false,'Cancel / Hide');
-        return;
-      }
-      $('paymentCard').classList.add('hidden');
-    };
   }catch(error){
     console.error('Dashboard error:',error);
     showMessage('Something went wrong while loading the dashboard. Please refresh and try again.','err');

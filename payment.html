@@ -49,10 +49,16 @@ async function boot(){
     msg("Registration payment is currently disabled by DBH Admin.","err");
     return;
   }
-  if(Array.isArray(cfg.payments)&&cfg.payments.some(p=>p.status==="successful")){
+  if(cfg.registration_paid_live){
     $("pay").disabled=true;
     $("pay").innerHTML='<i class="fa-solid fa-circle-check"></i> Registration fee already paid';
-    msg(cfg.environment==="live"?"Your registration fee is already paid. You can view the receipt from your dashboard.":"A successful test-mode checkout already exists. It is not a live payment; contact DBH to reset the sandbox test if you need to run it again.","ok");
+    msg("Your live registration fee is already paid. No second registration payment is needed. Open your dashboard to view the receipt.","ok");
+    return;
+  }
+  if(Array.isArray(cfg.payments)&&cfg.payments.some(p=>p.status==="successful")){
+    $("pay").disabled=true;
+    $("pay").innerHTML='<i class="fa-solid fa-circle-check"></i> Test payment already recorded';
+    msg(cfg.environment==="live"?"Your registration fee is already paid. You can view the receipt from your dashboard.":"A successful TEST MODE checkout exists, but it is not a live payment and does not activate your agent tools. Contact DBH if you need to reset the sandbox test.","ok");
   }
  }catch(e){
   msg(e.message||"Unable to load payment details. Please refresh and try again.","err");

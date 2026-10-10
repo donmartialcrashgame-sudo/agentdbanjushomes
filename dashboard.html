@@ -258,7 +258,29 @@ async function boot(){
     if(!settingsError&&settings){
       const currency=String(settings.currency||'NGN').toUpperCase();
       $('price').textContent=formatMoney(settings.registration_fee,currency);
-      $('currency').textContent=(settings.registration_fee_usd?'
+      $('currency').textContent='$'+Number(settings.registration_fee_usd||50).toFixed(2)+' USD target · '+currency;
+      if(settings.fee_enabled===false){
+        $('pay').removeAttribute('href');
+        $('pay').style.pointerEvents='none';
+        $('pay').style.opacity='.6';
+        $('pay').innerHTML='<i class="fa-solid fa-ban"></i><span>Registration payment disabled</span>';
+      }
+    }
+    try{
+      const {data:priceConfig,error:priceConfigError}=await S.functions.invoke('dbh-agent-payment',{body:{action:'config'}});
+      if(!priceConfigError&&priceConfig?.success){
+        $('price').textContent=formatMoney(priceConfig.amount,'NGN');
+        const modeLabel=priceConfig.environment==='live'?'LIVE MODE — REAL PAYMENT':'TEST MODE — NO REAL MONEY';
+        const rateLabel=Number(priceConfig.exchange_rate)>0?' · ₦'+Number(priceConfig.exchange_rate).toLocaleString('en-NG',{maximumFractionDigits:4})+' / USD':'';
+        $('currency').textContent='$'+Number(priceConfig.target_usd||50).toFixed(2)+' USD target'+rateLabel+' · '+modeLabel;
+        if(priceConfig.fee_enabled===false){
+          $('pay').removeAttribute('href');
+          $('pay').style.pointerEvents='none';
+          $('pay').style.opacity='.6';
+          $('pay').innerHTML='<i class="fa-solid fa-ban"></i><span>Registration payment disabled</span>';
+        }
+      }else if(priceConfigError){console.warn('Could not refresh USD/NGN registration price:',priceConfigError)}
+    }catch(priceError){console.warn('Could not refresh USD/NGN registration price:',priceError)}
 
     const {data:payment,error:paymentError}=await S.from('agent_payment_records').select('status,paid_at,reference,amount,currency,payment_type,metadata,created_at').eq('user_id',user.id).in('payment_type',['registration_fee','agent_fee']).order('created_at',{ascending:false}).limit(1).maybeSingle();
     if(paymentError){console.error(paymentError);showMessage('Your payment record could not be loaded. Please refresh once.','warn')}

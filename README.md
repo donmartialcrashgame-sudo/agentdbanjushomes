@@ -43,6 +43,14 @@ The agent settings page lists the currently available provider options (X/Twitte
 
 Social account connection is optional and must not block agent registration, fee payment, or admin verification. Website URL entry is optional and does not imply website ownership verification. Automatic social-content import is a separate capability that requires platform permissions, API access, appropriate scopes, and a safe server-side synchronization job. No frontend-only implementation should claim automatic content display is operational.
 
+## Social account connections
+
+The agent Settings page shows account connection options for X/Twitter, GitHub, and GitLab, and marks Instagram, Facebook, TikTok, and LinkedIn as unavailable for now. Public profile URLs are separate from authenticated connections and must not be treated as interchangeable.
+
+The frontend connection cards are a UI foundation only. The secure provider account-linking flow is **not yet active**: the backend must implement OAuth state validation, provider-specific token exchange, a trusted callback, binding the provider's user ID to the currently authenticated DBH agent, server-side token storage, and disconnection/revocation. Generic Supabase OAuth sign-in must not be used for linking because it can change the active Supabase identity instead of linking another identity to the current agent. The UI should never mark a provider connected based only on browser input.
+
+Social account connections are optional and must not block registration, the $50 registration-fee payment, document submission, or admin approval. Website URL entry is also optional and only creates a public link; ownership verification is a separate opt-in feature. Automatic content display requires its own supported platform API permissions and backend synchronization, and should not be advertised as operational until implemented and tested.
+
 ## Verification
 
 The agent area is designed around these statuses:

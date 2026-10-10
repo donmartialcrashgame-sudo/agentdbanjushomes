@@ -35,6 +35,14 @@ The dashboard is designed with a clean DBH white-and-blue interface and a respon
 
 The interface is intended to use recognizable UI icons rather than text-only symbols, with accessible labels/tooltips for important actions.
 
+## Social account connections
+
+The agent settings page lists the currently available provider options (X/Twitter, GitHub, and GitLab) and clearly marks Instagram, Facebook, TikTok, and LinkedIn as unavailable for now. Public profile URLs and authenticated account connections are different data and must never be presented as interchangeable.
+
+**Current implementation status:** the frontend connection options are present, but a secure provider account-linking callback is still required before any connection may be marked as connected. Do not set connected status from browser input or from a generic OAuth sign-in. A production integration must preserve the signed-in DBH user, validate OAuth state, exchange tokens on the server, bind the returned provider account ID to that DBH agent, store provider tokens securely server-side, and provide a disconnect/revoke flow. OAuth login alone can switch the Supabase-authenticated identity and is not proof that a social account has been linked to the existing agent.
+
+Social account connection is optional and must not block agent registration, fee payment, or admin verification. Website URL entry is optional and does not imply website ownership verification. Automatic social-content import is a separate capability that requires platform permissions, API access, appropriate scopes, and a safe server-side synchronization job. No frontend-only implementation should claim automatic content display is operational.
+
 ## Verification
 
 The agent area is designed around these statuses:

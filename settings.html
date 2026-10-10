@@ -90,14 +90,21 @@ function getSavedConnections(){
  const all=currentApp?.social_links&&typeof currentApp.social_links==='object'?currentApp.social_links:{};
  return all.connections&&typeof all.connections==='object'?all.connections:{};
 }
+function linkedIdentity(key){
+ const cfg=DBH_OAUTH_PROVIDERS[key];
+ return (Array.isArray(currentUser?.identities)?currentUser.identities:[]).find(identity=>identity.provider===cfg.provider)||null;
+}
+function identityUsername(identity){
+ const meta=identity?.identity_data||{};
+ return meta.user_name||meta.username||meta.preferred_username||meta.nickname||meta.full_name||meta.name||null;
+}
 function paintSocialConnections(){
- const connections=getSavedConnections();
  for(const key of Object.keys(DBH_OAUTH_PROVIDERS)){
-  const cap=key==='twitter'?'Twitter':key[0].toUpperCase()+key.slice(1),entry=connections[key]||{};
+  const cap=key==='twitter'?'Twitter':key[0].toUpperCase()+key.slice(1);
+  const identity=linkedIdentity(key),username=identityUsername(identity);
   const status=$('status'+cap),button=$('connect'+cap);
-  const linked=!!entry.connected&&!!entry.provider_user_id&&entry.status==='verified';
-  if(status)status.textContent=linked?'Connected as '+(entry.username||'authorized account'):'Not connected to DBH';
-  if(button){button.textContent=linked?'Reconnect '+DBH_OAUTH_PROVIDERS[key].label:'Connect '+DBH_OAUTH_PROVIDERS[key].label;button.disabled=false}
+  if(status)status.textContent=identity?'Connected as '+(username||'authorized account'):'Not connected to DBH';
+  if(button){button.textContent=identity?'Connected':'Connect '+DBH_OAUTH_PROVIDERS[key].label;button.disabled=!!identity}
  }
 }
 
@@ -108,11 +115,18 @@ async function finishSocialIdentityLink(){
  try{
   const {data,error}=await S.auth.getUser();
   if(error||!data.user)throw new Error('The provider callback did not return a valid signed-in DBH session.');
+  if(!currentUser||data.user.id!==currentUser.id)throw new Error('The returned account does not match the DBH account you were using. Nothing was linked to this profile.');
+  currentUser=data.user;
   const identities=Array.isArray(data.user.identities)?data.user.identities:[];
   const identity=identities.find(item=>item.provider===DBH_OAUTH_PROVIDERS[key].provider);
-  if(!identity)throw new Error('Supabase did not return the linked provider identity. Check the provider permissions and callback.');
-  const username=identity.identity_data?.user_name||identity.identity_data?.preferred_username||identity.identity_data?.full_name||identity.identity_data?.name||null;
+  if(!identity)throw new Error('Supabase did not return the linked provider identity. Check that identity linking is enabled in Supabase Auth.');
+  const username=identityUsername(identity);
   const updated={...(currentApp?.social_links&&typeof currentApp.social_links==='object'?currentApp.social_links:{}),connections:{...getSavedConnections(),[key]:{connected:true,status:'verified',provider:DBH_OAUTH_PROVIDERS[key].provider,provider_user_id:identity.id,username,connected_at:new Date().toISOString()}}};
+  const providerHost={twitter:'x.com',github:'github.com',gitlab:'gitlab.com'}[key];
+  if(username&&providerHost){
+    const profileUrl=safeSocialUrl('https://'+providerHost+'/'+encodeURIComponent(username),providerHost);
+    if(profileUrl){updated[key]=profileUrl;const inputId={twitter:'socialX',github:'socialGithub',gitlab:'socialGitlab'}[key];if(inputId&&$(inputId))$(inputId).value=profileUrl}
+  }
   await profileAction({action:'save_agent_profile',full_name:val('fullName'),phone:val('phone'),whatsapp_number:val('whatsapp'),business_name:val('businessName'),business_type:val('businessType'),state:val('state'),city:val('city'),address:val('address'),bio:val('bio'),years_experience:val('yearsExperience'),license_number:val('licenseNumber'),social_links:updated});
   currentApp.social_links=updated;
   show(DBH_OAUTH_PROVIDERS[key].label+' is now linked to your signed-in DBH account.','ok');

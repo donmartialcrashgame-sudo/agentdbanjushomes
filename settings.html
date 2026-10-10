@@ -109,7 +109,7 @@ async function connectSocialAccount(key){
   if(sessionError||!sessionData.session)throw new Error('Your DBH session expired. Please sign in again.');
   // Prevent a generic OAuth login from replacing the active DBH agent session.
   // Real account linking needs the provider-specific authorization callback described in README.
-  throw new Error('Secure account linking for '+cfg.label+' is not active yet. Please try again after the DBH backend callback is deployed. Your existing DBH session has been left unchanged.');
+  throw new Error(cfg.label+' appears here as an available provider, but DBH account linking is not active until its trusted server callback is deployed. Your existing DBH session has been left unchanged.');
  }catch(e){show(e.message||'Could not start account linking.','err')}
  finally{button.disabled=false;button.innerHTML=previous}
 }

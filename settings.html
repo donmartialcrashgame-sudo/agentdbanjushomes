@@ -115,13 +115,15 @@ async function finishSocialIdentityLink(){
  const key=params.get('social_link');
  if(!key||!DBH_OAUTH_PROVIDERS[key])return;
  try{
+  const providerError=params.get('error_description')||params.get('error');
+  if(providerError)throw new Error('The '+DBH_OAUTH_PROVIDERS[key].label+' authorization was not completed: '+providerError);
   const {data,error}=await S.auth.getUser();
-  if(error||!data.user)throw new Error('The provider callback did not return a valid signed-in DBH session.');
+  if(error||!data.user)throw new Error('Your DBH session could not be verified after provider authorization. Sign in again and retry.');
   if(!currentUser||data.user.id!==currentUser.id)throw new Error('The returned account does not match the DBH account you were using. Nothing was linked to this profile.');
   currentUser=data.user;
   const identities=Array.isArray(data.user.identities)?data.user.identities:[];
   const identity=identities.find(item=>item.provider===DBH_OAUTH_PROVIDERS[key].provider);
-  if(!identity)throw new Error('Supabase did not return the linked provider identity. Check that identity linking is enabled in Supabase Auth.');
+  if(!identity)throw new Error('Supabase did not return the linked '+DBH_OAUTH_PROVIDERS[key].label+' identity. Confirm identity linking is enabled for this Supabase project.');
   const username=identityUsername(identity);
   const updated={...(currentApp?.social_links&&typeof currentApp.social_links==='object'?currentApp.social_links:{}),connections:{...getSavedConnections(),[key]:{connected:true,status:'verified',provider:DBH_OAUTH_PROVIDERS[key].provider,provider_user_id:identity.id,username,connected_at:new Date().toISOString()}}};
   const providerHost={twitter:'x.com',github:'github.com',gitlab:'gitlab.com'}[key];
@@ -132,7 +134,7 @@ async function finishSocialIdentityLink(){
   await profileAction({action:'save_agent_profile',full_name:val('fullName'),phone:val('phone'),whatsapp_number:val('whatsapp'),business_name:val('businessName'),business_type:val('businessType'),state:val('state'),city:val('city'),address:val('address'),bio:val('bio'),years_experience:val('yearsExperience'),license_number:val('licenseNumber'),social_links:updated});
   currentApp.social_links=updated;
   show(DBH_OAUTH_PROVIDERS[key].label+' is now linked to your signed-in DBH account.','ok');
- }catch(e){show(e.message||'Could not verify the linked provider identity.','err')}
+ }catch(e){console.error('DBH social identity link:',e);show(e.message||'Could not verify the linked provider identity.','err')}
  finally{history.replaceState({},'',location.pathname);paintSocialConnections()}
 }
 
@@ -158,7 +160,7 @@ async function load(){
  if(!q.data){location.href='agent-onboarding.html';return}
  setForm(q.data,currentUser);
  paintSocialConnections();
- finishSocialIdentityLink();
+ await finishSocialIdentityLink();
  const st=String(q.data.status||'pending').replaceAll('_',' ');$('statusPill').textContent=st.toUpperCase();$('applicationStatus').textContent=st.toUpperCase();$('sessionStatus').textContent=String(q.data.session_status||'active').toUpperCase();$('agentId').textContent=q.data.id||'—';$('providerFact').textContent=q.data.business_name||q.data.full_name||'—';$('emailFact').textContent=q.data.email||currentUser.email||'—';$('phoneFact').textContent=q.data.phone||'—';
  const n=await S.from('dbh_notifications').select('id',{count:'exact',head:true}).eq('recipient_email',String(currentUser.email||'').toLowerCase()).eq('is_read',false);if(!n.error)$('notificationCount').textContent=String(n.count||0);
  loadPrefs();

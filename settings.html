@@ -83,21 +83,26 @@ function paintSocialConnections(){
  for(const key of Object.keys(DBH_OAUTH_PROVIDERS)){
   const cap=key[0].toUpperCase()+key.slice(1),entry=connections[key]||{};
   const status=$('status'+cap),button=$('connect'+cap);
-  if(status)status.textContent=entry.connected?'Connected as '+(entry.username||'authorized account'):'Not connected to DBH';
-  if(button){button.textContent=entry.connected?'Reconnect '+DBH_OAUTH_PROVIDERS[key].label:'Connect '+DBH_OAUTH_PROVIDERS[key].label;button.disabled=false}
+  const linked=!!entry.connected&&!!entry.provider_user_id&&entry.status==='verified';
+  if(status)status.textContent=linked?'Connected as '+(entry.username||'authorized account'):'Not connected to DBH';
+  if(button){button.textContent=linked?'Reconnect '+DBH_OAUTH_PROVIDERS[key].label:'Connect '+DBH_OAUTH_PROVIDERS[key].label;button.disabled=false}
  }
 }
 async function connectSocialAccount(key){
  const cfg=DBH_OAUTH_PROVIDERS[key];if(!cfg)return;
  const button=$('connect'+key[0].toUpperCase()+key.slice(1));
- const previous=button.innerHTML;button.disabled=true;button.textContent='Checking…';
+ const previous=button.innerHTML;button.disabled=true;button.textContent='Opening…';
  try{
   const {data:sessionData,error:sessionError}=await S.auth.getSession();
   if(sessionError||!sessionData.session)throw new Error('Your DBH session expired. Please sign in again.');
-  // No safe link flow can be completed until the backend implements provider token exchange,
-  // account ownership binding and a trusted callback. Keep this action explicitly disabled.
-  show(cfg.label+' is listed as available, but secure linking still needs its backend callback. Your DBH sign-in will not be changed.','err');
- }catch(e){show(e.message||'Could not check the account connection.','err')}
+  const {data,error}=await S.auth.signInWithOAuth({provider:cfg.provider,options:{scopes:cfg.scopes,skipBrowserRedirect:true}});
+  if(error)throw error;
+  if(!data?.url)throw new Error('Supabase did not return an authorization URL. Check that this provider is enabled in Supabase Authentication providers.');
+  // This diagnostic sign-in URL is opened only after the agent clicks; we do not mark it connected.
+  const popup=window.open(data.url,'dbh-'+key+'-oauth','width=600,height=720');
+  if(!popup)throw new Error('The provider window was blocked. Allow pop-ups and try again.');
+  show('Provider authorization opened. The agent remains unconnected until DBH has a trusted account-link callback.','err');
+ }catch(e){show(e.message||'Could not open provider authorization.','err')}
  finally{button.disabled=false;button.innerHTML=previous}
 }
 

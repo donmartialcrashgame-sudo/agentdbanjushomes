@@ -93,7 +93,7 @@ function getSavedConnections(){
 function paintSocialConnections(){
  const connections=getSavedConnections();
  for(const key of Object.keys(DBH_OAUTH_PROVIDERS)){
-  const cap=key[0].toUpperCase()+key.slice(1),entry=connections[key]||{};
+  const cap=key==='twitter'?'Twitter':key[0].toUpperCase()+key.slice(1),entry=connections[key]||{};
   const status=$('status'+cap),button=$('connect'+cap);
   const linked=!!entry.connected&&!!entry.provider_user_id&&entry.status==='verified';
   if(status)status.textContent=linked?'Connected as '+(entry.username||'authorized account'):'Not connected to DBH';

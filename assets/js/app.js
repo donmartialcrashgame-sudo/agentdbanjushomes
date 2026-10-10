@@ -80,6 +80,7 @@
       '#dbhSidebar.dbh-floating-sidebar{position:fixed!important;left:0!important;top:0!important;width:250px!important;height:100vh!important;z-index:100!important}#dbhSidebar.dbh-floating-sidebar~.dbh-sidebar-overlay{z-index:99!important}.dbh-floating-sidebar~.top,.dbh-floating-sidebar~.wrap{margin-left:250px!important;width:calc(100% - 250px)!important}@media(max-width:900px){#dbhSidebar{position:fixed!important;z-index:100!important;left:-275px!important;top:72px!important;width:260px!important;height:calc(100vh - 72px)!important;transition:left .28s cubic-bezier(.2,.8,.2,1)!important;box-shadow:12px 0 35px rgba(0,0,0,.16)!important}#dbhSidebar.open{left:0!important}.dbh-sidebar-overlay.show{display:block!important}.dbh-floating-sidebar~.wrap,.dbh-floating-sidebar~main{margin-left:0!important}}'+
       '@media(prefers-reduced-motion:reduce){#dbhSidebar *,#dbhSidebar *:before,#dbhSidebar *:after{animation:none!important;transition:none!important}}';
     document.head.appendChild(style);
+    const guard=document.createElement('style');guard.id='dbhSharedSidebarViewportGuard';guard.textContent="\n/* Keep the shared agent navigation inside its viewport on small screens. */\na.disabled[aria-disabled=\"true\"]{pointer-events:auto!important;cursor:not-allowed!important}#dbhSidebar{box-sizing:border-box!important;max-width:100vw!important;overscroll-behavior:contain!important}#dbhSidebar .nav a span{min-width:0!important;overflow-wrap:anywhere!important}#dbhSidebar .nav a .lock{flex:0 0 auto!important}@media(max-width:900px){#dbhSidebar{left:-275px!important;top:68px!important;width:min(260px,86vw)!important;max-width:86vw!important;height:calc(100dvh - 68px)!important;max-height:calc(100dvh - 68px)!important;padding-bottom:calc(18px + env(safe-area-inset-bottom))!important}#dbhSidebar.open{left:0!important}.dbh-sidebar-overlay{position:fixed!important;inset:68px 0 0!important;z-index:99!important;background:rgba(3,20,38,.42)!important;backdrop-filter:blur(2px)!important}}";document.head.appendChild(guard);
   }
 
   function init(){
@@ -107,6 +108,7 @@
     }
     const menu=document.getElementById('dbhMenu');
     const closeSidebar=function(){side.classList.remove('open');overlay.classList.remove('show')};
+    if(!side.dataset.disabledLinksWired){side.dataset.disabledLinksWired='1';side.addEventListener('click',function(e){const link=e.target.closest('a[aria-disabled="true"]');if(link){e.preventDefault();e.stopPropagation();}});}
     if(menu && !menu.dataset.wired){
       menu.dataset.wired='1';
       menu.addEventListener('click',function(e){e.preventDefault();side.classList.toggle('open');overlay.classList.toggle('show',side.classList.contains('open'));});
@@ -168,12 +170,12 @@
         const session=sessionResult&&sessionResult.data&&sessionResult.data.session;
         if(!session) return;
         const uid=session.user.id;
-        const q=await client.from('agent_applications').select('full_name,email,status,session_status').eq('user_id',uid).maybeSingle();
+        const q=await client.from('agent_applications').select('full_name,email,status,session_status,created_at').eq('user_id',uid).order('created_at',{ascending:false}).limit(1).maybeSingle();
         const a=q&&q.data;
         const nameEl=document.getElementById('name'),emailEl=document.getElementById('email');
         if(nameEl) nameEl.textContent=(a&&a.full_name)||session.user.user_metadata?.full_name||session.user.email?.split('@')[0]||'DBH Agent';
         if(emailEl) emailEl.textContent=(a&&a.email)||session.user.email||'';
-        if(statusEl) statusEl.textContent=(a&&a.status)||((a&&a.session_status)||'PENDING');
+        if(statusEl){const sessionStatus=String(a&&a.session_status||'active').toLowerCase();statusEl.textContent=['banned','suspended','disabled','inactive'].includes(sessionStatus)?sessionStatus.toUpperCase():String(a&&a.status||'PENDING').replaceAll('_',' ').toUpperCase();}
         syncVerificationBadge();
       }catch(err){ console.warn('DBH sidebar profile load failed:',err); }
     }

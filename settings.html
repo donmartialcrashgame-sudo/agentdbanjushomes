@@ -69,6 +69,56 @@ function loading(btn,on,label){if(on){btn.dataset.old=btn.innerHTML;btn.disabled
 function val(id){return $(id).value.trim()}
 async function profileAction(body){const {data,error}=await S.auth.getSession();if(error||!data.session)throw new Error('Your session expired. Please sign in again.');const r=await fetch(PROFILE_FN,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+data.session.access_token},body:JSON.stringify(body)});const result=await r.json().catch(()=>({}));if(!r.ok)throw new Error(result.error||result.message||'Could not save your agent profile.');return result}
 function socialPayload(){return {instagram:val('socialInstagram'),facebook:val('socialFacebook'),x:val('socialX'),linkedin:val('socialLinkedin'),tiktok:val('socialTiktok'),youtube:val('socialYoutube'),website:val('socialWebsite')}}
+const DBH_OAUTH_PROVIDERS={
+  twitter:{label:'X',provider:'twitter',scopes:'users.read tweet.read offline.access'},
+  github:{label:'GitHub',provider:'github',scopes:'read:user user:email'},
+  gitlab:{label:'GitLab',provider:'gitlab',scopes:'read_user'}
+};
+function getSavedConnections(){
+ const all=currentApp?.social_links&&typeof currentApp.social_links==='object'?currentApp.social_links:{};
+ return all.connections&&typeof all.connections==='object'?all.connections:{};
+}
+function paintSocialConnections(){
+ const connections=getSavedConnections();
+ for(const key of Object.keys(DBH_OAUTH_PROVIDERS)){
+  const cap=key[0].toUpperCase()+key.slice(1),entry=connections[key]||{};
+  const status=$('status'+cap),button=$('connect'+cap);
+  if(status)status.textContent=entry.connected?'Connected as '+(entry.username||'authorized account'):'Not connected to DBH';
+  if(button){button.textContent=entry.connected?'Reconnect '+DBH_OAUTH_PROVIDERS[key].label:'Connect '+DBH_OAUTH_PROVIDERS[key].label;button.disabled=false}
+ }
+}
+async function connectSocialAccount(key){
+ const cfg=DBH_OAUTH_PROVIDERS[key];if(!cfg)return;
+ const button=$('connect'+key[0].toUpperCase()+key.slice(1));
+ const previous=button.innerHTML;button.disabled=true;button.textContent='Opening…';
+ try{
+  const {data:sessionData,error:sessionError}=await S.auth.getSession();
+  if(sessionError||!sessionData.session)throw new Error('Your DBH session expired. Please sign in again.');
+  // This is an OAuth sign-in flow, not a guaranteed account-link operation. Do not overwrite the existing DBH auth session.
+  const callback=location.origin+location.pathname+'?social_callback='+encodeURIComponent(key);
+  const {data,error}=await S.auth.signInWithOAuth({provider:cfg.provider,options:{scopes:cfg.scopes,redirectTo:callback,skipBrowserRedirect:true,queryParams:key==='twitter'?{force_login:'true'}:undefined}});
+  if(error)throw error;
+  if(!data?.url)throw new Error('Supabase did not return an authorization URL. Confirm that '+cfg.label+' is enabled under Supabase Authentication providers.');
+  // Keep the DBH dashboard session intact; finish this separate provider authorization in a popup.
+  const popup=window.open(data.url,'dbh-'+key+'-connect','width=600,height=720,noopener,noreferrer');
+  if(!popup)throw new Error('The authorization window was blocked. Allow pop-ups for DBH and try again.');
+  show('Complete the authorization in the provider window. DBH will not mark the account connected until the callback is verified.','ok');
+  const started=Date.now();
+  const poll=setInterval(async()=>{
+   if(Date.now()-started>120000){clearInterval(poll);button.disabled=false;button.innerHTML=previous;return}
+   try{
+    const {data:cb,error:cbError}=await S.from('agent_social_connections').select('provider,provider_user_id,username,connected_at,status').eq('user_id',currentUser.id).eq('provider',key).maybeSingle();
+    if(!cbError&&cb&&['connected','verified'].includes(String(cb.status||'').toLowerCase())){
+      clearInterval(poll);
+      // Connection row must be created by a trusted callback/server, never by this browser.
+      currentApp.social_links={...(currentApp.social_links||{}),connections:{...getSavedConnections(),[key]:{connected:true,username:cb.username||null,provider_user_id:cb.provider_user_id,connected_at:cb.connected_at}}};
+      paintSocialConnections();button.disabled=false;button.innerHTML=previous;show(cfg.label+' successfully connected to DBH.','ok');
+    }
+   }catch(_){}
+  },2500);
+ }catch(e){show(e.message||'Could not start account authorization.','err');button.disabled=false;button.innerHTML=previous}
+}
+
 function setForm(app,user){currentApp=app;snapshot={fullName:app.full_name||user.user_metadata?.full_name||'',email:app.email||user.email||'',phone:app.phone||user.phone||'',whatsapp:app.whatsapp_number||'',businessName:app.business_name||'',businessType:app.business_type||'',state:app.state||'',city:app.city||'',address:app.address||'',bio:app.bio||'',yearsExperience:app.years_experience??'',licenseNumber:app.license_number||'',social:app.social_links&&typeof app.social_links==='object'?app.social_links:{},profilePhoto:app.profile_photo_url||''};$('fullName').value=snapshot.fullName;$('email').value=snapshot.email;$('phone').value=snapshot.phone;$('whatsapp').value=snapshot.whatsapp;$('businessName').value=snapshot.businessName;$('businessType').value=snapshot.businessType;$('state').value=snapshot.state;$('city').value=snapshot.city;$('address').value=snapshot.address;$('bio').value=snapshot.bio;$('yearsExperience').value=snapshot.yearsExperience;$('licenseNumber').value=snapshot.licenseNumber;$('socialInstagram').value=snapshot.social.instagram||'';$('socialFacebook').value=snapshot.social.facebook||'';$('socialX').value=snapshot.social.x||'';$('socialLinkedin').value=snapshot.social.linkedin||'';$('socialTiktok').value=snapshot.social.tiktok||'';$('socialYoutube').value=snapshot.social.youtube||'';$('socialWebsite').value=snapshot.social.website||'';if(snapshot.profilePhoto){$('profilePhotoPreview').src=snapshot.profilePhoto;$('photoStatus').textContent='Your saved profile photo is shown above.'}if($('publicProfileLink')){$('publicProfileLink').href='https://dbanjushomes.online/view-agent.html?id='+encodeURIComponent(user.id);const approved=['approved','verified'].includes(String(app.status||'').toLowerCase());$('publicProfileLink').setAttribute('aria-disabled',approved?'false':'true');$('publicProfileLink').title=approved?'Open your public DBH profile':'Your public profile becomes available after DBH approval or verification'}}
 async function load(){
  const {data,error}=await S.auth.getSession();if(error||!data.session){location.href='login.html';return}currentUser=data.session.user;
@@ -76,6 +126,7 @@ async function load(){
  if(q.error){console.error(q.error);show('We could not load your provider settings. Please refresh the page.','err');return}
  if(!q.data){location.href='agent-onboarding.html';return}
  setForm(q.data,currentUser);
+ paintSocialConnections();
  const st=String(q.data.status||'pending').replaceAll('_',' ');$('statusPill').textContent=st.toUpperCase();$('applicationStatus').textContent=st.toUpperCase();$('sessionStatus').textContent=String(q.data.session_status||'active').toUpperCase();$('agentId').textContent=q.data.id||'—';$('providerFact').textContent=q.data.business_name||q.data.full_name||'—';$('emailFact').textContent=q.data.email||currentUser.email||'—';$('phoneFact').textContent=q.data.phone||'—';
  const n=await S.from('dbh_notifications').select('id',{count:'exact',head:true}).eq('recipient_email',String(currentUser.email||'').toLowerCase()).eq('is_read',false);if(!n.error)$('notificationCount').textContent=String(n.count||0);
  loadPrefs();
@@ -96,6 +147,7 @@ async function saveProfile(){
 
 $('profilePhotoFile').addEventListener('change',async()=>{const file=$('profilePhotoFile').files?.[0];if(!file)return;if(!['image/jpeg','image/png','image/webp'].includes(file.type)){show('Choose a JPG, PNG or WebP image.','err');$('profilePhotoFile').value='';return}if(file.size>2*1024*1024){show('Profile photos must be no larger than 2 MB.','err');$('profilePhotoFile').value='';return}const input=$('profilePhotoFile');input.disabled=true;$('photoStatus').textContent='Uploading profile photo…';try{const dataUrl=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result||''));reader.onerror=()=>reject(new Error('Unable to read the image.'));reader.readAsDataURL(file)});const result=await profileAction({action:'upload_profile_photo',content_type:file.type,file_base64:dataUrl.split(',')[1]||''});currentApp.profile_photo_url=result.profile_photo_url;snapshot.profilePhoto=result.profile_photo_url;$('profilePhotoPreview').src=result.profile_photo_url;$('photoStatus').textContent='Photo uploaded. It will appear publicly after DBH approves your profile.';show('Profile photo saved.','ok')}catch(e){console.error(e);$('photoStatus').textContent='Upload failed. Please try again.';show(e.message||'Could not upload your photo.','err')}finally{input.disabled=false}});
 function loadPrefs(){try{const p=JSON.parse(localStorage.getItem('dbhAgentSettings')||'{}');$('prefEnquiries').checked=p.enquiries!==false;$('prefProperty').checked=p.property!==false;$('prefPayments').checked=p.payments!==false;$('prefBrowser').checked=p.browser===true}catch(e){}}
+$('connectTwitter').onclick=()=>connectSocialAccount('twitter');$('connectGithub').onclick=()=>connectSocialAccount('github');$('connectGitlab').onclick=()=>connectSocialAccount('gitlab');
 $('saveProfile').onclick=saveProfile;$('resetProfile').onclick=()=>{if(snapshot){$('fullName').value=snapshot.fullName;$('phone').value=snapshot.phone;$('whatsapp').value=snapshot.whatsapp;$('businessName').value=snapshot.businessName;$('businessType').value=snapshot.businessType;$('state').value=snapshot.state;$('city').value=snapshot.city;$('address').value=snapshot.address;$('bio').value=snapshot.bio;$('yearsExperience').value=snapshot.yearsExperience;$('licenseNumber').value=snapshot.licenseNumber;$('socialInstagram').value=snapshot.social.instagram||'';$('socialFacebook').value=snapshot.social.facebook||'';$('socialX').value=snapshot.social.x||'';$('socialLinkedin').value=snapshot.social.linkedin||'';$('socialTiktok').value=snapshot.social.tiktok||'';$('socialYoutube').value=snapshot.social.youtube||'';$('socialWebsite').value=snapshot.social.website||''}show('Unsaved changes were reset.','ok')};
 $('savePrefs').onclick=async()=>{const p={enquiries:$('prefEnquiries').checked,property:$('prefProperty').checked,payments:$('prefPayments').checked,browser:$('prefBrowser').checked};localStorage.setItem('dbhAgentSettings',JSON.stringify(p));if(p.browser&&'Notification'in window&&Notification.permission==='default')await Notification.requestPermission();show('Notification preferences saved on this browser.','ok')};
 $('refreshSession').onclick=async()=>{const b=$('refreshSession');loading(b,true,'Refreshing...');await load();loading(b,false,'Refresh account')};

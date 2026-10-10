@@ -37,19 +37,11 @@ The interface is intended to use recognizable UI icons rather than text-only sym
 
 ## Social account connections
 
-The agent settings page lists the currently available provider options (X/Twitter, GitHub, and GitLab) and clearly marks Instagram, Facebook, TikTok, and LinkedIn as unavailable for now. Public profile URLs and authenticated account connections are different data and must never be presented as interchangeable.
+The agent Settings page supports optional identity linking for X/Twitter, GitHub, and GitLab using Supabase Auth's `linkIdentity()` flow. It marks Instagram, Facebook, TikTok, and LinkedIn as unavailable for now. Public profile URLs and authenticated account connections are separate data.
 
-**Current implementation status:** the frontend connection options are present, but a secure provider account-linking callback is still required before any connection may be marked as connected. Do not set connected status from browser input or from a generic OAuth sign-in. A production integration must preserve the signed-in DBH user, validate OAuth state, exchange tokens on the server, bind the returned provider account ID to that DBH agent, store provider tokens securely server-side, and provide a disconnect/revoke flow. OAuth login alone can switch the Supabase-authenticated identity and is not proof that a social account has been linked to the existing agent.
+Identity linking requires each OAuth provider to be enabled and configured in Supabase Auth, the Supabase manual identity-linking setting to be enabled, and the deployed agent portal callback URL to be on the Supabase redirect allow list. Provider status should be derived from the signed-in Supabase user's identities, not editable profile metadata. A successful identity link confirms which provider account authorized access; it does **not** yet enable automatic social-content import.
 
-Social account connection is optional and must not block agent registration, fee payment, or admin verification. Website URL entry is optional and does not imply website ownership verification. Automatic social-content import is a separate capability that requires platform permissions, API access, appropriate scopes, and a safe server-side synchronization job. No frontend-only implementation should claim automatic content display is operational.
-
-## Social account connections
-
-The agent Settings page shows account connection options for X/Twitter, GitHub, and GitLab, and marks Instagram, Facebook, TikTok, and LinkedIn as unavailable for now. Public profile URLs are separate from authenticated connections and must not be treated as interchangeable.
-
-The frontend connection cards are a UI foundation only. The secure provider account-linking flow is **not yet active**: the backend must implement OAuth state validation, provider-specific token exchange, a trusted callback, binding the provider's user ID to the currently authenticated DBH agent, server-side token storage, and disconnection/revocation. Generic Supabase OAuth sign-in must not be used for linking because it can change the active Supabase identity instead of linking another identity to the current agent. The UI should never mark a provider connected based only on browser input.
-
-Social account connections are optional and must not block registration, the $50 registration-fee payment, document submission, or admin approval. Website URL entry is also optional and only creates a public link; ownership verification is a separate opt-in feature. Automatic content display requires its own supported platform API permissions and backend synchronization, and should not be advertised as operational until implemented and tested.
+Social account connections are optional and must not block agent registration, the $50 registration-fee payment, document submission, or admin approval. Website URL entry is also optional and only creates a public link; website ownership verification is separate. Automatic content display requires the relevant platform API access, permissions, a secure token-handling design and tested synchronization. It must not be advertised as operational until implemented and verified.
 
 ## Verification
 

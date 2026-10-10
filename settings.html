@@ -100,18 +100,38 @@ function paintSocialConnections(){
   if(button){button.textContent=linked?'Reconnect '+DBH_OAUTH_PROVIDERS[key].label:'Connect '+DBH_OAUTH_PROVIDERS[key].label;button.disabled=false}
  }
 }
+
+async function finishSocialIdentityLink(){
+ const params=new URLSearchParams(location.search);
+ const key=params.get('social_link');
+ if(!key||!DBH_OAUTH_PROVIDERS[key])return;
+ try{
+  const {data,error}=await S.auth.getUser();
+  if(error||!data.user)throw new Error('The provider callback did not return a valid signed-in DBH session.');
+  const identities=Array.isArray(data.user.identities)?data.user.identities:[];
+  const identity=identities.find(item=>item.provider===DBH_OAUTH_PROVIDERS[key].provider);
+  if(!identity)throw new Error('Supabase did not return the linked provider identity. Check the provider permissions and callback.');
+  const username=identity.identity_data?.user_name||identity.identity_data?.preferred_username||identity.identity_data?.full_name||identity.identity_data?.name||null;
+  const updated={...(currentApp?.social_links&&typeof currentApp.social_links==='object'?currentApp.social_links:{}),connections:{...getSavedConnections(),[key]:{connected:true,status:'verified',provider:DBH_OAUTH_PROVIDERS[key].provider,provider_user_id:identity.id,username,connected_at:new Date().toISOString()}}};
+  await profileAction({action:'save_agent_profile',full_name:val('fullName'),phone:val('phone'),whatsapp_number:val('whatsapp'),business_name:val('businessName'),business_type:val('businessType'),state:val('state'),city:val('city'),address:val('address'),bio:val('bio'),years_experience:val('yearsExperience'),license_number:val('licenseNumber'),social_links:updated});
+  currentApp.social_links=updated;
+  show(DBH_OAUTH_PROVIDERS[key].label+' is now linked to your signed-in DBH account.','ok');
+ }catch(e){show(e.message||'Could not verify the linked provider identity.','err')}
+ finally{history.replaceState({},'',location.pathname);paintSocialConnections()}
+}
+
 async function connectSocialAccount(key){
  const cfg=DBH_OAUTH_PROVIDERS[key];if(!cfg)return;
- const button=$('connect'+key[0].toUpperCase()+key.slice(1));
- const previous=button.innerHTML;button.disabled=true;button.textContent='Checking…';
+ const button=$('connect'+(key==='twitter'?'Twitter':key[0].toUpperCase()+key.slice(1)));
+ const previous=button.innerHTML;button.disabled=true;button.textContent='Connecting…';
  try{
   const {data:sessionData,error:sessionError}=await S.auth.getSession();
   if(sessionError||!sessionData.session)throw new Error('Your DBH session expired. Please sign in again.');
-  // Prevent a generic OAuth login from replacing the active DBH agent session.
-  // Real account linking needs the provider-specific authorization callback described in README.
-  throw new Error(cfg.label+' appears here as an available provider, but DBH account linking is not active until its trusted server callback is deployed. Your existing DBH session has been left unchanged.');
- }catch(e){show(e.message||'Could not start account linking.','err')}
- finally{button.disabled=false;button.innerHTML=previous}
+  const {data,error}=await S.auth.linkIdentity({provider:cfg.provider,options:{scopes:cfg.scopes,redirectTo:location.origin+location.pathname+'?social_link='+encodeURIComponent(key)}});
+  if(error)throw error;
+  if(!data?.url)throw new Error('Supabase did not return the provider authorization URL. Check that '+cfg.label+' is enabled and manual identity linking is enabled in Supabase Auth.');
+  location.href=data.url;
+ }catch(e){show(e.message||'Could not start account linking.','err');button.disabled=false;button.innerHTML=previous}
 }
 
 function setForm(app,user){currentApp=app;snapshot={fullName:app.full_name||user.user_metadata?.full_name||'',email:app.email||user.email||'',phone:app.phone||user.phone||'',whatsapp:app.whatsapp_number||'',businessName:app.business_name||'',businessType:app.business_type||'',state:app.state||'',city:app.city||'',address:app.address||'',bio:app.bio||'',yearsExperience:app.years_experience??'',licenseNumber:app.license_number||'',social:app.social_links&&typeof app.social_links==='object'?app.social_links:{},profilePhoto:app.profile_photo_url||''};$('fullName').value=snapshot.fullName;$('email').value=snapshot.email;$('phone').value=snapshot.phone;$('whatsapp').value=snapshot.whatsapp;$('businessName').value=snapshot.businessName;$('businessType').value=snapshot.businessType;$('state').value=snapshot.state;$('city').value=snapshot.city;$('address').value=snapshot.address;$('bio').value=snapshot.bio;$('yearsExperience').value=snapshot.yearsExperience;$('licenseNumber').value=snapshot.licenseNumber;$('socialInstagram').value=snapshot.social.instagram||'';$('socialFacebook').value=snapshot.social.facebook||'';$('socialX').value=typeof snapshot.social.x==='string'?snapshot.social.x:'';$('socialLinkedin').value=snapshot.social.linkedin||'';$('socialTiktok').value=snapshot.social.tiktok||'';$('socialYoutube').value=snapshot.social.youtube||'';$('socialWebsite').value=snapshot.social.website||'';if(snapshot.profilePhoto){$('profilePhotoPreview').src=snapshot.profilePhoto;$('photoStatus').textContent='Your saved profile photo is shown above.'}if($('publicProfileLink')){$('publicProfileLink').href='https://dbanjushomes.online/view-agent.html?id='+encodeURIComponent(user.id);const approved=['approved','verified'].includes(String(app.status||'').toLowerCase());$('publicProfileLink').setAttribute('aria-disabled',approved?'false':'true');$('publicProfileLink').title=approved?'Open your public DBH profile':'Your public profile becomes available after DBH approval or verification'}}
@@ -122,6 +142,7 @@ async function load(){
  if(!q.data){location.href='agent-onboarding.html';return}
  setForm(q.data,currentUser);
  paintSocialConnections();
+ finishSocialIdentityLink();
  const st=String(q.data.status||'pending').replaceAll('_',' ');$('statusPill').textContent=st.toUpperCase();$('applicationStatus').textContent=st.toUpperCase();$('sessionStatus').textContent=String(q.data.session_status||'active').toUpperCase();$('agentId').textContent=q.data.id||'—';$('providerFact').textContent=q.data.business_name||q.data.full_name||'—';$('emailFact').textContent=q.data.email||currentUser.email||'—';$('phoneFact').textContent=q.data.phone||'—';
  const n=await S.from('dbh_notifications').select('id',{count:'exact',head:true}).eq('recipient_email',String(currentUser.email||'').toLowerCase()).eq('is_read',false);if(!n.error)$('notificationCount').textContent=String(n.count||0);
  loadPrefs();

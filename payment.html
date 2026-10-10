@@ -52,7 +52,8 @@ async function boot(){
     msg("Your live registration fee is already paid. Continue to document verification; you can access your receipt from the dashboard.","ok");
     return;
   }
-  const successfulPayment=Array.isArray(cfg.payments)?cfg.payments.find(p=>String(p.status||"").toLowerCase()==="successful"):null;
+  const paidStatuses=["successful","completed","paid","approved"];
+  const successfulPayment=Array.isArray(cfg.payments)?cfg.payments.find(p=>paidStatuses.includes(String(p.status||"").trim().toLowerCase())):null;
   if(successfulPayment){
     $("pay").disabled=true;
     $("pay").innerHTML='<i class="fa-solid fa-circle-check"></i> Registration fee already paid';

@@ -53,6 +53,9 @@ body{overflow-x:hidden;background:#f5f8fc}.shell{grid-template-columns:250px min
 @media(max-width:390px){.main{padding-inline:10px}.brand-copy strong{font-size:10px}.top-actions{gap:4px}.top-actions .icon,.profile-chip{width:34px;height:34px;min-width:34px}.payment-actions{grid-template-columns:1fr}.metrics-grid{gap:7px}.metric-card{padding:10px;display:block}.metric-card.stat i{margin-bottom:10px}.metric-card b{font-size:21px}.hero-dashboard{padding:19px;min-height:320px}.hero-actions{display:grid;grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.live-pill i,.hero-dashboard:before,.hero-dashboard:after,.hero-house,.orbit,.quick-card,.metric-card,.tool{animation:none!important;transition:none!important}}
 
+
+/* Final dashboard layout guard: prevent cards, code labels and navigation from escaping their containers. */
+html,body{width:100%;max-width:100%;overflow-x:clip}body{min-width:0}.shell{grid-template-columns:250px minmax(0,1fr);min-width:0}.shell>.main{min-width:0;width:100%;max-width:none}.main *{min-width:0}.welcome,.notice,.payment,.hero-dashboard,.quick-row,.metrics-grid,.section,.activity-panel,.tools{max-width:100%}.payment>*{min-width:0}.payment p,.notice p,.tool p,.hero-copy p{overflow-wrap:anywhere}.payment-actions{min-width:0}.paybtn,.dismissbtn{max-width:100%;white-space:normal;line-height:1.35;text-align:center}.price strong{overflow-wrap:anywhere}.quick-card,.tool,.card,.activity-row{min-width:0;overflow-wrap:anywhere}.tool h3,.activity-copy strong{overflow-wrap:anywhere}#dbhSidebar{min-width:0;overscroll-behavior:contain}#dbhSidebar .nav a{min-width:0}#dbhSidebar .nav a span{min-width:0;overflow-wrap:anywhere}#dbhSidebar a[aria-disabled="true"]{cursor:not-allowed}@media(max-width:900px){.shell{display:block!important;min-height:calc(100vh - 68px)}#dbhSidebar{top:68px!important;height:calc(100dvh - 68px)!important;max-height:calc(100dvh - 68px)!important}.main{padding:22px 16px 38px!important}.payment{grid-template-columns:minmax(0,1fr)!important}.payment .price{min-width:0;text-align:left}.hero-dashboard{min-width:0}.hero-copy{min-width:0}.quick-row,.tools{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:620px){.main{padding:17px 12px 30px!important}.quick-row,.tools{grid-template-columns:minmax(0,1fr)}.metrics-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.payment-actions{grid-template-columns:minmax(0,1fr)}.payment-actions>*{width:100%}.activity-row{grid-template-columns:34px minmax(0,1fr)}.activity-time{grid-column:2;white-space:normal}}@media(max-width:360px){.main{padding-inline:9px!important}.metrics-grid{grid-template-columns:minmax(0,1fr)}.hero-actions{display:grid;grid-template-columns:minmax(0,1fr)}}
 </style>
 </head>
 <body>
@@ -184,8 +187,9 @@ function setToolAccess(open){
     }
   });
   document.querySelectorAll('[data-requires-access="true"]').forEach(el=>{
-    if(open){el.href=el.dataset.href||'activity.html';el.removeAttribute('aria-disabled')}
-    else{el.dataset.href=el.getAttribute('href')||'activity.html';el.href='#';el.setAttribute('aria-disabled','true')}
+    if(!el.dataset.href) el.dataset.href=el.getAttribute('href')||'activity.html';
+    if(open){el.href=el.dataset.href;el.removeAttribute('aria-disabled')}
+    else{el.href='#';el.setAttribute('aria-disabled','true')}
   });
   const add=$('addPropertyHero');if(add){add.href=open?'add-property.html':'#';add.setAttribute('aria-disabled',open?'false':'true')}
   const browse=$('browsePropertiesHero');if(browse){browse.href=open?'properties.html':'#';browse.setAttribute('aria-disabled',open?'false':'true')}
@@ -285,9 +289,11 @@ async function boot(){
     const {data:paymentRows,error:paymentError}=await S.from('agent_payment_records').select('status,paid_at,reference,amount,currency,payment_type,metadata,created_at').eq('user_id',user.id).in('payment_type',['registration_fee','agent_fee']).order('created_at',{ascending:false}).limit(20);
     if(paymentError){console.error(paymentError);showMessage('Your payment record could not be loaded. Please refresh once.','warn')}
     const paymentList=paymentRows||[];
-    const livePaidPayment=paymentList.find(p=>p.status==='successful'&&String(p.metadata?.environment||'').toLowerCase()==='live');
+    const livePaidPayment=paymentList.find(p=>String(p.status||'').toLowerCase()==='successful'&&String(p.metadata?.environment||'').toLowerCase()==='live');
     const payment=livePaidPayment||paymentList[0]||null;
     const paid=!!livePaidPayment;
+    const sessionState=String(app.session_status||'active').toLowerCase();
+    const suspended=['banned','suspended','disabled','inactive'].includes(sessionState)||status==='suspended';
 
     const applicationPendingAfterDecline=status==='pending';
     const {data:declinedDocs,error:declinedError}=await S.from('agent_application_documents')
@@ -298,27 +304,41 @@ async function boot(){
     if(declinedError) console.error(declinedError);
     const hasDeclinedDocument=Array.isArray(declinedDocs)&&declinedDocs.length>0;
     const dismissed=app.payment_card_dismissed===true;
-    const unlocked=paid&&verified;
+    const unlocked=paid&&verified&&!suspended;
     setToolAccess(unlocked);
 
     if(paid){
-      $('noticeTitle').textContent=unlocked?'Payment received and verification completed.':'Registration payment received.';
-      $('noticeText').textContent=unlocked?'Your remaining agent tools are now unlocked.':'Your payment is recorded successfully. Complete verification so DBH can unlock the remaining agent tools.';
+      $('noticeTitle').textContent=unlocked?'Registration payment and verification complete.':suspended?'Registration payment received, but account access is paused.':'Registration payment received.';
+      $('noticeText').textContent=unlocked?'Your registration payment is confirmed and your application is verified. Your agent tools are unlocked.':suspended?'Your registration fee is recorded, but this account is currently restricted. Check Notifications or contact DBH Admin.':'Your registration payment is confirmed. Complete your required identity documents and wait for DBH Admin verification before property tools are unlocked.';
       if(dismissed){
         $('paymentCard').classList.add('hidden');
       }else{
         $('paymentCard').classList.remove('hidden');
         $('paymentTitle').textContent='Registration fee paid successfully';
-        $('paymentText').textContent='Your payment has been recorded. You can cancel/hide this payment card from your dashboard; hiding it does not cancel or refund the payment.';
-        $('pay').removeAttribute('href');
-        $('pay').style.pointerEvents='none';
-        $('pay').style.opacity='.65';
-        $('pay').innerHTML='<i class="fa-solid fa-circle-check"></i><span>Payment successful</span>';
+        $('paymentText').textContent=unlocked?'Your payment and verification are complete. You can hide this card.':suspended?'Your payment is recorded. Contact DBH Admin about your account restriction.':'Your payment is recorded. Continue to document verification; payment alone does not approve your agent account.';
+        if(unlocked){
+          $('pay').removeAttribute('href');
+          $('pay').style.pointerEvents='none';
+          $('pay').style.opacity='.65';
+          $('pay').innerHTML='<i class="fa-solid fa-circle-check"></i><span>Payment successful</span>';
+        }else if(suspended){
+          $('pay').href='notifications.html';
+          $('pay').style.pointerEvents='auto';
+          $('pay').style.opacity='1';
+          $('pay').innerHTML='<i class="fa-solid fa-headset"></i><span>Contact DBH Admin</span>';
+        }else{
+          $('pay').href='agent-documents.html';
+          $('pay').style.pointerEvents='auto';
+          $('pay').style.opacity='1';
+          $('pay').innerHTML='<i class="fa-solid fa-file-shield"></i><span>Continue verification</span>';
+        }
       }
-    }else if(payment?.status==='pending'){
+    }else if(String(payment?.status||'').toLowerCase()==='pending'){
       $('pay').href='payment.html';
+      $('pay').style.pointerEvents='auto';
+      $('pay').style.opacity='1';
       $('pay').innerHTML='<i class="fa-solid fa-clock"></i><span>Continue payment</span>';
-      showMessage('A previous payment attempt is pending. You can continue the secure Flutterwave checkout.','warn');
+      showMessage('A previous payment attempt is pending. Open the secure checkout to continue or verify its status.','warn');
     }
 
     if(hasDeclinedDocument || applicationPendingAfterDecline){
@@ -339,9 +359,13 @@ async function boot(){
     }else if(status==='needs information'){
       $('noticeTitle').textContent='More information is required.';
       $('noticeText').textContent='Please check your verification area for the information or documents requested by DBH Admin.';
-    }else if(status==='suspended'){
-      $('noticeTitle').textContent='Your agent account is suspended.';
-      $('noticeText').textContent='Agent tools remain unavailable while the account is suspended. Contact DBH Admin for the reason and next steps.';
+    }
+    if(suspended){
+      $('noticeIcon').className='fa-solid fa-circle-exclamation';
+      $('noticeIcon').style.color='#b91c1c';
+      $('noticeTitle').textContent='Your agent account is restricted.';
+      $('noticeText').textContent='Agent tools remain locked while your account session is '+safeText(sessionState==='active'?'restricted':sessionState)+'. Check Notifications or contact DBH Admin for next steps.';
+      $('applicationNotice').style.borderLeftColor='#dc2626';
       setToolAccess(false);
     }
 

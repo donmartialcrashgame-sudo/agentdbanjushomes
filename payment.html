@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
 <title>Registration Payment | DBH</title>
-<link rel="icon" href="https://dbanjushomes-com.onrender.com/dbh-logo.jpg">
+<link rel="icon" href="https://dbanjushomes.online/dbh-logo.jpg">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 <style>
 :root{--b:#0b63ce;--d:#062b52;--t:#0f172a;--m:#64748b;--l:#e2e8f0;--bg:#f5f9fe;--ok:#15803d;--err:#b91c1c}
@@ -12,7 +12,7 @@
 </style>
 </head>
 <body>
-<header class="top"><a class="brand" href="dashboard.html"><img src="https://dbanjushomes-com.onrender.com/dbh-logo.jpg" alt="DBH"><div>D Banjus Homes Nig Ltd<small>AGENT PORTAL</small></div></a><a class="icon" aria-label="Notifications" href="notifications.html"><i class="fa-regular fa-bell"></i><span class="dot" id="notificationCount">0</span></a><button class="icon mobile-menu" id="dbhMenu" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button><a class="icon" aria-label="Dashboard" href="dashboard.html"><i class="fa-solid fa-gauge-high"></i></a></header>
+<header class="top"><a class="brand" href="dashboard.html"><img src="https://dbanjushomes.online/dbh-logo.jpg" alt="DBH"><div>D Banjus Homes Nig Ltd<small>AGENT PORTAL</small></div></a><a class="icon" aria-label="Notifications" href="notifications.html"><i class="fa-regular fa-bell"></i><span class="dot" id="notificationCount">0</span></a><button class="icon mobile-menu" id="dbhMenu" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button><a class="icon" aria-label="Dashboard" href="dashboard.html"><i class="fa-solid fa-gauge-high"></i></a></header>
 <div class="shell"><aside class="side" id="dbhSidebar"><div class="agent"><div class="avatar"><i class="fa-solid fa-user"></i></div><strong id="name">DBH Agent</strong><small id="email">Loading...</small><div class="status" id="status">PENDING</div></div>
 <nav class="nav"><a href="dashboard.html" data-page="dashboard.html"><i class="fa-solid fa-gauge-high"></i> Overview</a><a href="#" class="locked" aria-disabled="true"><i class="fa-solid fa-house"></i> My Properties <i class="fa-solid fa-lock" style="margin-left:auto"></i></a><a href="#" class="locked" aria-disabled="true"><i class="fa-solid fa-plus"></i> Add Property <i class="fa-solid fa-lock" style="margin-left:auto"></i></a><a href="#" class="locked" aria-disabled="true"><i class="fa-solid fa-comments"></i> Customer Enquiries <i class="fa-solid fa-lock" style="margin-left:auto"></i></a><a href="payment.html" data-page="payment-result.html"><i class="fa-solid fa-credit-card"></i> Registration Payment</a><a href="agent-documents.html" data-page="agent-documents.html"><i class="fa-solid fa-file-shield"></i> Verification</a><a href="notifications.html" data-page="notifications.html"><i class="fa-regular fa-bell"></i> Notifications</a><a href="#" class="locked" aria-disabled="true"><i class="fa-solid fa-gear"></i> Settings</a></nav></aside>
 <main class="main"><div class="layout"><section class="intro"><div class="eyebrow">DBH AGENT REGISTRATION</div><h1>Complete your registration payment.</h1><p>DBH targets a $50 USD registration fee. The checkout amount is converted to Nigerian naira using the latest acceptable daily USD/NGN reference rate and rounded up to the next ₦100. Your displayed rate is locked into your checkout record.</p><div class="price"><strong id="price">Loading...</strong><span id="currency"></span></div><div class="secure"><i class="fa-solid fa-shield-halved"></i> Server-side verification is required before the payment is recorded as successful.</div></section>
@@ -40,8 +40,9 @@ async function boot(){
   $("currency").textContent="NGN • "+envLabel;
   $("targetUsd").textContent=money(cfg.target_usd,"USD")+" target";
   $("fxRate").textContent="₦"+Number(cfg.exchange_rate).toLocaleString("en-NG",{minimumFractionDigits:2,maximumFractionDigits:4})+" per $1";
-  const when=cfg.fx_updated_at?new Date(cfg.fx_updated_at).toLocaleString("en-NG",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}):"date unavailable";
-  $("fxSource").textContent=String(cfg.fx_source||"Daily USD/NGN reference")+" · "+when+" · round up ₦100";
+  const rateDate=cfg.fx_rate_date?new Date(cfg.fx_rate_date+"T12:00:00Z").toLocaleDateString("en-NG",{day:"numeric",month:"short",year:"numeric"}):"date unavailable";
+  const checkedAt=cfg.fx_updated_at?new Date(cfg.fx_updated_at).toLocaleString("en-NG",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}):"refresh time unavailable";
+  $("fxSource").textContent=String(cfg.fx_source||"Daily USD/NGN reference")+" · effective "+rateDate+" · checked "+checkedAt+" · round up to next ₦100";
   $("envMode").textContent=envLabel;
   if(cfg.fee_enabled===false){
     $("pay").disabled=true;

@@ -40,7 +40,7 @@
 <div class="grid">
 <section class="card balance-card" aria-labelledby="balanceTitle">
 <div class="card-top"><span class="label" id="balanceTitle">Available balance</span><span class="svg-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.8" y="5" width="18.4" height="14" rx="2"/><path d="M3 10h18M7 15h3"/></svg></span></div>
-<div class="balance" id="availableBalance">₦0.00</div><div class="hint">NGN wallet balance available for eligible wallet features.</div><div style="margin-top:17px"><span class="status-pill" id="walletStatus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg><span>Checking wallet</span></span></div>
+<div class="balance" id="availableBalance">₦0.00</div><div class="hint">Available to withdraw</div><div class="hint" style="margin-top:6px">Reserved / pending withdrawals: <strong id="pendingBalance" style="color:#fff">₦0.00</strong></div><div style="margin-top:17px"><span class="status-pill" id="walletStatus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg><span>Checking wallet</span></span></div>
 </section>
 <section class="card" aria-labelledby="accountTitle">
 <div class="section-title"><span class="svg-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10h18L12 3 3 10Z"/><path d="M5 10v9M9 10v9M15 10v9M19 10v9M3 21h18"/></svg></span><div><h2 id="accountTitle">Permanent virtual account</h2><span class="hint" style="color:var(--muted)">Flutterwave · NGN</span></div></div>
@@ -166,6 +166,7 @@ async function boot(){
   const walletData=wallet.wallet||wallet.data?.wallet||{};
   const account=wallet.virtual_account||wallet.account||wallet.data?.virtual_account||wallet.data?.account||null;
   $('availableBalance').textContent=money(walletData.available_balance??wallet.available_balance??0);
+  $('pendingBalance').textContent=money(walletData.pending_balance??wallet.pending_balance??0);
   $('accountState').textContent=stateText(account?.status||walletData.status||'pending');
   if(account&&account.account_number){
    currentAccountNumber=String(account.account_number);
@@ -280,7 +281,7 @@ $('submitWithdrawal').addEventListener('click',async()=>{
  finally{button.disabled=!(withdrawalEligible&&verifiedRecipient&&$('confirmRecipient').checked&&Number($('withdrawAmount').value)>=1000);button.textContent='Request withdrawal';}
 });
 async function refreshWalletBalance(){
- try{const result=await callWallet('status');const wallet=result.wallet||{};$('availableBalance').textContent=money(wallet.available_balance||0);}
+ try{const result=await callWallet('status');const wallet=result.wallet||{};$('availableBalance').textContent=money(wallet.available_balance||0);$('pendingBalance').textContent=money(wallet.pending_balance||0);}
  catch(e){console.warn('Could not refresh wallet balance',e);}
 }
 

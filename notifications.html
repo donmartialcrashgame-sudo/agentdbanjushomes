@@ -43,6 +43,21 @@
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="assets/js/app.js"></script>
 <script>
+/* Notifications is a standalone page: close the shared drawer on initial load so it cannot cover the page on phones. */
+(function(){
+  function closeInitialDrawer(){
+    const side=document.getElementById('dbhSidebar');
+    const overlay=document.getElementById('dbhSidebarOverlay');
+    if(side) side.classList.remove('open');
+    if(overlay) overlay.classList.remove('show');
+    document.documentElement.classList.remove('sidebar-open');
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',closeInitialDrawer,{once:true});
+  else closeInitialDrawer();
+  window.addEventListener('pageshow',closeInitialDrawer);
+})();
+</script>
+<script>
 const U='https://cpgajlsyuieeengdnamy.supabase.co',K='sb_publishable_fbcJT-QGKyZg0tDkpbDkOQ_CcQf2ugW',S=window.DBHSupabaseClient||(window.DBHSupabaseClient=window.supabase.createClient(U,K)),$=id=>document.getElementById(id);
 function icon(type){type=String(type||'').toLowerCase();if(type.includes('payment'))return 'fa-credit-card';if(type.includes('verif')||type.includes('document'))return 'fa-file-shield';if(type.includes('property'))return 'fa-house';if(type.includes('security'))return 'fa-shield-halved';return 'fa-bell'}
 function esc(v){return String(v??'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[x]))}

@@ -7,6 +7,7 @@
     ['activity.html','fa-chart-line','Activity & Reports','activityNav'],
     ['enquiries.html','fa-flag','Complaints & Reports','enquiriesNav'],
     ['payment-result.html','fa-file-invoice-dollar','Payment Receipts',''],
+    ['wallet.html','fa-wallet','Agent Wallet',''],
     ['agent-documents.html','fa-id-card','Verification',''],
     ['notifications.html','fa-bell','Notifications',''],
     ['settings.html','fa-user-gear','My Profile & Settings','']
@@ -48,7 +49,7 @@
       '#dbhSidebar .verified-badge.show{display:block!important}'+
       '#dbhSidebar .nav{display:grid!important;gap:5px!important;margin:0!important;padding:0!important;list-style:none!important}'+
       '#dbhSidebar .nav a{box-sizing:border-box!important;width:100%!important;min-height:44px!important;padding:11px 12px!important;margin:0!important;border-radius:13px!important;color:#526275!important;background:transparent!important;border:1px solid transparent!important;font-size:11px!important;font-weight:800!important;line-height:1.2!important;display:flex!important;align-items:center!important;gap:11px!important;text-decoration:none!important;position:relative!important;transition:background .2s ease,color .2s ease,transform .2s ease,box-shadow .2s ease!important;animation:dbhNavIn .35s both!important}'+
-      '#dbhSidebar .nav a:nth-child(2){animation-delay:.03s!important}#dbhSidebar .nav a:nth-child(3){animation-delay:.06s!important}#dbhSidebar .nav a:nth-child(4){animation-delay:.09s!important}#dbhSidebar .nav a:nth-child(5){animation-delay:.12s!important}#dbhSidebar .nav a:nth-child(6){animation-delay:.15s!important}#dbhSidebar .nav a:nth-child(7){animation-delay:.18s!important}#dbhSidebar .nav a:nth-child(8){animation-delay:.21s!important}#dbhSidebar .nav a:nth-child(9){animation-delay:.24s!important}'+
+      '#dbhSidebar .nav a:nth-child(2){animation-delay:.03s!important}#dbhSidebar .nav a:nth-child(3){animation-delay:.06s!important}#dbhSidebar .nav a:nth-child(4){animation-delay:.09s!important}#dbhSidebar .nav a:nth-child(5){animation-delay:.12s!important}#dbhSidebar .nav a:nth-child(6){animation-delay:.15s!important}#dbhSidebar .nav a:nth-child(7){animation-delay:.18s!important}#dbhSidebar .nav a:nth-child(8){animation-delay:.21s!important}#dbhSidebar .nav a:nth-child(9){animation-delay:.24s!important}#dbhSidebar .nav a:nth-child(10){animation-delay:.27s!important}'+
       '#dbhSidebar .nav a:before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:99px;background:var(--dbh-blue);transform:scaleY(0);transition:transform .2s ease!important}'+
       '#dbhSidebar .nav a i:first-child{width:19px!important;min-width:19px!important;text-align:center!important;color:inherit!important;font-size:13px!important;transition:transform .2s ease,color .2s ease!important}'+
       '#dbhSidebar .nav a span{display:block!important;flex:1!important;white-space:nowrap!important}'+

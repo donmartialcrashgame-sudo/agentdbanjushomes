@@ -93,11 +93,11 @@ Approved agents can receive enquiries associated with their properties. Public l
 
 ## Payments
 
-The payment provider is **Flutterwave**. The current agent registration checkout is connected to Flutterwave **v4 Sandbox/Test Mode** and uses the DBH-controlled registration fee from `agent_settings`.
+The payment provider is **Flutterwave**. The registration checkout uses the DBH-controlled registration fee returned by the `dbh-agent-payment` Edge Function. Confirm that the deployed function uses the intended production endpoint and live credentials before accepting real payments; frontend labels never determine the actual environment.
 
 Payment status is separate from agent approval. A successful payment must not automatically approve an agent.
 
-The current registration fee is **$50 USD**. Payment is separate from verification and admin approval. The payment Edge Function uses `FLW_CLIENT_ID`, `FLW_CLIENT_SECRET`, and `FLW_ENCRYPTION_KEY` as server-side secrets. The webhook function is `dbh-flutterwave-webhook`; configure a Flutterwave webhook secret hash as `FLW_SECRET_HASH` before relying on webhook updates. Test mode uses Flutterwave's sandbox environment; switch to production credentials/endpoints only after DBH is ready for live payments.
+The current agent portal UI displays the DBH registration fee in NGN (currently configured as ₦100,000 in the payment page). The Edge Function remains the source of truth for checkout amount, environment and transaction verification. Keep all private Flutterwave credentials in Supabase Edge Function secrets only; never expose them in browser JavaScript or GitHub. Payment is separate from verification and admin approval. A new agent can enter the dashboard and defer checkout, but agent tools remain locked until payment is confirmed and DBH approves/verifies the account. Before enabling live virtual account creation, review the `dbh-agent-wallet` server-side request, Flutterwave webhook payload validation and idempotent crediting path. The virtual-account creation action is currently intentionally locked; the wallet page must not imply that an account has been created.
 
 ## Account enforcement
 

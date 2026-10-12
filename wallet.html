@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<title>Agent Wallet | DBH</title><link rel="icon" href="https://dbanjushomes.online/dbh-logo.jpg">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+<style>
+:root{--blue:#0b63ce;--deep:#062b52;--text:#0f172a;--muted:#64748b;--line:#e2e8f0;--bg:#f5f9fe;--green:#15803d;--amber:#92400e}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;max-width:100%;overflow-x:clip}body{font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+.top{height:72px;position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:0 27px;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 4px 18px #08274607}
+.brand{display:flex;gap:10px;align-items:center;color:var(--deep);text-decoration:none;font-weight:900}.brand img{width:42px;height:42px;border-radius:11px;object-fit:cover}.brand small{display:block;margin-top:3px;font-size:8px;letter-spacing:.15em;color:var(--muted)}
+.top-actions{display:flex;gap:8px;align-items:center}.icon-btn{width:40px;height:40px;display:grid;place-items:center;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--deep);text-decoration:none;cursor:pointer}.icon-btn svg{width:18px;height:18px}.menu-btn{display:none}
+.workspace{display:grid;grid-template-columns:250px minmax(0,1fr);min-height:calc(100dvh - 72px)}.side{background:#fff;border-right:1px solid var(--line);padding:18px 13px;position:sticky;top:72px;height:calc(100dvh - 72px);overflow:auto}
+.main{width:100%;min-width:0;max-width:1400px;padding:clamp(20px,3vw,38px);margin:0 auto}
+.eyebrow{font-size:9px;letter-spacing:.16em;font-weight:900;color:var(--blue)}h1{font-size:clamp(28px,3vw,39px);letter-spacing:-.045em;line-height:1.1;margin:9px 0 8px;color:#082e55}.lead{max-width:760px;color:var(--muted);font-size:12px;line-height:1.75;margin:0 0 24px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:0 10px 28px #183b5b06;min-width:0}
+.balance-card{position:relative;overflow:hidden;min-height:206px;background:linear-gradient(130deg,#041e3a,#062b52 45%,#0b63ce);color:#fff;border:0}.balance-card:after{content:"";position:absolute;width:220px;height:220px;right:-80px;top:-95px;border-radius:50%;border:28px solid #ffffff12;pointer-events:none}
+.card-top{display:flex;align-items:center;justify-content:space-between;gap:12px}.label{font-size:10px;color:#dbeafe;font-weight:800}.svg-icon{display:grid;place-items:center;width:42px;height:42px;flex:0 0 42px;border-radius:13px;background:#ffffff17;color:#fff}.svg-icon svg{width:23px;height:23px}.balance{font-size:clamp(30px,4vw,42px);font-weight:900;letter-spacing:-.04em;margin:22px 0 8px}.hint{color:#dbeafe;font-size:10px;line-height:1.6}.status-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:99px;font-size:9px;font-weight:900;background:#fffbeb;color:#92400e;border:1px solid #fde68a}.status-pill.ready{background:#f0fdf4;color:#166534;border-color:#bbf7d0}.status-pill svg{width:12px;height:12px}
+.card h2{margin:0;font-size:16px;color:#123353;letter-spacing:-.02em}.card-copy{margin:7px 0 17px;font-size:10px;line-height:1.7;color:var(--muted)}.section-title{display:flex;align-items:center;gap:11px}.section-title .svg-icon{background:#eff6ff;color:var(--blue)}
+.account-fields{display:grid;gap:0}.account-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #eef2f7}.account-row:last-child{border-bottom:0}.account-row span{font-size:10px;color:var(--muted)}.account-row strong{font-size:11px;color:#123353;text-align:right;overflow-wrap:anywhere}
+.btn{display:inline-flex;justify-content:center;align-items:center;gap:8px;border:0;border-radius:11px;background:var(--blue);color:#fff;padding:12px 16px;font-size:11px;font-weight:900;text-decoration:none;cursor:pointer;min-height:43px}.btn svg{width:16px;height:16px}.btn:disabled{opacity:.56;cursor:not-allowed}.btn.secondary{background:#eff6ff;color:#155eaa;border:1px solid #bfdbfe}
+.notice{display:flex;align-items:flex-start;gap:11px;border:1px solid #bfdbfe;background:#eff6ff;color:#174a7e;border-radius:15px;padding:15px;margin-top:17px;font-size:10px;line-height:1.7}.notice svg{width:19px;height:19px;flex:0 0 19px;margin-top:1px}.notice strong{display:block;font-size:11px;margin-bottom:3px}.notice.warn{background:#fffbeb;border-color:#fde68a;color:#854d0e}.notice.error{background:#fef2f2;border-color:#fecaca;color:#991b1b}.notice[hidden]{display:none!important}
+.card-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}.loading-state{display:flex;align-items:center;gap:9px;color:var(--muted);font-size:10px}.spinner{width:17px;height:17px;border:2px solid #cbd5e1;border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:900px){.workspace{display:block}.side{position:fixed;z-index:100;left:-275px;top:68px;width:min(260px,86vw);max-width:86vw;height:calc(100dvh - 68px);transition:left .25s;box-shadow:12px 0 35px #0002}.side.open{left:0}.menu-btn{display:grid}.main{padding:22px 16px 38px}}
+@media(max-width:600px){.top{height:68px;padding:0 12px}.brand img{width:36px;height:36px}.brand strong{font-size:11px}.brand small{font-size:7px}.grid{grid-template-columns:1fr}.card{padding:18px;border-radius:17px}.balance-card{min-height:190px}.account-row{align-items:flex-start}.account-row strong{max-width:65%}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;scroll-behavior:auto!important;transition:none!important}}
+</style></head>
+<body>
+<header class="top">
+<a class="brand" href="dashboard.html"><img src="https://dbanjushomes.online/dbh-logo.jpg" alt="DBH logo"><span><strong>D Banjus Homes Nig Ltd</strong><small>AGENT WALLET</small></span></a>
+<div class="top-actions">
+<a class="icon-btn" href="notifications.html" aria-label="Notifications" title="Notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg></a>
+<button class="icon-btn menu-btn" id="dbhMenu" type="button" aria-label="Open navigation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+<a class="icon-btn" href="dashboard.html" aria-label="Back to dashboard" title="Dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="5" rx="1.5"/><rect x="13" y="10" width="8" height="11" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/></svg></a>
+</div></header>
+<div class="workspace"><aside class="side" id="dbhSidebar"></aside><main class="main">
+<div class="eyebrow">FINANCE CENTRE</div><h1>Your agent wallet</h1><p class="lead">Track your DBH wallet and view your permanent bank account details here when they are available. Deposits must be confirmed server-side before your available balance changes.</p>
+<div id="pageMessage" class="notice" role="status" aria-live="polite" hidden></div>
+<div class="grid">
+<section class="card balance-card" aria-labelledby="balanceTitle">
+<div class="card-top"><span class="label" id="balanceTitle">Available balance</span><span class="svg-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.8" y="5" width="18.4" height="14" rx="2"/><path d="M3 10h18M7 15h3"/></svg></span></div>
+<div class="balance" id="availableBalance">₦0.00</div><div class="hint">NGN wallet balance available for eligible wallet features.</div><div style="margin-top:17px"><span class="status-pill" id="walletStatus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg><span>Checking wallet</span></span></div>
+</section>
+<section class="card" aria-labelledby="accountTitle">
+<div class="section-title"><span class="svg-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10h18L12 3 3 10Z"/><path d="M5 10v9M9 10v9M15 10v9M19 10v9M3 21h18"/></svg></span><div><h2 id="accountTitle">Permanent virtual account</h2><span class="hint" style="color:var(--muted)">Flutterwave · NGN</span></div></div>
+<p class="card-copy">When live account creation is activated, the bank, account name and account number will appear here. Never share your BVN/NIN, bank PIN or OTP with anyone claiming to be DBH support.</p>
+<div class="account-fields">
+<div class="account-row"><span>Bank name</span><strong id="bankName">Not generated</strong></div>
+<div class="account-row"><span>Account name</span><strong id="accountName">Not generated</strong></div>
+<div class="account-row"><span>Account number</span><strong id="accountNumber">Not generated</strong></div>
+<div class="account-row"><span>Account status</span><strong id="accountState">Unavailable</strong></div>
+</div>
+<div class="card-actions"><button class="btn secondary" type="button" id="copyAccount" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>Copy account number</button><button class="btn" type="button" id="generateAccount" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18M3 12h18"/><circle cx="12" cy="12" r="9"/></svg>Generate Virtual Account Number</button></div>
+</section>
+<section class="card" aria-labelledby="activityTitle">
+<div class="section-title"><span class="svg-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 6-7"/></svg></span><div><h2 id="activityTitle">Wallet activity</h2><span class="hint" style="color:var(--muted)">Recent credited transactions</span></div></div>
+<p class="card-copy">Wallet entries will be shown here after server-verified deposits and other supported wallet events.</p><div id="walletActivity" class="loading-state"><span class="spinner" aria-hidden="true"></span><span>Checking wallet transactions...</span></div>
+</section>
+<section class="card" aria-labelledby="securityTitle">
+<div class="section-title"><span class="svg-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/></svg></span><div><h2 id="securityTitle">Security & eligibility</h2><span class="hint" style="color:var(--muted)">Keep your account protected</span></div></div>
+<p class="card-copy">Registration payment and DBH approval/verification are separate checks. Wallet access will remain unavailable while your agent account is pending, rejected or restricted.</p>
+<div class="account-row"><span>Registration payment</span><strong id="paymentEligibility">Checking…</strong></div><div class="account-row"><span>DBH verification</span><strong id="verificationEligibility">Checking…</strong></div><div class="account-row"><span>Session</span><strong id="sessionEligibility">Checking…</strong></div>
+</section>
+</div>
+<div class="notice warn" id="activationNote"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg><div><strong>Live virtual account creation is not enabled yet</strong>The account-generation endpoint is still intentionally locked while DBH verifies live Flutterwave configuration and webhook handling. No BVN/NIN is being collected and no bank account will be created from this page at this stage.</div></div>
+</main></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="assets/js/app.js?v=20261012-wallet-flow"></script>
+<script>
+const SUPABASE_URL='https://cpgajlsyuieeengdnamy.supabase.co';
+const SUPABASE_KEY='sb_publishable_fbcJT-QGKyZg0tDkpbDkOQ_CcQf2ugW';
+const S=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const $=id=>document.getElementById(id);
+const WALLET_FN=SUPABASE_URL+'/functions/v1/dbh-agent-wallet';
+let currentAccountNumber='';
+function money(value){const amount=Number(value||0);return new Intl.NumberFormat('en-NG',{style:'currency',currency:'NGN',minimumFractionDigits:2,maximumFractionDigits:2}).format(Number.isFinite(amount)?amount:0)}
+function notice(message,type='info'){const el=$('pageMessage');el.hidden=false;el.className='notice'+(type==='warn'?' warn':type==='error'?' error':'');el.querySelector('div')?.remove();const copy=document.createElement('div');copy.textContent=message;el.appendChild(copy)}
+async function callWallet(action){
+ const {data,error}=await S.auth.getSession();
+ if(error||!data.session)throw new Error('Your session expired. Please sign in again.');
+ const response=await fetch(WALLET_FN,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+data.session.access_token},body:JSON.stringify({action})});
+ const payload=await response.json().catch(()=>({}));
+ if(!response.ok)throw new Error(payload.error||payload.message||'Wallet service is not available yet.');
+ return payload;
+}
+function setWalletStatus(text,ready=false){const el=$('walletStatus');el.className='status-pill'+(ready?' ready':'');el.querySelector('span')?.remove();const span=document.createElement('span');span.textContent=text;el.appendChild(span)}
+function stateText(value){return String(value||'pending').replaceAll('_',' ').toUpperCase()}
+async function boot(){
+ try{
+  const {data:auth,error:authError}=await S.auth.getUser();if(authError||!auth.user){location.href='login.html';return}
+  const user=auth.user;
+  const {data:app,error:appError}=await S.from('agent_applications').select('id,status,session_status,created_at').eq('user_id',user.id).order('created_at',{ascending:false}).limit(1).maybeSingle();
+  if(appError)throw new Error('Could not load your agent application status.');
+  if(!app){location.href='agent-onboarding.html';return}
+  const status=String(app.status||'pending').toLowerCase().replaceAll('_',' ');
+  const sessionStatus=String(app.session_status||'active').toLowerCase();
+  const suspended=['banned','suspended','disabled','inactive'].includes(sessionStatus)||status==='suspended';
+  const {data:payments,error:paymentError}=await S.from('agent_payment_records').select('status,payment_type,created_at').eq('user_id',user.id).in('payment_type',['registration_fee','agent_fee']).order('created_at',{ascending:false}).limit(20);
+  if(paymentError)console.warn('Wallet eligibility payment check unavailable:',paymentError);
+  const paid=(payments||[]).some(p=>['successful','completed','paid','approved'].includes(String(p.status||'').toLowerCase()));
+  const verified=['verified','approved'].includes(status);
+  $('paymentEligibility').textContent=paid?'PAID':'NOT PAID';
+  $('verificationEligibility').textContent=stateText(status);
+  $('sessionEligibility').textContent=stateText(sessionStatus);
+  const eligible=paid&&verified&&!suspended;
+  if(!eligible){
+   setWalletStatus('Locked');
+   $('accountState').textContent='Locked';
+   $('walletActivity').textContent='Wallet activity is not available until the account becomes eligible.';
+   $('activationNote').className='notice warn';
+   $('activationNote').querySelector('div').innerHTML='<strong>Wallet access is locked</strong>Confirm your registration payment and wait for DBH Admin approval/verification. Account generation is never a substitute for identity verification.';
+   return;
+  }
+  setWalletStatus('Checking secure wallet');
+  const wallet=await callWallet('status');
+  const walletData=wallet.wallet||wallet.data?.wallet||{};
+  const account=wallet.virtual_account||wallet.account||wallet.data?.virtual_account||wallet.data?.account||null;
+  $('availableBalance').textContent=money(walletData.available_balance??wallet.available_balance??0);
+  $('accountState').textContent=stateText(account?.status||walletData.status||'pending');
+  if(account&&account.account_number){
+   currentAccountNumber=String(account.account_number);
+   $('bankName').textContent=account.bank_name||'Bank details available';
+   $('accountName').textContent=account.account_name||'DBH Agent';
+   $('accountNumber').textContent=currentAccountNumber;
+   $('copyAccount').disabled=false;
+   $('generateAccount').disabled=true;
+   $('generateAccount').textContent='Virtual account already created';
+   setWalletStatus('Account available',true);
+   $('activationNote').hidden=true;
+  }else{
+   $('accountState').textContent='Not generated';
+   $('bankName').textContent='Not generated';
+   $('accountName').textContent='Not generated';
+   $('accountNumber').textContent='Not generated';
+   $('walletActivity').textContent='No wallet transactions have been recorded yet.';
+   setWalletStatus('Wallet ready; account not generated');
+   notice('Your agent account meets the dashboard eligibility checks. Permanent virtual account generation remains temporarily paused while the live Flutterwave request and webhook are reviewed. No account was created.','warn');
+  }
+ }catch(error){
+  console.error('DBH agent wallet:',error);
+  setWalletStatus('Unavailable');
+  $('accountState').textContent='Unavailable';
+  $('walletActivity').textContent='Wallet details could not be loaded.';
+  notice(error.message||'Wallet details could not be loaded. Please retry later.','error');
+ }
+}
+$('copyAccount').addEventListener('click',async()=>{
+ if(!currentAccountNumber)return;
+ try{await navigator.clipboard.writeText(currentAccountNumber);notice('Account number copied.','info')}
+ catch{notice('Copy is unavailable in this browser. Select the account number and copy it manually.','warn')}
+});
+$('generateAccount').addEventListener('click',async()=>{
+ notice('Virtual account creation is still locked by the server. No BVN/NIN has been submitted and no account was created.','warn');
+});
+boot();
+</script></body></html>

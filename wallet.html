@@ -215,7 +215,7 @@ $('generateAccount').addEventListener('click',async()=>{
  try{const result=await callWallet('create_virtual_account',{bvn});input.value='';if(result.account?.account_number){currentAccountNumber=String(result.account.account_number);$('bankName').textContent=result.account.bank_name||'Flutterwave MFB';$('accountName').textContent=result.account.account_name||'DBH Agent';$('accountNumber').textContent=currentAccountNumber;$('accountState').textContent='ACTIVE';$('copyAccount').disabled=false;$('bvnSetup').hidden=true;$('activationNote').hidden=true;setWalletStatus('Account available',true);notice('Your permanent DBH wallet account is ready.','info');}else{notice('Flutterwave did not return account details. Contact DBH support before retrying.','error');}}catch(e){notice(e.message||'Could not create the virtual account. Contact DBH support before retrying.','error');}finally{button.disabled=!canCreateLiveAccount;button.textContent='Generate Permanent Account';}
 });
 
-let withdrawalEligible=false, verifiedRecipient=null, bankOptions=[];
+let withdrawalEligible=false, verifiedRecipient=null, bankOptions=[], pendingWithdrawalRequestKey=null;
 function withdrawalStatusClass(value){return String(value||'requested').toLowerCase().replace(/[^a-z]/g,'')}
 function elText(id,value){const node=$(id);if(node)node.textContent=String(value??'')}
 function renderWithdrawalHistory(rows){
@@ -270,11 +270,11 @@ $('submitWithdrawal').addEventListener('click',async()=>{
  if(!withdrawalEligible){elText('withdrawalHint','Your wallet is not eligible for withdrawals yet.');return;}
  if(!verifiedRecipient||!$('confirmRecipient').checked||!Number.isSafeInteger(amount)||amount<1000){elText('withdrawalHint','Verify and confirm the recipient, then enter at least ₦1,000.');return;}
  const button=$('submitWithdrawal');button.disabled=true;button.textContent='Submitting request…';
- const requestKey=crypto.randomUUID();
+ const requestKey=pendingWithdrawalRequestKey||(pendingWithdrawalRequestKey=crypto.randomUUID());
  try{
   const result=await callWallet('request_withdrawal',{amount,bank_code:verifiedRecipient.bank_code,account_number:verifiedRecipient.account_number,account_name:verifiedRecipient.account_name,request_key:requestKey});
   elText('withdrawalHint','Withdrawal request submitted. Funds are reserved pending DBH Admin approval.');
-  $('withdrawAmount').value='';$('withdrawAccount').value='';$('withdrawBank').value='';resetRecipient();
+  pendingWithdrawalRequestKey=null;$('withdrawAmount').value='';$('withdrawAccount').value='';$('withdrawBank').value='';resetRecipient();
   await Promise.all([loadWithdrawalHistory(),refreshWalletBalance()]);
  }catch(e){elText('withdrawalHint',e.message||'Withdrawal request could not be submitted.');}
  finally{button.disabled=!(withdrawalEligible&&verifiedRecipient&&$('confirmRecipient').checked&&Number($('withdrawAmount').value)>=1000);button.textContent='Request withdrawal';}

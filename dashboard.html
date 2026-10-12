@@ -30,6 +30,7 @@
 .wallet-preview-copy{min-width:0;flex:1}.wallet-preview-copy strong{display:block;font-size:11px;color:#123353}.wallet-preview-copy span{display:block;color:var(--muted);font-size:10px;line-height:1.6;margin-top:4px}
 .wallet-open-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 14px;border:1px solid #bfdbfe;border-radius:11px;background:#eff6ff;color:#155eaa;font-size:10px;font-weight:900;white-space:nowrap}
 @media(max-width:550px){.wallet-preview-card{align-items:flex-start;flex-wrap:wrap;padding:14px}.wallet-preview-copy{flex-basis:calc(100% - 62px)}.wallet-open-btn{width:100%}}
+.payment-reminder{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:-5px 0 20px;padding:15px 17px;border:1px solid #bfdbfe;background:#eff6ff;border-radius:15px}.payment-reminder[hidden]{display:none!important}.payment-reminder strong{display:block;font-size:11px;color:#123353}.payment-reminder small{display:block;color:#526b85;font-size:10px;line-height:1.5;margin-top:4px}@media(max-width:550px){.payment-reminder{flex-direction:column;align-items:stretch}.payment-reminder .wallet-open-btn{width:100%}}
 
 @media(max-width:900px){.shell{grid-template-columns:1fr}.side{position:fixed;z-index:40;left:-275px;top:72px;width:260px;transition:.25s;box-shadow:10px 0 35px #0002}.side.open{left:0}.grid{grid-template-columns:1fr 1fr}.tools{grid-template-columns:1fr}.main{padding:22px 16px}.payment{grid-template-columns:1fr}.price{text-align:left}}
 @media(max-width:550px){.top{padding:0 12px}.brand div{font-size:12px}.grid{grid-template-columns:1fr}.welcome{display:block}h1{font-size:27px}.payment{padding:22px;border-radius:19px}.payment h2{font-size:23px}.price strong{font-size:33px}.top-actions .bell{display:none}}
@@ -108,6 +109,7 @@ html,body{width:100%;max-width:100%;overflow-x:clip}body{min-width:0}.shell{grid
 <i class="fa-solid fa-circle-info" id="noticeIcon"></i>
 <div><b id="noticeTitle">Your registration application is in progress.</b><p id="noticeText">Registration payment and verification are separate stages. DBH Admin approval is required before agent tools are activated.</p></div>
 </div>
+<div class="payment-reminder" id="paymentReminder" hidden><span><strong>Registration payment pending</strong><small>Your agent tools remain locked until payment and DBH verification are complete.</small></span><a href="payment.html" class="wallet-open-btn">Complete payment</a></div>
 
 <div class="payment-modal-backdrop" id="paymentBackdrop" hidden>
 <section class="payment payment-modal" id="paymentCard">
@@ -338,10 +340,12 @@ async function boot(){
     if(declinedError) console.error(declinedError);
     const hasDeclinedDocument=Array.isArray(declinedDocs)&&declinedDocs.length>0;
     const dismissed=app.payment_card_dismissed===true || sessionStorage.getItem('dbhRegistrationPaymentDeferred')==='1';
+    $('paymentReminder').hidden=paid||suspended||!dismissed;
     const unlocked=paid&&verified&&!suspended;
     setToolAccess(unlocked);
 
     if(paid){
+      $('paymentReminder').hidden=true;
       $('noticeTitle').textContent=unlocked?'Registration payment and verification complete.':suspended?'Registration payment received, but account access is paused.':'Registration payment received.';
       $('noticeText').textContent=unlocked?'Your registration payment is confirmed and your application is verified. Your agent tools are unlocked.':suspended?'Your registration fee is recorded, but this account is currently restricted. Check Notifications or contact DBH Admin.':'Your registration payment is confirmed. Complete your required identity documents and wait for DBH Admin verification before property tools are unlocked.';
       if(dismissed){
@@ -421,6 +425,7 @@ async function boot(){
 $('payLater').addEventListener('click',()=>{
   sessionStorage.setItem('dbhRegistrationPaymentDeferred','1');
   $('paymentBackdrop').hidden=true;
+  $('paymentReminder').hidden=false;
   showMessage('You can continue using your dashboard. Agent tools stay locked until your registration fee is confirmed and DBH approves your application.','warn');
 });
 $('logout').onclick=async()=>{

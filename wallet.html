@@ -154,8 +154,8 @@ $('copyAccount').addEventListener('click',async()=>{
 });
 $('generateAccount').addEventListener('click',async()=>{
  if(!canCreateLiveAccount){notice('Permanent account generation is still locked by DBH. No BVN was submitted and no account was created.','warn');return;}
- const input=$('walletBvn');const bvn=String(input.value||'').replace(/\\s/g,'');
- if(!/^\\d{11}$/.test(bvn)){notice('Enter your valid 11-digit BVN.','error');input.focus();return;}
+ const input=$('walletBvn');const bvn=String(input.value||'').replace(/\s/g,'');
+ if(!/^\d{11}$/.test(bvn)){notice('Enter your valid 11-digit BVN.','error');input.focus();return;}
  const button=$('generateAccount');button.disabled=true;button.textContent='Creating secure account…';
  try{const result=await callWallet('create_virtual_account',{bvn});input.value='';if(result.account?.account_number){currentAccountNumber=String(result.account.account_number);$('bankName').textContent=result.account.bank_name||'Flutterwave MFB';$('accountName').textContent=result.account.account_name||'DBH Agent';$('accountNumber').textContent=currentAccountNumber;$('accountState').textContent='ACTIVE';$('copyAccount').disabled=false;$('bvnSetup').hidden=true;$('activationNote').hidden=true;setWalletStatus('Account available',true);notice('Your permanent DBH wallet account is ready.','info');}else{notice('Flutterwave did not return account details. Contact DBH support before retrying.','error');}}catch(e){notice(e.message||'Could not create the virtual account. Contact DBH support before retrying.','error');}finally{button.disabled=!canCreateLiveAccount;button.textContent='Generate Permanent Account';}
 });

@@ -19,10 +19,10 @@
 @keyframes dbhNIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}@keyframes dbhFloat{50%{transform:translateY(14px) rotate(5deg)}}.hero{position:relative;overflow:hidden;box-shadow:0 20px 45px rgba(11,99,206,.18)}.hero:after{content:"";position:absolute;width:230px;height:230px;border:1px solid #ffffff22;border-radius:50%;right:30px;top:-130px;animation:dbhFloat 6s ease-in-out infinite}.hero>*{position:relative;z-index:1}.item{animation:dbhNIn .4s both;transition:.2s}.item:hover{transform:translateY(-3px);box-shadow:0 16px 32px rgba(6,43,82,.11)}.ico{transition:.2s}.item:hover .ico{transform:scale(1.08) rotate(-3deg)}.toolbar{box-shadow:0 10px 25px rgba(6,43,82,.06)}@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}</style>
 </head>
 <body>
-<header class="top"><a class="brand" href="dashboard.html"><img src="https://dbanjushomes.online/dbh-logo.jpg" alt="DBH"><div>D Banjus Homes Nig Ltd<small>AGENT NOTIFICATIONS</small></div></a><div><a class="btn" href="dashboard.html"><i class="fa-solid fa-arrow-left"></i> Dashboard</a></div></header>
+<header class="top"><a class="brand" href="dashboard.html"><img src="https://dbanjushomes.online/dbh-logo.jpg" alt="DBH"><div>D Banjus Homes Nig Ltd<small>AGENT NOTIFICATIONS</small></div></a><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><a class="btn" href="how-to-use.html"><i class="fa-solid fa-circle-question"></i> How to use</a><button class="btn" id="refresh" type="button"><i class="fa-solid fa-rotate"></i> Refresh</button><a class="btn" href="dashboard.html"><i class="fa-solid fa-arrow-left"></i> Dashboard</a></div></header>
 <main class="wrap">
 <section class="hero"><div><div class="eyebrow">DBH AGENT PORTAL</div><h1>Notifications</h1><p>Stay updated about your application, payment, verification, properties and account status.</p></div><div class="count"><div><b id="unread">0</b><small>UNREAD</small></div></div></section>
-<div class="toolbar"><span id="summary">Loading notifications...</span><button class="btn primary" id="readAll"><i class="fa-solid fa-check-double"></i> Mark all as read</button></div>
+<div class="toolbar"><div><strong style="display:block;font-size:12px;color:#062b52;margin-bottom:4px"><i class="fa-solid fa-inbox"></i> Your updates</strong><span id="summary">Loading notifications...</span></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="showUnread" type="button" aria-pressed="false"><i class="fa-solid fa-envelope"></i> Unread only</button><button class="btn primary" id="readAll"><i class="fa-solid fa-check-double"></i> Mark all as read</button></div></div>
 <div id="msg" class="msg"></div><section class="list" id="list"></section>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="assets/js/app.js"></script>
@@ -32,17 +32,19 @@ function icon(type){type=String(type||'').toLowerCase();if(type.includes('paymen
 function esc(v){return String(v??'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[x]))}
 function ago(v){const d=new Date(v),s=Math.floor((Date.now()-d.getTime())/1000);if(s<60)return 'Just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';if(s<604800)return Math.floor(s/86400)+'d ago';return d.toLocaleDateString()}
 function msg(t){$('msg').textContent=t;$('msg').className='msg show err'}
-let currentUserEmail='';
+let currentUserEmail='',allRows=[],unreadOnly=false;
 function renderRows(rows){
+  allRows=rows;
   const unread=rows.filter(n=>!n.is_read&&String(n.recipient_email||'').toLowerCase()!=='*').length;
+  const visibleRows=unreadOnly?rows.filter(n=>!n.is_read):rows;
   $('unread').textContent=String(unread);
   $('summary').textContent=rows.length?rows.length+' notification'+(rows.length===1?'':'s')+' • '+unread+' unread':'No notifications yet';
-  $('list').innerHTML=rows.length?rows.map(n=>{
+  $('list').innerHTML=visibleRows.length?visibleRows.map(n=>{
     const isBroadcast=String(n.recipient_email||'').trim()==='*';
     const markButton=!n.is_read&&!isBroadcast?'<button class="mark-read" type="button" data-mark-read="'+esc(n.id)+'" aria-label="Mark notification as read"><i class="fa-solid fa-check"></i> Mark read</button>':'';
     const link=n.link?'<p><a href="'+esc(n.link)+'" style="color:#0b63ce;font-weight:800">Open related page <i class="fa-solid fa-arrow-up-right-from-square"></i></a></p>':'';
     return '<article class="item '+(!n.is_read?'unread':'')+'"><div class="ico"><i class="fa-solid '+icon(n.type)+'"></i></div><div><h3>'+esc(n.title||(isBroadcast?'DBH announcement':'DBH notification'))+'</h3><p>'+esc(n.message||'')+'</p>'+link+(isBroadcast?'<small class="broadcast-label"><i class="fa-solid fa-bullhorn"></i> DBH announcement</small>':'')+markButton+'</div><time class="time">'+esc(ago(n.created_at))+'</time></article>';
-  }).join(''):'<div class="empty"><i class="fa-regular fa-bell-slash"></i><h3>No notifications yet</h3><p>DBH updates about your application, payments and account will appear here.</p></div>';
+  }).join(''):(unreadOnly?'<div class="empty"><i class="fa-solid fa-check-double"></i><h3>You are all caught up</h3><p>There are no unread notifications right now.</p></div>':'<div class="empty"><i class="fa-regular fa-bell-slash"></i><h3>No notifications yet</h3><p>DBH updates about your application, payments and account will appear here.</p></div>');
 }
 async function loadNotifications(){
   const cols='id,recipient_email,title,message,type,link,is_read,created_at';
@@ -76,6 +78,8 @@ $('list').addEventListener('click',async event=>{
   if(error){console.error('Mark notification read failed:',error);msg('Could not mark this notification as read. Please try again.');button.disabled=false;return}
   await loadNotifications();
 });
+$('refresh').onclick=async()=>{const b=$('refresh');b.disabled=true;b.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Refreshing';try{await loadNotifications()}finally{b.disabled=false;b.innerHTML='<i class="fa-solid fa-rotate"></i> Refresh'}};
+$('showUnread').onclick=()=>{unreadOnly=!unreadOnly;$('showUnread').setAttribute('aria-pressed',String(unreadOnly));$('showUnread').innerHTML=unreadOnly?'<i class="fa-solid fa-list"></i> Show all':'<i class="fa-solid fa-envelope"></i> Unread only';renderRows(allRows)};
 $('readAll').onclick=async()=>{
   const b=$('readAll');b.disabled=true;
   const {error}=await S.from('dbh_notifications').update({is_read:true}).eq('recipient_email',currentUserEmail).eq('is_read',false).select('id');

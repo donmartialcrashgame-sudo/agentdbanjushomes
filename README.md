@@ -28,7 +28,8 @@ The dashboard is designed with a clean DBH white-and-blue interface and a respon
 - My Properties
 - Add Property
 - Customer Enquiries
-- Payments
+- Payments & receipts
+- Agent wallet
 - Verification
 - Notifications
 - Settings

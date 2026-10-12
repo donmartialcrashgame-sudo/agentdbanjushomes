@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<title>DBH Withdrawal Approvals</title><link rel="icon" href="https://dbanjushomes.online/dbh-logo.jpg">
+<style>
+:root{--blue:#0b63ce;--deep:#062b52;--ink:#10243a;--muted:#64748b;--line:#e2e8f0;--bg:#f4f8fd;--green:#166534;--red:#991b1b;--amber:#92400e}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}header{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line);padding:16px clamp(16px,4vw,36px);display:flex;justify-content:space-between;align-items:center;gap:14px}header strong{color:var(--deep)}header a{color:var(--blue);font-weight:800;text-decoration:none;font-size:12px}.wrap{max-width:1100px;margin:auto;padding:28px 16px 50px}h1{font-size:clamp(25px,4vw,36px);letter-spacing:-.04em;margin:8px 0}.sub{color:var(--muted);font-size:12px;line-height:1.7;max-width:760px}.topline{font-size:9px;letter-spacing:.14em;font-weight:900;color:var(--blue)}.actions{display:flex;gap:8px;flex-wrap:wrap}.btn{border:0;border-radius:10px;background:var(--blue);color:#fff;padding:10px 13px;font-weight:850;font-size:11px;cursor:pointer}.btn.secondary{background:#eff6ff;color:#155eaa;border:1px solid #bfdbfe}.btn.danger{background:#fff1f2;color:#9f1239;border:1px solid #fecdd3}.btn:disabled{opacity:.55;cursor:wait}.message{margin:16px 0;padding:13px;border-radius:12px;background:#eff6ff;border:1px solid #bfdbfe;color:#174a7e;font-size:12px;line-height:1.6}.message.error{background:#fef2f2;border-color:#fecaca;color:var(--red)}.message[hidden]{display:none}.list{display:grid;gap:14px;margin-top:22px}.item{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 8px 24px #16395a06}.itemhead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.item h2{margin:0;font-size:17px}.muted{font-size:11px;color:var(--muted);line-height:1.7;overflow-wrap:anywhere}.pill{display:inline-flex;border-radius:99px;padding:5px 9px;background:#fffbeb;color:var(--amber);font-size:9px;font-weight:900;text-transform:uppercase}.pill.processing{background:#eff6ff;color:#1d4ed8}.details{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:16px 0}.detail{padding:12px;background:#f8fbff;border:1px solid var(--line);border-radius:11px;min-width:0}.detail span{display:block;color:var(--muted);font-size:9px;margin-bottom:5px}.detail strong{display:block;font-size:12px;overflow-wrap:anywhere}.itemactions{display:flex;gap:8px;flex-wrap:wrap}.empty{background:#fff;border:1px dashed #cbd5e1;border-radius:16px;padding:28px;text-align:center;color:var(--muted);font-size:12px}@media(max-width:650px){header{align-items:flex-start}.details{grid-template-columns:1fr 1fr}.itemhead{align-items:flex-start;flex-direction:column}.item{padding:14px}}@media(max-width:390px){.details{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div><strong>D Banjus Homes Nig Ltd</strong><div class="muted">Finance · Withdrawal approvals</div></div><div class="actions"><a href="dashboard.html">Agent dashboard</a><button class="btn secondary" id="refresh">Refresh</button></div></header>
+<main class="wrap">
+<div class="topline">ADMIN FINANCE CENTRE</div><h1>Withdrawal requests</h1>
+<p class="sub">Review the recipient and amount before approving. Approval initiates a real Flutterwave bank transfer. Never approve unless the transfer amount, recipient account, and business payout balance are correct. A request stays processing until Flutterwave confirms its final status.</p>
+<div id="message" class="message" role="status" aria-live="polite" hidden></div>
+<div class="actions"><button class="btn secondary" id="loadRequests">Load requests</button></div>
+<div class="list" id="withdrawals"><div class="empty">Checking your admin access…</div></div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL='https://cpgajlsyuieeengdnamy.supabase.co';
+const SUPABASE_KEY='sb_publishable_fbcJT-QGKyZg0tDkpbDkOQ_CcQf2ugW';
+const S=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const $=id=>document.getElementById(id);
+async function callWallet(action,extra={}){
+ const {data,error}=await S.auth.getSession();if(error||!data.session)throw new Error('Please sign in with the DBH Admin account.');
+ const response=await fetch(SUPABASE_URL+'/functions/v1/dbh-agent-wallet',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+data.session.access_token},body:JSON.stringify({action,...extra})});
+ const payload=await response.json().catch(()=>({}));if(!response.ok)throw new Error(payload.error||'Withdrawal service request failed.');return payload;
+}
+function showMessage(text,error=false){const el=$('message');el.hidden=false;el.textContent=text;el.className='message'+(error?' error':'')}
+function money(value){return new Intl.NumberFormat('en-NG',{style:'currency',currency:'NGN',minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(value||0))}
+function addDetail(parent,label,value){const box=document.createElement('div');box.className='detail';const l=document.createElement('span');l.textContent=label;const v=document.createElement('strong');v.textContent=value??'—';box.append(l,v);parent.appendChild(box)}
+function button(label,kind,handler){const b=document.createElement('button');b.className='btn'+(kind?' '+kind:'');b.textContent=label;b.addEventListener('click',async()=>{if(b.disabled)return;b.disabled=true;const old=b.textContent;b.textContent='Working…';try{await handler()}catch(e){showMessage(e.message||'Action failed.',true)}finally{b.disabled=false;b.textContent=old}});return b}
+function render(rows){
+ const root=$('withdrawals');root.replaceChildren();
+ if(!rows.length){const empty=document.createElement('div');empty.className='empty';empty.textContent='No pending or processing withdrawals.';root.appendChild(empty);return;}
+ rows.forEach(row=>{
+  const card=document.createElement('article');card.className='item';
+  const head=document.createElement('div');head.className='itemhead';const titleWrap=document.createElement('div');const title=document.createElement('h2');title.textContent=money(row.amount);const agent=document.createElement('div');agent.className='muted';agent.textContent=(row.agent?.full_name||'DBH Agent')+' · '+(row.agent?.email||row.user_id);titleWrap.append(title,agent);
+  const pill=document.createElement('span');pill.className='pill '+String(row.status||'').toLowerCase();pill.textContent=row.status;head.append(titleWrap,pill);card.appendChild(head);
+  const details=document.createElement('div');details.className='details';
+  addDetail(details,'Bank code',row.recipient_bank_code);addDetail(details,'Account number',row.recipient_account_number);addDetail(details,'Verified account name',row.recipient_account_name);addDetail(details,'Requested',row.requested_at?new Date(row.requested_at).toLocaleString('en-NG'):'—');addDetail(details,'Transfer reference',row.transfer_reference);addDetail(details,'Flutterwave status',row.provider_status||'Not sent');
+  card.appendChild(details);
+  if(row.failure_reason){const note=document.createElement('p');note.className='muted';note.textContent='Note: '+row.failure_reason;card.appendChild(note);}
+  const actions=document.createElement('div');actions.className='itemactions';
+  if(row.status==='requested'){
+   actions.appendChild(button('Approve & send transfer','',async()=>{
+    if(!confirm('Send '+money(row.amount)+' to '+row.recipient_account_name+' at account '+row.recipient_account_number+'? This initiates a real Flutterwave payout.'))return;
+    const result=await callWallet('approve_withdrawal',{withdrawal_id:row.id});showMessage(result.message||'Approval processed.');await load();
+   }));
+   actions.appendChild(button('Reject & return funds','danger',async()=>{
+    const reason=prompt('Reason for rejecting this withdrawal:','Rejected by DBH Admin');if(reason===null)return;
+    if(!confirm('Reject this request and return the reserved amount to the agent wallet?'))return;
+    const result=await callWallet('reject_withdrawal',{withdrawal_id:row.id,reason});showMessage(result.message||'Request rejected.');await load();
+   }));
+  } else if(row.status==='processing'){
+   actions.appendChild(button('Verify transfer status','secondary',async()=>{
+    const result=await callWallet('verify_withdrawal',{withdrawal_id:row.id});showMessage(result.message||'Status checked.');await load();
+   }));
+  }
+  card.appendChild(actions);root.appendChild(card);
+ });
+}
+async function load(){
+ const btn=$('loadRequests');btn.disabled=true;
+ try{const result=await callWallet('admin_withdrawals');render(result.withdrawals||[]);if(!$('message').hidden)$('message').hidden=true;}
+ catch(e){$('withdrawals').replaceChildren();const empty=document.createElement('div');empty.className='empty';empty.textContent=e.message||'Could not load withdrawals.';$('withdrawals').appendChild(empty);showMessage(e.message||'Could not load withdrawals.',true);}
+ finally{btn.disabled=false;}
+}
+$('refresh').addEventListener('click',load);$('loadRequests').addEventListener('click',load);
+S.auth.getSession().then(({data,error})=>{if(error||!data.session){location.href='login.html';return}load()});
+</script>
+</body></html>

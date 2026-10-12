@@ -28,6 +28,7 @@
 .wallet-preview-card{display:flex;align-items:center;gap:14px;padding:18px;background:#fff;border:1px solid var(--line);border-radius:17px;box-shadow:0 8px 24px #16395a06}
 .wallet-preview-icon{width:46px;height:46px;flex:0 0 46px;display:grid;place-items:center;border-radius:14px;background:#eff6ff;color:var(--blue)}
 .wallet-preview-copy{min-width:0;flex:1}.wallet-preview-copy strong{display:block;font-size:11px;color:#123353}.wallet-preview-copy span{display:block;color:var(--muted);font-size:10px;line-height:1.6;margin-top:4px}
+.wallet-preview-details{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:13px}.wallet-preview-detail{min-width:0;border:1px solid var(--line);background:#f8fbff;border-radius:12px;padding:11px 12px}.wallet-preview-detail span{display:block;color:var(--muted);font-size:9px;margin-bottom:5px}.wallet-preview-detail strong{display:block;color:#123353;font-size:11px;overflow-wrap:anywhere}.wallet-preview-detail.balance strong{font-size:16px;color:var(--blue)}@media(max-width:550px){.wallet-preview-details{grid-template-columns:1fr}}
 .wallet-open-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 14px;border:1px solid #bfdbfe;border-radius:11px;background:#eff6ff;color:#155eaa;font-size:10px;font-weight:900;white-space:nowrap}
 @media(max-width:550px){.wallet-preview-card{align-items:flex-start;flex-wrap:wrap;padding:14px}.wallet-preview-copy{flex-basis:calc(100% - 62px)}.wallet-open-btn{width:100%}}
 .payment-reminder{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:-5px 0 20px;padding:15px 17px;border:1px solid #bfdbfe;background:#eff6ff;border-radius:15px}.payment-reminder[hidden]{display:none!important}.payment-reminder strong{display:block;font-size:11px;color:#123353}.payment-reminder small{display:block;color:#526b85;font-size:10px;line-height:1.5;margin-top:4px}@media(max-width:550px){.payment-reminder{flex-direction:column;align-items:stretch}.payment-reminder .wallet-open-btn{width:100%}}
@@ -171,7 +172,15 @@ html,body{width:100%;max-width:100%;overflow-x:clip}body{min-width:0}.shell{grid
   <div class="section-head"><div><h2 id="walletPreviewTitle">Agent wallet</h2><p class="sub">Your wallet and permanent bank account for receiving eligible DBH deposits.</p></div><a class="section-link" href="wallet.html">Open wallet <svg aria-hidden="true" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a></div>
   <div class="wallet-preview-card">
     <div class="wallet-preview-icon"><svg aria-hidden="true" viewBox="0 0 24 24" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h3"/></svg></div>
-    <div class="wallet-preview-copy"><strong id="walletPreviewTitleText">Wallet setup is available from your wallet page</strong><span id="walletPreviewText">Registration payment and DBH approval are required before wallet features can be activated.</span></div>
+    <div class="wallet-preview-copy"><strong id="walletPreviewTitleText">Wallet setup is available from your wallet page</strong><span id="walletPreviewText">Registration payment and DBH approval are required before wallet features can be activated.</span>
+      <div class="wallet-preview-details" aria-live="polite">
+        <div class="wallet-preview-detail balance"><span>Available balance</span><strong id="dashboardWalletBalance">Loading…</strong></div>
+        <div class="wallet-preview-detail"><span>Bank name</span><strong id="dashboardWalletBank">Checking…</strong></div>
+        <div class="wallet-preview-detail"><span>DBH account label</span><strong id="dashboardWalletLabel">DBH Home</strong></div>
+        <div class="wallet-preview-detail"><span>Bank account name</span><strong id="dashboardWalletAccountName">Checking…</strong></div>
+        <div class="wallet-preview-detail"><span>Account number</span><strong id="dashboardWalletNumber">Checking…</strong></div>
+      </div>
+    </div>
     <a class="wallet-open-btn" href="wallet.html">View wallet</a>
   </div>
 </section>
@@ -240,6 +249,19 @@ function setToolAccess(open){
 function countText(id,count){const el=$(id);if(el)el.textContent=typeof count==='number'?count.toLocaleString('en-NG'):'—'}
 function formatActivityTime(value){if(!value)return '';const d=new Date(value);if(Number.isNaN(d.getTime()))return '';return new Intl.DateTimeFormat('en-NG',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}).format(d)}
 function safeText(value){return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
+function dashboardMoney(value){const n=Number(value||0);return new Intl.NumberFormat('en-NG',{style:'currency',currency:'NGN',minimumFractionDigits:2,maximumFractionDigits:2}).format(Number.isFinite(n)?n:0)}
+async function loadWalletPreview(session,fullName){
+ const set=(id,value)=>{const el=$(id);if(el)el.textContent=value};
+ const displayName=String(fullName||'').trim().replace(/\s+/g,' ');
+ set('dashboardWalletLabel',displayName?'DBH Home ('+displayName+')':'DBH Home');
+ try{
+  const response=await fetch(SUPABASE_URL+'/functions/v1/dbh-agent-wallet',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+session.access_token},body:JSON.stringify({action:'status'})});
+  const result=await response.json().catch(()=>({}));if(!response.ok)throw new Error(result.error||'Wallet status unavailable');
+  const wallet=result.wallet||result.data?.wallet||{};const account=result.account||result.virtual_account||result.data?.account||result.data?.virtual_account||null;
+  set('dashboardWalletBalance',dashboardMoney(wallet.available_balance??result.available_balance??0));
+  set('dashboardWalletBank',account?.bank_name||'Not generated');set('dashboardWalletAccountName',account?.account_name||'Not generated');set('dashboardWalletNumber',account?.account_number||'Not generated');
+ }catch(error){console.warn('Dashboard wallet summary unavailable:',error);set('dashboardWalletBalance','Unavailable');set('dashboardWalletBank','Unavailable');set('dashboardWalletAccountName','Unavailable');set('dashboardWalletNumber','Unavailable')}
+}
 async function loadDashboardMetrics(userId){
   const [props,views,contacts,recent]=await Promise.all([
     S.from('properties').select('id',{count:'exact',head:true}).eq('created_by',userId),
@@ -285,6 +307,7 @@ async function boot(){
       $('headerAvatar').replaceChildren(photo);
     }
     loadDashboardMetrics(user.id).catch(err=>console.warn('Dashboard metrics unavailable:',err));
+    loadWalletPreview(sessionData.session,fullName).catch(err=>console.warn('Wallet preview unavailable:',err));
     const status=cleanStatus(app.status);
     const verified=status==='verified'||status==='approved';
     if($('status')) $('status').textContent=status.toUpperCase();

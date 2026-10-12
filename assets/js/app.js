@@ -7,7 +7,7 @@
     ['activity.html','fa-chart-line','Activity & Reports','activityNav'],
     ['enquiries.html','fa-flag','Complaints & Reports','enquiriesNav'],
     ['payment-result.html','fa-file-invoice-dollar','Payment Receipts',''],
-    ['wallet.html','fa-wallet','Agent Wallet',''],
+    ['wallet.html','svg-wallet','Agent Wallet',''],
     ['agent-documents.html','fa-id-card','Verification',''],
     ['notifications.html','fa-bell','Notifications',''],
     ['settings.html','fa-user-gear','My Profile & Settings','']
@@ -24,7 +24,8 @@
       '<nav class="nav" id="agentNav">'+
       NAV.map(function(n){
         var extra=n[3] ? ' id="'+n[3]+'"' : '';
-        return '<a'+extra+' href="'+n[0]+'" data-page="'+n[0]+'"><i class="fa-solid '+n[1]+'"></i><span>'+n[2]+'</span></a>';
+        var icon=n[1]==='svg-wallet'?'<svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h3"/></svg>':'<i class="fa-solid '+n[1]+'"></i>';
+        return '<a'+extra+' href="'+n[0]+'" data-page="'+n[0]+'">'+icon+'<span>'+n[2]+'</span></a>';
       }).join('')+
       '</nav>';
   }
@@ -51,13 +52,13 @@
       '#dbhSidebar .nav a{box-sizing:border-box!important;width:100%!important;min-height:44px!important;padding:11px 12px!important;margin:0!important;border-radius:13px!important;color:#526275!important;background:transparent!important;border:1px solid transparent!important;font-size:11px!important;font-weight:800!important;line-height:1.2!important;display:flex!important;align-items:center!important;gap:11px!important;text-decoration:none!important;position:relative!important;transition:background .2s ease,color .2s ease,transform .2s ease,box-shadow .2s ease!important;animation:dbhNavIn .35s both!important}'+
       '#dbhSidebar .nav a:nth-child(2){animation-delay:.03s!important}#dbhSidebar .nav a:nth-child(3){animation-delay:.06s!important}#dbhSidebar .nav a:nth-child(4){animation-delay:.09s!important}#dbhSidebar .nav a:nth-child(5){animation-delay:.12s!important}#dbhSidebar .nav a:nth-child(6){animation-delay:.15s!important}#dbhSidebar .nav a:nth-child(7){animation-delay:.18s!important}#dbhSidebar .nav a:nth-child(8){animation-delay:.21s!important}#dbhSidebar .nav a:nth-child(9){animation-delay:.24s!important}#dbhSidebar .nav a:nth-child(10){animation-delay:.27s!important}'+
       '#dbhSidebar .nav a:before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:99px;background:var(--dbh-blue);transform:scaleY(0);transition:transform .2s ease!important}'+
-      '#dbhSidebar .nav a i:first-child{width:19px!important;min-width:19px!important;text-align:center!important;color:inherit!important;font-size:13px!important;transition:transform .2s ease,color .2s ease!important}'+
+      '#dbhSidebar .nav a i:first-child,#dbhSidebar .nav a>svg:first-child{width:19px!important;min-width:19px!important;height:16px!important;text-align:center!important;color:inherit!important;font-size:13px!important;transition:transform .2s ease,color .2s ease!important;flex:0 0 19px!important}#dbhSidebar .nav a>svg:first-child{display:block!important;overflow:visible!important}'+
       '#dbhSidebar .nav a span{display:block!important;flex:1!important;white-space:nowrap!important}'+
       '#dbhSidebar .nav a.active{background:linear-gradient(90deg,#eaf3ff,#f7fbff)!important;color:var(--dbh-blue)!important;border-color:#dbeafe!important;box-shadow:0 7px 18px rgba(11,99,206,.08)!important}'+
       '#dbhSidebar .nav a.active:before{transform:scaleY(1)!important}'+
-      '#dbhSidebar .nav a.active i:first-child{transform:translateX(1px) scale(1.05)!important}'+
+      '#dbhSidebar .nav a.active i:first-child,#dbhSidebar .nav a.active>svg:first-child{transform:translateX(1px) scale(1.05)!important}'+
       '#dbhSidebar .nav a:hover{background:#f5f9ff!important;color:var(--dbh-blue)!important;transform:translateX(2px)!important}'+
-      '#dbhSidebar .nav a:hover i:first-child{transform:scale(1.08)!important}'+
+      '#dbhSidebar .nav a:hover i:first-child,#dbhSidebar .nav a:hover>svg:first-child{transform:scale(1.08)!important}'+
       '#dbhSidebar .nav a.disabled{opacity:.52!important;cursor:not-allowed!important;transform:none!important}'+
       '#dbhSidebar .nav a.disabled:hover{background:transparent!important;color:#526275!important}'+
       '#dbhSidebar .nav .lock{margin-left:auto!important;color:#94a3b8!important;font-size:9px!important;width:auto!important;min-width:auto!important}'+

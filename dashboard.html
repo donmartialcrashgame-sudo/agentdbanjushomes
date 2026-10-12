@@ -25,6 +25,13 @@
 .tools{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.tool{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px}.tool i{font-size:22px;color:var(--blue);margin-bottom:10px}.tool h3{margin:0 0 5px;font-size:14px}.tool p{margin:0;color:var(--muted);font-size:10px;line-height:1.6}.tool.locked{opacity:.62}.tool.locked i{color:#94a3b8}
 .msg{display:none;margin-top:13px;padding:11px;border-radius:10px;font-size:10px}.msg.show{display:block}.err{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}.ok{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}.warn{background:#fffbeb;color:#92400e;border:1px solid #fde68a}
 .access-card{display:none;margin-top:20px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:18px;padding:18px}.access-card.show{display:flex;align-items:center;gap:14px}.access-card>i{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#dcfce7;color:var(--green);font-size:20px}.access-card b{font-size:12px}.access-card p{margin:4px 0 0;color:#166534;font-size:10px;line-height:1.5}
+.wallet-preview-card{display:flex;align-items:center;gap:14px;padding:18px;background:#fff;border:1px solid var(--line);border-radius:17px;box-shadow:0 8px 24px #16395a06}
+.wallet-preview-icon{width:46px;height:46px;flex:0 0 46px;display:grid;place-items:center;border-radius:14px;background:#eff6ff;color:var(--blue)}
+.wallet-preview-copy{min-width:0;flex:1}.wallet-preview-copy strong{display:block;font-size:11px;color:#123353}.wallet-preview-copy span{display:block;color:var(--muted);font-size:10px;line-height:1.6;margin-top:4px}
+.wallet-open-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 14px;border:1px solid #bfdbfe;border-radius:11px;background:#eff6ff;color:#155eaa;font-size:10px;font-weight:900;white-space:nowrap}
+@media(max-width:550px){.wallet-preview-card{align-items:flex-start;flex-wrap:wrap;padding:14px}.wallet-preview-copy{flex-basis:calc(100% - 62px)}.wallet-open-btn{width:100%}}
+.payment-reminder{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:-5px 0 20px;padding:15px 17px;border:1px solid #bfdbfe;background:#eff6ff;border-radius:15px}.payment-reminder[hidden]{display:none!important}.payment-reminder strong{display:block;font-size:11px;color:#123353}.payment-reminder small{display:block;color:#526b85;font-size:10px;line-height:1.5;margin-top:4px}@media(max-width:550px){.payment-reminder{flex-direction:column;align-items:stretch}.payment-reminder .wallet-open-btn{width:100%}}
+
 @media(max-width:900px){.shell{grid-template-columns:1fr}.side{position:fixed;z-index:40;left:-275px;top:72px;width:260px;transition:.25s;box-shadow:10px 0 35px #0002}.side.open{left:0}.grid{grid-template-columns:1fr 1fr}.tools{grid-template-columns:1fr}.main{padding:22px 16px}.payment{grid-template-columns:1fr}.price{text-align:left}}
 @media(max-width:550px){.top{padding:0 12px}.brand div{font-size:12px}.grid{grid-template-columns:1fr}.welcome{display:block}h1{font-size:27px}.payment{padding:22px;border-radius:19px}.payment h2{font-size:23px}.price strong{font-size:33px}.top-actions .bell{display:none}}
 
@@ -102,6 +109,7 @@ html,body{width:100%;max-width:100%;overflow-x:clip}body{min-width:0}.shell{grid
 <i class="fa-solid fa-circle-info" id="noticeIcon"></i>
 <div><b id="noticeTitle">Your registration application is in progress.</b><p id="noticeText">Registration payment and verification are separate stages. DBH Admin approval is required before agent tools are activated.</p></div>
 </div>
+<div class="payment-reminder" id="paymentReminder" hidden><span><strong>Registration payment pending</strong><small>Your agent tools remain locked until payment and DBH verification are complete.</small></span><a href="payment.html" class="wallet-open-btn">Complete payment</a></div>
 
 <div class="payment-modal-backdrop" id="paymentBackdrop" hidden>
 <section class="payment payment-modal" id="paymentCard">
@@ -110,7 +118,8 @@ html,body{width:100%;max-width:100%;overflow-x:clip}body{min-width:0}.shell{grid
 <h2 id="paymentTitle">Complete your DBH registration</h2>
 <p id="paymentText">Pay the current registration fee securely through Flutterwave. After successful payment, you can hide this payment card from your dashboard.</p>
 <div class="payment-actions">
-<a class="paybtn" id="pay" href="payment.html"><i class="fa-solid fa-lock"></i><span>Pay registration fee</span></a>
+<a class="paybtn" id="pay" href="payment.html"><svg aria-hidden="true" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span>Pay registration fee</span></a>
+<button class="dismissbtn" type="button" id="payLater"><svg aria-hidden="true" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg><span>Pay later — go to dashboard</span></button>
 </div>
 <div id="msg" class="msg"></div>
 </div>
@@ -155,6 +164,16 @@ html,body{width:100%;max-width:100%;overflow-x:clip}body{min-width:0}.shell{grid
 <section class="section recent-section" aria-labelledby="recentHeading">
   <div class="section-head"><div><h2 id="recentHeading">Recent listing activity</h2><p class="sub">Latest recorded views and contact actions on your properties.</p></div><a class="section-link" href="activity.html" data-requires-access="true">View activity <i class="fa-solid fa-arrow-right"></i></a></div>
   <div class="activity-panel" id="recentActivity" aria-live="polite"><div class="activity-empty"><i class="fa-solid fa-chart-line"></i><div><strong>Loading your activity</strong><span>Your latest property activity will appear here.</span></div></div></div>
+</section>
+
+
+<section class="section" id="walletPreview" aria-labelledby="walletPreviewTitle">
+  <div class="section-head"><div><h2 id="walletPreviewTitle">Agent wallet</h2><p class="sub">Your wallet and permanent bank account for receiving eligible DBH deposits.</p></div><a class="section-link" href="wallet.html">Open wallet <svg aria-hidden="true" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a></div>
+  <div class="wallet-preview-card">
+    <div class="wallet-preview-icon"><svg aria-hidden="true" viewBox="0 0 24 24" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h3"/></svg></div>
+    <div class="wallet-preview-copy"><strong id="walletPreviewTitleText">Wallet setup is available from your wallet page</strong><span id="walletPreviewText">Registration payment and DBH approval are required before wallet features can be activated.</span></div>
+    <a class="wallet-open-btn" href="wallet.html">View wallet</a>
+  </div>
 </section>
 
 <section class="section">
@@ -320,11 +339,13 @@ async function boot(){
       .order('created_at',{ascending:false});
     if(declinedError) console.error(declinedError);
     const hasDeclinedDocument=Array.isArray(declinedDocs)&&declinedDocs.length>0;
-    const dismissed=app.payment_card_dismissed===true;
+    const dismissed=app.payment_card_dismissed===true || sessionStorage.getItem('dbhRegistrationPaymentDeferred')==='1';
+    $('paymentReminder').hidden=paid||suspended||!dismissed;
     const unlocked=paid&&verified&&!suspended;
     setToolAccess(unlocked);
 
     if(paid){
+      $('paymentReminder').hidden=true;
       $('noticeTitle').textContent=unlocked?'Registration payment and verification complete.':suspended?'Registration payment received, but account access is paused.':'Registration payment received.';
       $('noticeText').textContent=unlocked?'Your registration payment is confirmed and your application is verified. Your agent tools are unlocked.':suspended?'Your registration fee is recorded, but this account is currently restricted. Check Notifications or contact DBH Admin.':'Your registration payment is confirmed. Complete your required identity documents and wait for DBH Admin verification before property tools are unlocked.';
       if(dismissed){
@@ -351,7 +372,7 @@ async function boot(){
         }
       }
     }else if(String(payment?.status||'').toLowerCase()==='pending'){
-      $('paymentBackdrop').hidden=false;
+      $('paymentBackdrop').hidden=dismissed;
       $('paymentTitle').textContent='Complete your registration payment';
       $('paymentText').textContent='Pay the one-time ₦100,000 registration fee to continue. Your agent tools become available after payment is recorded and DBH Admin verifies your application.';
       $('pay').href='payment.html';
@@ -360,11 +381,13 @@ async function boot(){
       $('pay').innerHTML='<i class="fa-solid fa-clock"></i><span>Continue payment</span>';
       showMessage('A previous payment attempt is pending. Open the secure checkout to continue or verify its status.','warn');
     }else if(!paid&&!suspended){
-      $('paymentBackdrop').hidden=false;
+      $('paymentBackdrop').hidden=dismissed;
       $('price').textContent='₦100,000';
       $('currency').textContent='One-time agent registration fee · NGN';
     }
 
+    $('walletPreviewTitleText').textContent=unlocked?'Your agent wallet is ready to review':'Your agent wallet is not active yet';
+    $('walletPreviewText').textContent=unlocked?'Open the wallet page to check your wallet status and permanent bank account setup availability.':'Complete the registration fee and wait for DBH approval/verification. Virtual account creation remains paused until live setup is finalized.';
     if(hasDeclinedDocument || applicationPendingAfterDecline){
       $('noticeIcon').className='fa-solid fa-circle-exclamation';
       $('noticeIcon').style.color='#b91c1c';
@@ -399,6 +422,12 @@ async function boot(){
   }
 }
 
+$('payLater').addEventListener('click',()=>{
+  sessionStorage.setItem('dbhRegistrationPaymentDeferred','1');
+  $('paymentBackdrop').hidden=true;
+  $('paymentReminder').hidden=false;
+  showMessage('You can continue using your dashboard. Agent tools stay locked until your registration fee is confirmed and DBH approves your application.','warn');
+});
 $('logout').onclick=async()=>{
   const button=$('logout');
   setButtonLoading(button,true,'Signing out...');

@@ -137,7 +137,15 @@ async function boot(){
    $('accountNumber').textContent='Not generated';
    $('walletActivity').textContent='No wallet transactions have been recorded yet.';
    setWalletStatus('Wallet ready; account not generated');
-   notice('Your agent account meets the dashboard eligibility checks. Permanent virtual account generation remains temporarily paused while the live Flutterwave request and webhook are reviewed. No account was created.','warn');
+   if(canCreateLiveAccount){
+    $('activationNote').hidden=true;
+    $('bvnSetup').hidden=false;
+    $('generateAccount').disabled=false;
+    $('generateAccount').textContent='Generate Permanent Account';
+    notice('Your account is eligible. Enter your 11-digit BVN and select Generate Permanent Account. DBH does not store your BVN.','info');
+   }else{
+    notice('Your agent account meets the dashboard eligibility checks, but live account generation is not available. Please contact DBH support.','warn');
+   }
   }
  }catch(error){
   console.error('DBH agent wallet:',error);

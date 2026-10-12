@@ -62,9 +62,9 @@
 <div class="account-row"><span>Registration payment</span><strong id="paymentEligibility">Checking…</strong></div><div class="account-row"><span>DBH verification</span><strong id="verificationEligibility">Checking…</strong></div><div class="account-row"><span>Session</span><strong id="sessionEligibility">Checking…</strong></div>
 </section>
 </div>
-<div class="notice warn" id="activationNote"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg><div><strong>Live virtual account creation is not enabled yet</strong>The account-generation endpoint is still intentionally locked while DBH verifies live Flutterwave configuration and webhook handling. No BVN/NIN is being collected and no bank account will be created from this page at this stage.</div></div>
+<div class="notice warn" id="activationNote"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg><div><strong>Complete the required steps</strong>Your permanent wallet account becomes available after DBH confirms your ₦100,000 registration payment and your agent application is verified. You will then be asked for your BVN securely for account creation.</div></div>
 </main></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="assets/js/app.js?v=20261012-wallet-flow"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="assets/js/app.js?v=20261012-wallet-payment-gate"></script>
 <script>
 const SUPABASE_URL='https://cpgajlsyuieeengdnamy.supabase.co';
 const SUPABASE_KEY='sb_publishable_fbcJT-QGKyZg0tDkpbDkOQ_CcQf2ugW';
@@ -94,20 +94,36 @@ async function boot(){
   const status=String(app.status||'pending').toLowerCase().replaceAll('_',' ');
   const sessionStatus=String(app.session_status||'active').toLowerCase();
   const suspended=['banned','suspended','disabled','inactive'].includes(sessionStatus)||status==='suspended';
-  const {data:payments,error:paymentError}=await S.from('agent_payment_records').select('status,payment_type,created_at').eq('user_id',user.id).in('payment_type',['registration_fee','agent_fee']).order('created_at',{ascending:false}).limit(20);
+  const {data:payments,error:paymentError}=await S.from('agent_payment_records')
+   .select('status,payment_type,amount,currency,paid_at,created_at')
+   .eq('user_id',user.id).eq('payment_type','registration_fee')
+   .eq('status','successful').eq('currency','NGN').gte('amount',100000)
+   .not('paid_at','is',null).order('paid_at',{ascending:false}).limit(1);
   if(paymentError)console.warn('Wallet eligibility payment check unavailable:',paymentError);
-  const paid=(payments||[]).some(p=>['successful','completed','paid','approved'].includes(String(p.status||'').toLowerCase()));
+  const paid=!paymentError&&Array.isArray(payments)&&payments.length>0;
   const verified=['verified','approved'].includes(status);
-  $('paymentEligibility').textContent=paid?'PAID':'NOT PAID';
+  $('paymentEligibility').textContent=paid?'PAID — ₦100,000 CONFIRMED':'NOT PAID';
   $('verificationEligibility').textContent=stateText(status);
   $('sessionEligibility').textContent=stateText(sessionStatus);
   const eligible=paid&&verified&&!suspended;
-  if(!eligible){
-   setWalletStatus('Locked');
-   $('accountState').textContent='Locked';
-   $('walletActivity').textContent='Wallet activity is not available until the account becomes eligible.';
+  if(!paid){
+   setWalletStatus('Registration payment required');
+   $('accountState').textContent='Locked — fee required';
+   $('walletActivity').textContent='Complete the ₦100,000 registration fee payment first. Return here after the payment receipt confirms success.';
    $('activationNote').className='notice warn';
-   $('activationNote').querySelector('div').innerHTML='<strong>Wallet access is locked</strong>Confirm your registration payment and wait for DBH Admin approval/verification. Account generation is never a substitute for identity verification.';
+   $('activationNote').querySelector('div').innerHTML='<strong>Step 1: Pay the ₦100,000 registration fee</strong>Your permanent account cannot be generated until DBH confirms a successful registration-fee payment. <a href="payment.html" style="display:inline-flex;margin-top:10px;padding:10px 13px;background:#0b63ce;color:#fff;border-radius:9px;text-decoration:none;font-weight:800">Pay registration fee securely</a>';
+   $('generateAccount').disabled=true;
+   $('bvnSetup').hidden=true;
+   return;
+  }
+  if(!eligible){
+   setWalletStatus('Awaiting DBH verification');
+   $('accountState').textContent='Locked — verification required';
+   $('walletActivity').textContent='Your registration payment is confirmed. Permanent account generation unlocks after DBH verifies and approves your agent application.';
+   $('activationNote').className='notice warn';
+   $('activationNote').querySelector('div').innerHTML='<strong>Step 2: Complete DBH verification</strong>Your ₦100,000 registration payment is confirmed. Wait for DBH Admin to verify/approve your application and complete onboarding before generating your permanent account.';
+   $('generateAccount').disabled=true;
+   $('bvnSetup').hidden=true;
    return;
   }
   setWalletStatus('Checking secure wallet');

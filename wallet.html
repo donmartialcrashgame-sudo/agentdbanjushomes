@@ -24,6 +24,7 @@
 @media(max-width:900px){.workspace{display:block}.side{position:fixed;z-index:100;left:-275px;top:68px;width:min(260px,86vw);max-width:86vw;height:calc(100dvh - 68px);transition:left .25s;box-shadow:12px 0 35px #0002}.side.open{left:0}.menu-btn{display:grid}.main{padding:22px 16px 38px}}
 @media(max-width:600px){.top{height:68px;padding:0 12px}.brand img{width:36px;height:36px}.brand strong{font-size:11px}.brand small{font-size:7px}.grid{grid-template-columns:1fr}.card{padding:18px;border-radius:17px}.balance-card{min-height:190px}.account-row{align-items:flex-start}.account-row strong{max-width:65%}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;scroll-behavior:auto!important;transition:none!important}}
+.withdraw-form{display:grid;gap:12px;margin-top:14px}.withdraw-form label{display:block;font-size:10px;font-weight:800;color:#123353;margin-bottom:6px}.withdraw-form input,.withdraw-form select{width:100%;min-height:44px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;padding:10px 12px;font:inherit;font-size:12px;color:#123353}.withdraw-form input:focus,.withdraw-form select:focus{outline:2px solid #93c5fd;border-color:#0b63ce}.withdraw-form .field-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.resolved-account{padding:12px;border:1px solid #bbf7d0;background:#f0fdf4;border-radius:12px;color:#166534;font-size:11px;line-height:1.6}.withdraw-list{display:grid;gap:10px;margin-top:12px}.withdraw-row{border:1px solid var(--line);border-radius:13px;padding:13px;min-width:0}.withdraw-row-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.withdraw-row strong{font-size:12px;color:#123353}.withdraw-row small{display:block;color:var(--muted);font-size:10px;line-height:1.6;margin-top:4px;overflow-wrap:anywhere}.withdraw-state{display:inline-block;border-radius:99px;padding:5px 8px;font-size:9px;font-weight:900;text-transform:uppercase;background:#fffbeb;color:#92400e}.withdraw-state.successful{background:#f0fdf4;color:#166534}.withdraw-state.failed,.withdraw-state.reversed,.withdraw-state.cancelled{background:#fef2f2;color:#991b1b}.withdraw-state.processing{background:#eff6ff;color:#1d4ed8}.withdraw-history-empty{color:var(--muted);font-size:11px;padding:14px 0}@media(max-width:600px){.withdraw-form .field-row{grid-template-columns:1fr}.withdraw-row-top{flex-direction:column}}
 </style></head>
 <body>
 <header class="top">
@@ -51,6 +52,23 @@
 <div class="account-row"><span>Account status</span><strong id="accountState">Unavailable</strong></div>
 </div>
 <div id="bvnSetup" hidden style="margin-top:14px"><label for="walletBvn" style="display:block;font-size:11px;font-weight:800;color:#123353;margin-bottom:7px">BVN (11 digits)</label><input id="walletBvn" type="password" inputmode="numeric" autocomplete="off" maxlength="11" placeholder="Enter your BVN securely" style="width:100%;min-height:44px;border:1px solid #cbd5e1;border-radius:10px;padding:12px;font:inherit"><p class="card-copy" style="margin:8px 0 0">Your BVN is sent to Flutterwave only for account creation. DBH does not save it. Never share your BVN or OTP with support staff.</p></div><div class="card-actions"><button class="btn secondary" type="button" id="copyAccount" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>Copy account number</button><button class="btn" type="button" id="generateAccount" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18M3 12h18"/><circle cx="12" cy="12" r="9"/></svg>Generate Virtual Account Number</button></div>
+</section>
+<section class="card" aria-labelledby="withdrawTitle" id="withdrawalSection">
+<div class="section-title"><span class="svg-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18M17 8l-5-5-5 5"/><path d="M4 14v5a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/></svg></span><div><h2 id="withdrawTitle">Withdraw funds</h2><span class="hint" style="color:var(--muted)">Flutterwave bank transfer · NGN</span></div></div>
+<p class="card-copy">Request a withdrawal to a Nigerian bank account. DBH Admin must approve each request before Flutterwave sends money. Your balance is reserved immediately, and returned if the transfer fails or Admin rejects the request.</p>
+<div class="withdraw-form" id="withdrawForm">
+<div><label for="withdrawAmount">Amount to withdraw (₦)</label><input id="withdrawAmount" type="number" min="1000" step="1" inputmode="numeric" placeholder="Minimum ₦1,000" required></div>
+<div class="field-row"><div><label for="withdrawBank">Destination bank</label><select id="withdrawBank" required><option value="">Loading Nigerian banks…</option></select></div><div><label for="withdrawAccount">10-digit account number</label><input id="withdrawAccount" type="text" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="Enter account number" required></div></div>
+<button class="btn secondary" id="verifyRecipient" type="button">Verify bank account</button>
+<div id="recipientResult" class="resolved-account" hidden></div>
+<label style="display:flex;align-items:flex-start;gap:9px;font-weight:600;line-height:1.5"><input id="confirmRecipient" type="checkbox" style="width:16px;min-height:16px;margin-top:2px" disabled><span>I confirm that the verified account name above belongs to the intended recipient.</span></label>
+<button class="btn" id="submitWithdrawal" type="button" disabled>Request withdrawal</button>
+<div class="card-copy" id="withdrawalHint" role="status" aria-live="polite" style="margin:0">Checking withdrawal eligibility…</div>
+</div>
+</section>
+<section class="card" aria-labelledby="withdrawHistoryTitle">
+<div class="section-title"><span class="svg-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><div><h2 id="withdrawHistoryTitle">Withdrawal history</h2><span class="hint" style="color:var(--muted)">Status updates from DBH and Flutterwave</span></div></div>
+<div id="withdrawalHistory" class="withdraw-list"><div class="loading-state"><span class="spinner"></span><span>Loading withdrawal history…</span></div></div>
 </section>
 <section class="card" aria-labelledby="activityTitle">
 <div class="section-title"><span class="svg-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 6-7"/></svg></span><div><h2 id="activityTitle">Wallet activity</h2><span class="hint" style="color:var(--muted)">Recent credited transactions</span></div></div>
@@ -112,6 +130,9 @@ async function boot(){
   $('verificationEligibility').textContent=stateText(status);
   $('sessionEligibility').textContent=stateText(sessionStatus);
   const eligible=paid&&verified&&!suspended;
+  withdrawalEligible=eligible;
+  $('submitWithdrawal').disabled=!eligible;
+  $('withdrawalHint').textContent=eligible?'Withdrawals require verified bank details and DBH Admin approval.':'Withdrawals unlock after the registration fee is confirmed, onboarding is completed, and DBH verifies your agent application.';
   if(!paid){
    setWalletStatus(latestConfirmed?'Payment recorded — amount needs review':'Registration payment required');
    $('accountState').textContent=latestConfirmed?'Locked — fee balance outstanding':'Locked — fee required';
@@ -193,5 +214,75 @@ $('generateAccount').addEventListener('click',async()=>{
  const button=$('generateAccount');button.disabled=true;button.textContent='Creating secure account…';
  try{const result=await callWallet('create_virtual_account',{bvn});input.value='';if(result.account?.account_number){currentAccountNumber=String(result.account.account_number);$('bankName').textContent=result.account.bank_name||'Flutterwave MFB';$('accountName').textContent=result.account.account_name||'DBH Agent';$('accountNumber').textContent=currentAccountNumber;$('accountState').textContent='ACTIVE';$('copyAccount').disabled=false;$('bvnSetup').hidden=true;$('activationNote').hidden=true;setWalletStatus('Account available',true);notice('Your permanent DBH wallet account is ready.','info');}else{notice('Flutterwave did not return account details. Contact DBH support before retrying.','error');}}catch(e){notice(e.message||'Could not create the virtual account. Contact DBH support before retrying.','error');}finally{button.disabled=!canCreateLiveAccount;button.textContent='Generate Permanent Account';}
 });
-boot();
+
+let withdrawalEligible=false, verifiedRecipient=null, bankOptions=[];
+function withdrawalStatusClass(value){return String(value||'requested').toLowerCase().replace(/[^a-z]/g,'')}
+function elText(id,value){const node=$(id);if(node)node.textContent=String(value??'')}
+function renderWithdrawalHistory(rows){
+ const root=$('withdrawalHistory');root.replaceChildren();
+ if(!rows||!rows.length){const empty=document.createElement('div');empty.className='withdraw-history-empty';empty.textContent='No withdrawals yet. Your requests will appear here.';root.appendChild(empty);return;}
+ rows.forEach(row=>{
+  const card=document.createElement('article');card.className='withdraw-row';
+  const top=document.createElement('div');top.className='withdraw-row-top';
+  const left=document.createElement('div');const amount=document.createElement('strong');amount.textContent=money(row.amount);left.appendChild(amount);
+  const detail=document.createElement('small');detail.textContent=(row.recipient_account_name||'Bank recipient')+' · account ending '+(row.recipient_account_last4||'----');left.appendChild(detail);
+  const date=document.createElement('small');date.textContent='Requested '+(row.requested_at?new Date(row.requested_at).toLocaleString('en-NG'):'—');left.appendChild(date);
+  const badge=document.createElement('span');badge.className='withdraw-state '+withdrawalStatusClass(row.status);badge.textContent=stateText(row.status);top.append(left,badge);card.appendChild(top);
+  if(row.failure_reason){const reason=document.createElement('small');reason.textContent='Note: '+row.failure_reason;card.appendChild(reason);}
+  if(row.provider_status){const provider=document.createElement('small');provider.textContent='Flutterwave: '+row.provider_status;card.appendChild(provider);}
+  root.appendChild(card);
+ });
+}
+async function loadWithdrawalHistory(){
+ try{const result=await callWallet('withdrawal_history');renderWithdrawalHistory(result.withdrawals||[]);}
+ catch(e){const root=$('withdrawalHistory');root.textContent=e.message||'Could not load withdrawal history.';}
+}
+async function loadWithdrawalBanks(){
+ try{
+  const result=await callWallet('withdrawal_banks');bankOptions=result.banks||[];
+  const select=$('withdrawBank');select.replaceChildren();
+  const first=document.createElement('option');first.value='';first.textContent='Choose your bank';select.appendChild(first);
+  bankOptions.sort((a,b)=>a.name.localeCompare(b.name)).forEach(bank=>{const option=document.createElement('option');option.value=bank.code;option.textContent=bank.name;option.dataset.name=bank.name;select.appendChild(option);});
+ }catch(e){const select=$('withdrawBank');select.replaceChildren();const opt=document.createElement('option');opt.value='';opt.textContent='Could not load banks — refresh';select.appendChild(opt);elText('withdrawalHint',e.message||'Unable to load Nigerian banks.');}
+}
+function resetRecipient(){
+ verifiedRecipient=null;$('recipientResult').hidden=true;$('confirmRecipient').checked=false;$('confirmRecipient').disabled=true;$('submitWithdrawal').disabled=true;
+}
+$('withdrawBank').addEventListener('change',resetRecipient);
+$('withdrawAccount').addEventListener('input',resetRecipient);
+$('withdrawAmount').addEventListener('input',()=>{$('submitWithdrawal').disabled=!(withdrawalEligible&&verifiedRecipient&&$('confirmRecipient').checked&&Number.isSafeInteger(Number($('withdrawAmount').value))&&Number($('withdrawAmount').value)>=1000);});
+$('confirmRecipient').addEventListener('change',()=>{$('submitWithdrawal').disabled=!(withdrawalEligible&&verifiedRecipient&&$('confirmRecipient').checked&&Number.isSafeInteger(Number($('withdrawAmount').value))&&Number($('withdrawAmount').value)>=1000);});
+$('verifyRecipient').addEventListener('click',async()=>{
+ const bankCode=$('withdrawBank').value,accountNumber=$('withdrawAccount').value.trim();
+ if(!bankCode||!/^\d{10}$/.test(accountNumber)){elText('withdrawalHint','Choose a bank and enter a valid 10-digit account number.');return;}
+ const button=$('verifyRecipient');button.disabled=true;button.textContent='Verifying account…';resetRecipient();
+ try{
+  const result=await callWallet('resolve_bank_account',{bank_code:bankCode,account_number:accountNumber});
+  verifiedRecipient={bank_code:bankCode,account_number:accountNumber,account_name:result.account_name};
+  const box=$('recipientResult');box.replaceChildren();
+  const title=document.createElement('strong');title.textContent='Verified account name';const name=document.createElement('div');name.textContent=result.account_name;box.append(title,name);box.hidden=false;
+  $('confirmRecipient').disabled=false;elText('withdrawalHint','Check the account name carefully before requesting a withdrawal.');
+ }catch(e){elText('withdrawalHint',e.message||'Could not verify recipient account.');}
+ finally{button.disabled=false;button.textContent='Verify bank account';}
+});
+$('submitWithdrawal').addEventListener('click',async()=>{
+ const amount=Number($('withdrawAmount').value);
+ if(!withdrawalEligible){elText('withdrawalHint','Your wallet is not eligible for withdrawals yet.');return;}
+ if(!verifiedRecipient||!$('confirmRecipient').checked||!Number.isSafeInteger(amount)||amount<1000){elText('withdrawalHint','Verify and confirm the recipient, then enter at least ₦1,000.');return;}
+ const button=$('submitWithdrawal');button.disabled=true;button.textContent='Submitting request…';
+ const requestKey=crypto.randomUUID();
+ try{
+  const result=await callWallet('request_withdrawal',{amount,bank_code:verifiedRecipient.bank_code,account_number:verifiedRecipient.account_number,account_name:verifiedRecipient.account_name,request_key:requestKey});
+  elText('withdrawalHint','Withdrawal request submitted. Funds are reserved pending DBH Admin approval.');
+  $('withdrawAmount').value='';$('withdrawAccount').value='';$('withdrawBank').value='';resetRecipient();
+  await Promise.all([loadWithdrawalHistory(),refreshWalletBalance()]);
+ }catch(e){elText('withdrawalHint',e.message||'Withdrawal request could not be submitted.');}
+ finally{button.disabled=!(withdrawalEligible&&verifiedRecipient&&$('confirmRecipient').checked&&Number($('withdrawAmount').value)>=1000);button.textContent='Request withdrawal';}
+});
+async function refreshWalletBalance(){
+ try{const result=await callWallet('status');const wallet=result.wallet||{};$('availableBalance').textContent=money(wallet.available_balance||0);}
+ catch(e){console.warn('Could not refresh wallet balance',e);}
+}
+
+boot().then(async()=>{await Promise.all([loadWithdrawalBanks(),loadWithdrawalHistory()]);}).catch(()=>{});
 </script></body></html>

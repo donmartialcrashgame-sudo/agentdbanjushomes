@@ -42,6 +42,13 @@
 </section>
 <section id="grid" class="grid"><div class="loading" id="loading"><div class="spinner"></div>Loading your properties...</div></section>
 <section class="empty" id="empty"><div class="circle"><i class="fa-solid fa-house-circle-exclamation"></i></div><h3>No properties yet</h3><p>Your property listings will appear here after you submit them. Add your first property and DBH Admin will review it before publication.</p><a class="btn primary" href="add-property.html"><i class="fa-solid fa-plus"></i>Add your first property</a></section>
+<div id="propTourOverlay" class="propTour-overlay" hidden></div>
+<section id="propTourCard" class="propTour-card" role="dialog" aria-modal="true" aria-labelledby="propTourTitle" hidden>
+ <div class="t-top"><span class="t-brand"><i class="fa-solid fa-compass"></i> DBH QUICK GUIDE</span><span class="t-count" id="propTourCount">STEP 1</span></div>
+ <h3 id="propTourTitle">Learn your properties page</h3><p id="propTourText">Follow the guide to learn this page.</p>
+ <div class="t-progress"><span id="propTourProgress"></span></div>
+ <div class="t-actions"><button id="propTourSkip" type="button">Skip</button><button id="propTourBack" type="button">Back</button><button class="t-next" id="propTourNext" type="button">Next <i class="fa-solid fa-arrow-right"></i></button></div>
+</section>
 </main></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/js/app.js"></script><script>window.DBHAgentSidebar&&window.DBHAgentSidebar.setAccess(true);</script>

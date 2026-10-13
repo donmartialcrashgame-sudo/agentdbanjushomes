@@ -286,92 +286,62 @@ $('socialDetailsModal').addEventListener('click',e=>{if(e.target===$('socialDeta
 $('disconnectSocialAccount').onclick=disconnectSocialAccount;
 
 function cleanDomain(input){
- let raw=String(input||'').trim().toLowerCase();
- raw=raw.replace(/^https?:\/\//,'').replace(/\/$/,'');
- if(!raw||raw.includes('/')||raw.includes('@')||raw.includes(':')||raw.includes(' ')||raw.length>253)throw new Error('Enter a domain only, for example yourdomain.com.');
- if(!/^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(raw))throw new Error('Enter a valid domain name, such as yourdomain.com.');
- if(raw==='dbanjushomes.online'||raw.endsWith('.dbanjushomes.online'))throw new Error('Use a domain you own, not a DBH domain.');
- return raw;
+ let d=String(input||'').trim().toLowerCase().replace(/^https?:\\/\\//,'').replace(/\\/$/,'');
+ if(!d||d.length>253||/[\\/@: ?#]/.test(d)||!/^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,63}$/.test(d))throw new Error('Enter a valid domain name, such as yourdomain.com.');
+ if(d==='dbanjushomes.online'||d.endsWith('.dbanjushomes.online')||d.endsWith('.onrender.com'))throw new Error('Enter a domain you own, not a DBH or Render domain.');
+ return d;
 }
-function domainSetup(){
- const links=currentApp?.social_links&&typeof currentApp.social_links==='object'?currentApp.social_links:{};
- return links.domain_setup&&typeof links.domain_setup==='object'?links.domain_setup:{};
-}
+function domainSetup(){const links=currentApp?.social_links&&typeof currentApp.social_links==='object'?currentApp.social_links:{};return links.domain_setup&&typeof links.domain_setup==='object'?links.domain_setup:{}}
 function paintDomainSetup(links){
- const d=links?.domain_setup&&typeof links.domain_setup==='object'?links.domain_setup:{};
- const connected=!!d.domain;
- $('customDomain').value=d.domain||'';
- $('domainEditFields').hidden=connected;
- $('domainEditFields').style.display=connected?'none':'block';
- $('domainConnectedSummary').hidden=!connected;
- $('domainConnectedSummary').style.display=connected?'flex':'none';
- if(connected){
-  $('domainConnectedName').textContent=d.domain;
-  $('domainConnectedState').textContent=(d.dns_verified?'DNS verified':'DNS not verified')+' · '+(d.activation_status||'awaiting DBH hosting activation')+' · HTTPS '+(d.ssl_status==='active'?'active':d.ssl_status==='pending'?'pending':'not checked');
- }
- $('domainStatus').textContent=connected?(d.dns_verified?'DNS ownership verified. Hosting activation is '+(d.activation_status||'pending DBH review')+'.':'Domain saved. DNS ownership has not been verified yet.'):'No custom domain has been configured.';
- if(d.domain&&d.token){$('dnsRecordName').value='_dbh-verify.'+d.domain;$('dnsRecordValue').value='dbh-agent-verification='+d.token;$('dnsInstructions').hidden=false;$('verifyDomain').disabled=false;}
+ const d=links?.domain_setup&&typeof links.domain_setup==='object'?links.domain_setup:{},ok=!!d.domain;
+ $('domainConnectedSummary').hidden=!ok;$('domainConnectedSummary').style.display=ok?'flex':'none';
+ $('domainEmptyState').hidden=ok;$('domainEmptyState').style.display=ok?'none':'block';
+ if(ok){$('domainConnectedName').textContent=d.domain;$('domainConnectedState').textContent=(d.dns_verified?'Render verified':'DNS verification pending')+' · '+(d.activation_status||'waiting for hosting verification')+' · HTTPS '+(d.ssl_status==='managed by Render'?'managed by Render':'pending verification');}
+ $('domainStatus').textContent=ok?(d.dns_verified?'Domain verified by Render. HTTPS certificates are managed by Render.':'Domain saved on the hosting service. Update DNS records, then refresh status.'):'No custom domain has been added.';
 }
-function currentDomainSetup(){return {...domainSetup(),domain:cleanDomain($('customDomain').value)}}
-async function persistDomainSetup(setup){
- const links={...(currentApp?.social_links&&typeof currentApp.social_links==='object'?currentApp.social_links:{}),domain_setup:setup};
- await profileAction({action:'save_agent_profile',full_name:val('fullName'),phone:val('phone'),whatsapp_number:val('whatsapp'),business_name:val('businessName'),business_type:val('businessType'),state:val('state'),city:val('city'),address:val('address'),bio:val('bio'),years_experience:val('yearsExperience'),license_number:val('licenseNumber'),social_links:links});
- currentApp={...currentApp,social_links:links};
+async function callDomainAction(action,extra={}){
+ const {data,error}=await S.auth.getSession();if(error||!data.session)throw new Error('Your session expired. Please sign in again.');
+ const r=await fetch(SUPABASE_URL+'/functions/v1/dbh-custom-domain',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+data.session.access_token},body:JSON.stringify({action,...extra})});
+ const result=await r.json().catch(()=>({}));if(!r.ok||!result.success)throw new Error(result.error||result.message||'The domain request could not be completed.');return result;
 }
+function showDomainMessage(message,type='ok'){$('domainMessage').textContent=message;$('domainMessage').className='message show '+(type==='err'?'err':'ok')}
+function openAddDomain(){$('customDomain').value='';$('addDomainModal').hidden=false;document.body.style.overflow='hidden';setTimeout(()=>$('customDomain').focus(),30)}
+function closeAddDomain(){$('addDomainModal').hidden=true;document.body.style.overflow=''}
 function showDomainDetails(){
  const d=domainSetup();if(!d.domain)return;
- $('domainDetailAddress').textContent=d.domain;
- $('domainDetailDns').textContent=d.dns_verified?'Verified':'Not verified';
- $('domainDetailActivation').textContent=d.activation_status||'Pending DBH review';
- $('domainDetailSsl').textContent=d.ssl_status==='active'?'Active':d.ssl_status==='pending'?'Pending issuance':d.ssl_status==='failed'?'Needs attention':'Not checked by hosting yet';
- $('domainDetailHint').textContent=d.dns_verified?'DNS ownership is verified. Hosting must still attach this hostname to the correct customer website and confirm that the SSL/TLS certificate is active.':'Add the TXT record and verify ownership. The domain will only open after its DNS points to DBH hosting and the hostname is configured on the hosting service. Certificate status is not confirmed until the hosting platform reports it.';
- $('openCustomDomain').href='https://'+d.domain;
- $('domainDetailsModal').hidden=false;document.body.style.overflow='hidden';
+ $('domainDetailAddress').textContent=d.domain;$('domainDetailDns').textContent=d.dns_verified?'Verified':'Not verified';
+ $('domainDetailActivation').textContent=d.activation_status||'Awaiting DNS verification';$('domainDetailSsl').textContent=d.dns_verified?'Managed by Render':'Pending DNS verification';
+ $('domainDetailHint').textContent=d.dns_verified?'Render has verified this domain. HTTPS certificates are managed by Render.':'Add the DNS records requested by Render at your domain provider, wait for propagation, then refresh status.';
+ $('openCustomDomain').href='https://'+d.domain;$('domainDetailsModal').hidden=false;document.body.style.overflow='hidden';
 }
-function closeDomainDetails(){ $('domainDetailsModal').hidden=true;document.body.style.overflow='';}
-$('viewDomainDetails').onclick=showDomainDetails;
-$('closeDomainDetails').onclick=closeDomainDetails;
+function closeDomainDetails(){$('domainDetailsModal').hidden=true;document.body.style.overflow=''}
+$('addCustomDomain').onclick=openAddDomain;$('closeAddDomain').onclick=closeAddDomain;$('cancelAddDomain').onclick=closeAddDomain;
+$('addDomainModal').addEventListener('click',e=>{if(e.target===$('addDomainModal'))closeAddDomain()});
+$('viewDomainDetails').onclick=showDomainDetails;$('closeDomainDetails').onclick=closeDomainDetails;$('closeDomainDetailsBottom').onclick=closeDomainDetails;
 $('domainDetailsModal').addEventListener('click',e=>{if(e.target===$('domainDetailsModal'))closeDomainDetails()});
-$('editDomainDetails').onclick=()=>{closeDomainDetails();$('domainEditFields').hidden=false;$('domainEditFields').style.display='block';$('domainConnectedSummary').hidden=true;$('domainConnectedSummary').style.display='none';$('customDomain').focus()};
-
-$('prepareDomain').onclick=async()=>{
+$('addDomainForm').addEventListener('submit',async e=>{
+ e.preventDefault();let domain;try{domain=cleanDomain($('customDomain').value)}catch(err){showDomainMessage(err.message,'err');return}
+ const btn=$('submitAddDomain');loading(btn,true,'Saving domain…');
  try{
-  const domain=cleanDomain($('customDomain').value);
-  let d=domainSetup();
-  if(d.domain!==domain||!d.token){const bytes=new Uint8Array(24);crypto.getRandomValues(bytes);const token=Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('');d={domain,token,dns_verified:false,activation_status:'pending DBH review',created_at:new Date().toISOString()};await persistDomainSetup(d);}
-  $('dnsRecordName').value='_dbh-verify.'+domain;$('dnsRecordValue').value='dbh-agent-verification='+d.token;$('dnsInstructions').hidden=false;$('verifyDomain').disabled=false;
-  $('domainStatus').textContent='DNS instructions ready. Add the TXT record at your DNS provider, wait for it to propagate, then verify.';
-  show('DNS instructions generated and saved. Add the TXT record at your domain provider.','ok');
- }catch(e){show(e.message||'Could not prepare domain verification.','err')}
+  const result=await callDomainAction('add',{domain});currentApp={...currentApp,social_links:{...(currentApp?.social_links||{}),domain_setup:result.domain}};
+  paintDomainSetup(currentApp.social_links);closeAddDomain();showDomainMessage('Domain added and saved automatically. Configure its DNS records to finish connecting it.','ok');
+  $('domainStatus').textContent=result.message||'Domain saved. Configure DNS at your provider, then refresh status.';
+  if(result.dns)$('domainStatus').textContent+=' DNS details: '+JSON.stringify(result.dns);
+ }catch(err){showDomainMessage(err.message||'Could not add this domain.','err')}finally{loading(btn,false,'Add domain')}
+});
+$('refreshDomainStatus').onclick=async()=>{
+ const btn=$('refreshDomainStatus');loading(btn,true,'Checking…');
+ try{const result=await callDomainAction('status');const links={...(currentApp?.social_links||{})};if(result.domain)links.domain_setup=result.domain;else delete links.domain_setup;currentApp={...currentApp,social_links:links};paintDomainSetup(links);showDomainMessage(result.domain?.dns_verified?'Render has verified your domain.':'Status refreshed. If pending, check DNS records and try again.','ok')}
+ catch(err){showDomainMessage(err.message||'Could not refresh domain status.','err')}finally{loading(btn,false,'Refresh status')}
 };
-$('verifyDomain').onclick=async()=>{
- const btn=$('verifyDomain');loading(btn,true,'Checking DNS…');
- try{
-  const d=currentDomainSetup();if(!d.token||d.domain!==cleanDomain($('customDomain').value))throw new Error('Generate DNS instructions for this domain first.');
-  const name='_dbh-verify.'+d.domain;
-  const response=await fetch('https://cloudflare-dns.com/dns-query?name='+encodeURIComponent(name)+'&type=TXT',{headers:{accept:'application/dns-json'}});
-  if(!response.ok)throw new Error('The public DNS resolver could not be reached. Try again later.');
-  const dns=await response.json();const expected='dbh-agent-verification='+d.token;
-  const found=(dns.Answer||[]).some(a=>Number(a.type)===16&&String(a.data||'').replace(/^"|"$/g,'').replace(/" "/g,'')===expected);
-  if(!found)throw new Error('The expected TXT record is not visible yet. Check the record name and value, then wait for DNS propagation.');
-  const verified={...d,dns_verified:true,dns_verified_at:new Date().toISOString(),activation_status:'pending DBH review'};
-  await persistDomainSetup(verified);paintDomainSetup(currentApp.social_links);
-  $('domainStatus').textContent='DNS ownership verified for '+d.domain+'. DBH hosting and HTTPS activation are still pending.';
-  show('DNS ownership verified. Your request is saved for DBH hosting activation.','ok');
- }catch(e){show(e.message||'DNS verification failed.','err')}
- finally{loading(btn,false,'Verify DNS ownership')}
+$('deleteCustomDomain').onclick=async()=>{
+ const d=domainSetup();if(!d.domain)return;
+ if(!confirm('Delete '+d.domain+' from DBH hosting? This does not cancel your domain registration or change DNS records.'))return;
+ const btn=$('deleteCustomDomain');loading(btn,true,'Deleting…');
+ try{await callDomainAction('delete',{domain:d.domain});const links={...(currentApp?.social_links||{})};delete links.domain_setup;currentApp={...currentApp,social_links:links};closeDomainDetails();paintDomainSetup(links);showDomainMessage('Custom domain removed from DBH hosting and settings.','ok')}
+ catch(err){showDomainMessage(err.message||'Could not delete this domain.','err')}finally{loading(btn,false,'Delete domain')}
 };
-$('saveDomainRequest').onclick=async()=>{
- const btn=$('saveDomainRequest');loading(btn,true,'Saving request…');
- try{
-  const domain=cleanDomain($('customDomain').value);let d=domainSetup();
-  if(d.domain!==domain){d={domain,token:'',dns_verified:false,activation_status:'pending DBH review',created_at:new Date().toISOString()};}
-  d={...d,domain,activation_status:d.dns_verified?'pending DBH review':'awaiting DNS verification',requested_at:new Date().toISOString()};
-  await persistDomainSetup(d);paintDomainSetup(currentApp.social_links);
-  show(d.dns_verified?'Domain request saved. DBH still needs to activate hosting and HTTPS.':'Domain request saved. Complete DNS verification when ready.','ok');
- }catch(e){show(e.message||'Could not save domain request.','err')}
- finally{loading(btn,false,'Save domain request')}
-};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('addDomainModal').hidden)closeAddDomain();if(!$('domainDetailsModal').hidden)closeDomainDetails()}});
 document.querySelectorAll('[data-copy]').forEach(b=>b.addEventListener('click',async()=>{const input=$(b.dataset.copy);if(!input?.value)return;try{await navigator.clipboard.writeText(input.value);show('Copied to clipboard.','ok')}catch{input.select();show('Select and copy the value manually.','err')}}));
 
 $('saveProfile').onclick=saveProfile;$('resetProfile').onclick=()=>{if(snapshot){$('fullName').value=snapshot.fullName;$('phone').value=snapshot.phone;$('whatsapp').value=snapshot.whatsapp;$('businessName').value=snapshot.businessName;$('businessType').value=snapshot.businessType;$('state').value=snapshot.state;$('city').value=snapshot.city;$('address').value=snapshot.address;$('bio').value=snapshot.bio;$('yearsExperience').value=snapshot.yearsExperience;$('licenseNumber').value=snapshot.licenseNumber;$('socialWebsite').value=snapshot.social.website||''}show('Unsaved changes were reset.','ok')};

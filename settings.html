@@ -45,6 +45,17 @@
 <div class="field full"><div class="social-launch-card"><div class="social-launch-icon"><i class="fa-solid fa-link"></i></div><div class="social-launch-copy"><strong>Connect your social accounts</strong><span>Authorize supported providers securely. DBH marks an account connected only after provider confirmation.</span></div><button class="btn primary" type="button" id="openSocialModal"><i class="fa-solid fa-plus"></i> Connect social account</button></div><div class="hint">Available now: X, GitHub and GitLab. Other providers are shown in the picker as unavailable for authorization.</div></div>
 <div class="field full profile-links-title">Website</div><div class="field full"><label>Professional website (optional)</label><input id="socialWebsite" type="url" inputmode="url" placeholder="https://yourwebsite.com"><div class="hint">Social profile links are populated only from accounts you authorize above, not from manually typed URLs.</div></div></div><div class="actions"><button class="btn" type="button" id="resetProfile">Reset changes</button><button class="btn primary" type="button" id="saveProfile">Save profile</button></div></div></section>
 
+
+<section class="setting-card" id="domainHostingCard"><div class="setting-head"><div class="head-icon"><i class="fa-solid fa-globe"></i></div><div><h2>Custom domain & DBH hosting</h2><p>Verify a domain you own and request that it opens your DBH-hosted public agent profile.</p></div></div><div class="setting-body">
+<div class="message" id="domainMessage" aria-live="polite"></div>
+<div class="field"><label for="customDomain">Your domain name</label><input id="customDomain" inputmode="url" autocomplete="url" placeholder="yourdomain.com"><div class="hint">Enter only the domain, without a path, email address, or existing URL. Example: yourdomain.com or agents.yourdomain.com.</div></div>
+<div class="field" style="margin-top:14px"><label for="domainDestination">DBH destination</label><input id="domainDestination" readonly value="Your DBH public agent profile"><div class="hint">The domain will be routed to your DBH-hosted profile after DBH activates it. This does not create a separate website or change your existing DNS records automatically.</div></div>
+<div class="domain-status" id="domainStatus" style="margin:14px 0;padding:13px;border:1px solid #dbeafe;background:#f8fbff;border-radius:12px;font-size:10px;line-height:1.6;color:#28527b">No custom domain has been configured.</div>
+<div id="dnsInstructions" hidden style="margin-top:14px;padding:15px;border:1px solid #dbeafe;border-radius:13px;background:#f8fbff"><strong style="font-size:11px;color:#0b3767">Add this DNS TXT record at your domain provider</strong><p class="hint">This record proves you control the domain. Do not delete or change your mail records.</p><div class="grid" style="margin-top:12px"><div class="field full"><label>Record type</label><input readonly value="TXT"></div><div class="field full"><label>Record name / host</label><input id="dnsRecordName" readonly><button class="btn" type="button" data-copy="dnsRecordName" style="margin-top:7px">Copy record name</button></div><div class="field full"><label>Record value</label><input id="dnsRecordValue" readonly><button class="btn" type="button" data-copy="dnsRecordValue" style="margin-top:7px">Copy record value</button></div></div><p class="hint">DNS changes can take time to appear. The check looks for the exact TXT value using a public DNS resolver.</p></div>
+<div class="actions" style="justify-content:flex-start;flex-wrap:wrap"><button class="btn" type="button" id="prepareDomain">Generate / refresh DNS instructions</button><button class="btn primary" type="button" id="verifyDomain" disabled>Verify DNS ownership</button><button class="btn" type="button" id="saveDomainRequest">Save domain request</button></div>
+<div class="hint" style="margin-top:13px"><i class="fa-solid fa-shield-halved"></i> DNS verification is separate from hosting activation. DBH must approve and configure the custom domain and HTTPS before it becomes live. Never share your domain provider password.</div>
+</div></section>
+
 <section class="setting-card"><div class="setting-head"><div class="head-icon"><i class="fa-solid fa-bell"></i></div><div><h2>Notifications</h2><p>Choose how this browser handles DBH agent notifications.</p></div></div><div class="setting-body">
 <div class="toggle-row"><div class="toggle-copy"><strong>Customer enquiry alerts</strong><span>Show alerts when a customer contacts you about a property.</span></div><label class="switch"><input type="checkbox" id="prefEnquiries" checked><span class="slider"></span></label></div>
 <div class="toggle-row"><div class="toggle-copy"><strong>Property status alerts</strong><span>Notify you when DBH changes a property's verification or publishing status.</span></div><label class="switch"><input type="checkbox" id="prefProperty" checked><span class="slider"></span></label></div>
@@ -80,7 +91,8 @@ function val(id){return $(id).value.trim()}
 async function profileAction(body){const {data,error}=await S.auth.getSession();if(error||!data.session)throw new Error('Your session expired. Please sign in again.');const r=await fetch(PROFILE_FN,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+data.session.access_token},body:JSON.stringify(body)});const result=await r.json().catch(()=>({}));if(!r.ok)throw new Error(result.error||result.message||'Could not save your agent profile.');return result}
 function safeSocialUrl(value,host){const v=String(value||'').trim();if(!v)return '';try{const u=new URL(/^https?:\/\//i.test(v)?v:'https://'+v);const hostname=u.hostname.toLowerCase();return u.protocol==='https:'&&(hostname===host||hostname.endsWith('.'+host))?u.href:''}catch{return ''}}
 function socialPayload(){
- const result={website:val('socialWebsite'),connections:{}};
+ const previous=currentApp?.social_links&&typeof currentApp.social_links==='object'?currentApp.social_links:{};
+ const result={...previous,website:val('socialWebsite'),connections:{}};
  for(const key of Object.keys(DBH_OAUTH_PROVIDERS)){
   const identity=linkedIdentity(key),username=identityUsername(identity);
   if(!identity)continue;
@@ -192,6 +204,7 @@ async function load(){
  if(q.error){console.error(q.error);show('We could not load your provider settings. Please refresh the page.','err');return}
  if(!q.data){location.href='agent-onboarding.html';return}
  setForm(q.data,currentUser);
+ paintDomainSetup(q.data.social_links||{});
  paintSocialConnections();
  renderSetupChecklist();
  await finishSocialIdentityLink();
@@ -272,6 +285,71 @@ $('connectGitlab').onclick=()=>linkedIdentity('gitlab')?openSocialDetails('gitla
 $('closeSocialDetails').onclick=closeSocialDetails;$('closeSocialDetailsBottom').onclick=closeSocialDetails;
 $('socialDetailsModal').addEventListener('click',e=>{if(e.target===$('socialDetailsModal'))closeSocialDetails()});
 $('disconnectSocialAccount').onclick=disconnectSocialAccount;
+
+function cleanDomain(input){
+ let raw=String(input||'').trim().toLowerCase();
+ raw=raw.replace(/^https?:\\/\\//,'').replace(/\\/$/,'');
+ if(!raw||raw.includes('/')||raw.includes('@')||raw.includes(':')||raw.includes(' ')||raw.length>253)throw new Error('Enter a domain only, for example yourdomain.com.');
+ if(!/^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,63}$/.test(raw))throw new Error('Enter a valid domain name, such as yourdomain.com.');
+ if(raw==='dbanjushomes.online'||raw.endsWith('.dbanjushomes.online'))throw new Error('Use a domain you own, not a DBH domain.');
+ return raw;
+}
+function domainSetup(){
+ const links=currentApp?.social_links&&typeof currentApp.social_links==='object'?currentApp.social_links:{};
+ return links.domain_setup&&typeof links.domain_setup==='object'?links.domain_setup:{};
+}
+function paintDomainSetup(links){
+ const d=links?.domain_setup&&typeof links.domain_setup==='object'?links.domain_setup:{};
+ $('customDomain').value=d.domain||'';
+ $('domainStatus').textContent=d.domain?(d.dns_verified?'DNS ownership verified. Hosting activation is '+(d.activation_status||'pending DBH review')+'.':'Domain saved. Generate DNS instructions and verify ownership.'):'No custom domain has been configured.';
+ if(d.domain&&d.token){$('dnsRecordName').value='_dbh-verify.'+d.domain;$('dnsRecordValue').value='dbh-agent-verification='+d.token;$('dnsInstructions').hidden=false;$('verifyDomain').disabled=false;}
+}
+function currentDomainSetup(){return {...domainSetup(),domain:cleanDomain($('customDomain').value)}}
+async function persistDomainSetup(setup){
+ const links={...(currentApp?.social_links&&typeof currentApp.social_links==='object'?currentApp.social_links:{}),domain_setup:setup};
+ await profileAction({action:'save_agent_profile',full_name:val('fullName'),phone:val('phone'),whatsapp_number:val('whatsapp'),business_name:val('businessName'),business_type:val('businessType'),state:val('state'),city:val('city'),address:val('address'),bio:val('bio'),years_experience:val('yearsExperience'),license_number:val('licenseNumber'),social_links:links});
+ currentApp={...currentApp,social_links:links};
+}
+$('prepareDomain').onclick=async()=>{
+ try{
+  const domain=cleanDomain($('customDomain').value);
+  let d=domainSetup();
+  if(d.domain!==domain||!d.token){const bytes=new Uint8Array(24);crypto.getRandomValues(bytes);const token=Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('');d={domain,token,dns_verified:false,activation_status:'pending DBH review',created_at:new Date().toISOString()};await persistDomainSetup(d);}
+  $('dnsRecordName').value='_dbh-verify.'+domain;$('dnsRecordValue').value='dbh-agent-verification='+d.token;$('dnsInstructions').hidden=false;$('verifyDomain').disabled=false;
+  $('domainStatus').textContent='DNS instructions ready. Add the TXT record at your DNS provider, wait for it to propagate, then verify.';
+  show('DNS instructions generated and saved. Add the TXT record at your domain provider.','ok');
+ }catch(e){show(e.message||'Could not prepare domain verification.','err')}
+};
+$('verifyDomain').onclick=async()=>{
+ const btn=$('verifyDomain');loading(btn,true,'Checking DNS…');
+ try{
+  const d=currentDomainSetup();if(!d.token||d.domain!==cleanDomain($('customDomain').value))throw new Error('Generate DNS instructions for this domain first.');
+  const name='_dbh-verify.'+d.domain;
+  const response=await fetch('https://cloudflare-dns.com/dns-query?name='+encodeURIComponent(name)+'&type=TXT',{headers:{accept:'application/dns-json'}});
+  if(!response.ok)throw new Error('The public DNS resolver could not be reached. Try again later.');
+  const dns=await response.json();const expected='dbh-agent-verification='+d.token;
+  const found=(dns.Answer||[]).some(a=>Number(a.type)===16&&String(a.data||'').replace(/^"|"$/g,'').replace(/" "/g,'')===expected);
+  if(!found)throw new Error('The expected TXT record is not visible yet. Check the record name and value, then wait for DNS propagation.');
+  const verified={...d,dns_verified:true,dns_verified_at:new Date().toISOString(),activation_status:'pending DBH review'};
+  await persistDomainSetup(verified);paintDomainSetup(currentApp.social_links);
+  $('domainStatus').textContent='DNS ownership verified for '+d.domain+'. DBH hosting and HTTPS activation are still pending.';
+  show('DNS ownership verified. Your request is saved for DBH hosting activation.','ok');
+ }catch(e){show(e.message||'DNS verification failed.','err')}
+ finally{loading(btn,false,'Verify DNS ownership')}
+};
+$('saveDomainRequest').onclick=async()=>{
+ const btn=$('saveDomainRequest');loading(btn,true,'Saving request…');
+ try{
+  const domain=cleanDomain($('customDomain').value);let d=domainSetup();
+  if(d.domain!==domain){d={domain,token:'',dns_verified:false,activation_status:'pending DBH review',created_at:new Date().toISOString()};}
+  d={...d,domain,activation_status:d.dns_verified?'pending DBH review':'awaiting DNS verification',requested_at:new Date().toISOString()};
+  await persistDomainSetup(d);paintDomainSetup(currentApp.social_links);
+  show(d.dns_verified?'Domain request saved. DBH still needs to activate hosting and HTTPS.':'Domain request saved. Complete DNS verification when ready.','ok');
+ }catch(e){show(e.message||'Could not save domain request.','err')}
+ finally{loading(btn,false,'Save domain request')}
+};
+document.querySelectorAll('[data-copy]').forEach(b=>b.addEventListener('click',async()=>{const input=$(b.dataset.copy);if(!input?.value)return;try{await navigator.clipboard.writeText(input.value);show('Copied to clipboard.','ok')}catch{input.select();show('Select and copy the value manually.','err')}}));
+
 $('saveProfile').onclick=saveProfile;$('resetProfile').onclick=()=>{if(snapshot){$('fullName').value=snapshot.fullName;$('phone').value=snapshot.phone;$('whatsapp').value=snapshot.whatsapp;$('businessName').value=snapshot.businessName;$('businessType').value=snapshot.businessType;$('state').value=snapshot.state;$('city').value=snapshot.city;$('address').value=snapshot.address;$('bio').value=snapshot.bio;$('yearsExperience').value=snapshot.yearsExperience;$('licenseNumber').value=snapshot.licenseNumber;$('socialWebsite').value=snapshot.social.website||''}show('Unsaved changes were reset.','ok')};
 $('savePrefs').onclick=async()=>{const p={enquiries:$('prefEnquiries').checked,property:$('prefProperty').checked,payments:$('prefPayments').checked,browser:$('prefBrowser').checked};localStorage.setItem('dbhAgentSettings',JSON.stringify(p));if(p.browser&&'Notification'in window&&Notification.permission==='default')await Notification.requestPermission();show('Notification preferences saved on this browser.','ok')};
 $('refreshSession').onclick=async()=>{const b=$('refreshSession');loading(b,true,'Refreshing...');await load();loading(b,false,'Refresh account')};

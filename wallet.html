@@ -113,18 +113,22 @@ async function boot(){
   const status=String(app.status||'pending').toLowerCase().replaceAll('_',' ');
   const sessionStatus=String(app.session_status||'active').toLowerCase();
   const suspended=['banned','suspended','disabled','inactive'].includes(sessionStatus)||status==='suspended';
+  // Match dashboard payment detection, including legacy agent_fee records and
+  // confirmed records that predate the paid_at field.
   const {data:payments,error:paymentError}=await S.from('agent_payment_records')
    .select('status,payment_type,amount,currency,paid_at,created_at')
-   .eq('user_id',user.id).eq('payment_type','registration_fee')
-   .in('status',['successful','completed','paid','approved'])
-   .eq('currency','NGN').not('paid_at','is',null)
-   .order('paid_at',{ascending:false}).limit(10);
+   .eq('user_id',user.id).in('payment_type',['registration_fee','agent_fee'])
+   .order('created_at',{ascending:false}).limit(50);
   if(paymentError)console.warn('Wallet eligibility payment check unavailable:',paymentError);
-  const confirmedPayments=!paymentError&&Array.isArray(payments)?payments:[];
-  const paidRecord=confirmedPayments.find(p=>Number(p.amount)>=100000)||null;
-  const paid=Boolean(paidRecord);
+  const paidStatuses=['successful','completed','paid','approved'];
+  const confirmedPayments=!paymentError&&Array.isArray(payments)
+   ?payments.filter(p=>paidStatuses.includes(String(p.status||'').trim().toLowerCase()))
+   :[];
+  const ngnPayments=confirmedPayments.filter(p=>String(p.currency||'').trim().toUpperCase()==='NGN');
+  const recordedAmount=ngnPayments.reduce((sum,p)=>sum+(Number(p.amount)||0),0);
+  const paid=recordedAmount>=100000;
+  const paidRecord=paid?ngnPayments[0]||null:null;
   const latestConfirmed=confirmedPayments[0]||null;
-  const recordedAmount=latestConfirmed?Number(latestConfirmed.amount)||0:0;
   const shortfall=Math.max(0,100000-recordedAmount);
   const verified=['verified','approved'].includes(status);
   $('paymentEligibility').textContent=paid?'PAID — ₦100,000 CONFIRMED':latestConfirmed?'PAYMENT RECORDED — '+money(recordedAmount):'NOT PAID';

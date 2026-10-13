@@ -191,3 +191,6 @@
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init);
   else init();
 })();
+
+/* Load the reusable guide on pages using the shared agent app. */
+(function(){if(document.getElementById('dbhUniversalGuideScript'))return;var s=document.createElement('script');s.id='dbhUniversalGuideScript';s.src='assets/js/page-guide.js?v=20261013-guide-all';s.defer=true;document.head.appendChild(s);})();

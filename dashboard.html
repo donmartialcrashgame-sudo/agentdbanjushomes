@@ -196,7 +196,7 @@ html,body{width:100%;max-width:100%;overflow-x:clip}body{min-width:0}.shell{grid
   </div>
 </section>
 
-<section class="section">
+<section class="section" id="agentToolsSection">
 <div class="section-head"><h2>Agent tools</h2><span class="unlock-note" id="toolState">LOCKED</span></div>
 <div class="tools">
 <a class="tool" id="propertyTool" data-href="properties.html" href="#" aria-disabled="true"><i class="fa-solid fa-house"></i><h3>My Properties</h3><p>View and manage properties submitted from your agent account.</p><span class="tool-link">Open properties <i class="fa-solid fa-arrow-right"></i></span></a>
@@ -504,20 +504,41 @@ $('logout').onclick=async()=>{
 /* First-time dashboard walkthrough. The tour only highlights sections; it never changes account access. */
 (function(){
   const tourSteps=[
-    {selector:'.hero-dashboard',title:'Your dashboard overview',text:'Start here for a summary of your DBH workspace. Use the quick buttons to reach common tasks. Your account status and any required next steps appear above.'},
+    {selector:'.top',title:'Your top navigation bar',text:'The top bar keeps important account controls close by. Use the notification bell for updates, your profile button to open settings, the menu button on mobile to open navigation, and the sign-out button when you want to leave your account.'},
+    {selector:'.top-actions .bell',title:'Notifications shortcut',text:'This bell opens your notifications. Check it for payment updates, verification decisions, account messages, and other DBH notices.'},
+    {selector:'#headerProfile',title:'Your profile shortcut',text:'Select your profile button to go to My Profile & Settings, where you can update your professional details and supported social account connections.'},
+    {selector:'#logout',title:'Sign out safely',text:'Use this button when you have finished working on a shared or personal device. Signing out ends your current session.'},
     {selector:'#applicationNotice',title:'Account status and next steps',text:'Read this notice for payment, verification, or administrator instructions. Registration payment and admin approval are separate steps; completing one does not automatically complete the other.'},
-    {selector:'#quickVerification',title:'Trust and verification',text:'Open Verification to upload or review the documents requested by DBH Admin and check your application status.'},
-    {selector:'#dbhSidebar a[data-page="add-property.html"]',title:'Add Property',text:'When your registration payment is confirmed and your account is approved/verified, use Add Property to submit a listing, its details, photos, and supporting information. It may remain locked until then.'},
-    {selector:'#dbhSidebar a[data-page="properties.html"]',title:'My Properties',text:'View and manage the properties you have submitted. Listings can require admin review before they are published to customers.'},
-    {selector:'#dbhSidebar a[data-page="activity.html"]',title:'Activity & Reports',text:'Review activity recorded on your listings, such as views and customer contact actions. This section may require your agent tools to be unlocked.'},
-    {selector:'#dbhSidebar a[data-page="enquiries.html"]',title:'Complaints & Reports',text:'Use this section to review property-related enquiries, complaints, and customer reports that are available to your account.'},
-    {selector:'#dbhSidebar a[data-page="payment-result.html"]',title:'Payment Receipts',text:'Find your payment records and open available receipts here. Keep your receipt details for reference if you need support.'},
-    {selector:'#dbhSidebar a[data-page="wallet.html"]',title:'Agent Wallet',text:'Open your wallet to review wallet details and any available banking setup. Wallet features depend on the account’s current eligibility and setup status.'},
-    {selector:'#dbhSidebar a[data-page="agent-documents.html"]',title:'Verification',text:'Upload or review your required identity and legal documents. If a document is declined, read the admin note and follow the instructions before resubmitting.'},
-    {selector:'#dbhSidebar a[data-page="notifications.html"]',title:'Notifications',text:'Check this section for account updates, verification decisions, payment notices, and messages from DBH Admin.'},
-    {selector:'#dbhSidebar a[data-page="settings.html"]',title:'My Profile & Settings',text:'Keep your photo, contact details, business information, service location, and professional bio up to date. Connect a supported social account here. Website and licence details are optional.'}
+    {selector:'#paymentCard',title:'Registration payment prompt',text:'If this payment card appears, follow the secure payment link to pay or continue a pending registration payment. You can choose to pay later where available, but agent tools stay locked until payment and DBH approval requirements are met.',optional:true},
+    {selector:'#paymentReminder',title:'Payment reminder',text:'If you deferred payment, this reminder brings you back to the registration payment page. Payment alone does not mean your application has been approved.',optional:true},
+    {selector:'#accessCard',title:'Agent tools unlocked',text:'When this success message appears, your registration payment and verification are complete and your agent tools are available.',optional:true},
+    {selector:'.hero-dashboard',title:'Your dashboard welcome area',text:'This large banner introduces your agent workspace. The buttons can take you to add a property or view properties when those tools are unlocked.'},
+    {selector:'#addPropertyHero',title:'Quick action: Add a property',text:'Use this shortcut to start a property listing. Add accurate details and clear images; if the link is locked, complete the registration and approval steps first.'},
+    {selector:'#browsePropertiesHero',title:'Quick action: View properties',text:'This shortcut opens your property management area so you can review listings submitted from your agent account, when access is enabled.'},
+    {selector:'.quick-row',title:'Quick links',text:'These cards are shortcuts to common tasks: business activity, trust and verification, and listing a property. They help you reach frequently used sections without searching the sidebar.'},
+    {selector:'#quickProperties',title:'Business activity shortcut',text:'Open this card to review available listing views and customer contact activity. It may remain locked until your agent tools are enabled.'},
+    {selector:'#quickVerification',title:'Trust and verification shortcut',text:'Use this card to review your document requirements and current verification status, or to continue a requested verification step.'},
+    {selector:'#quickAdd',title:'List a property shortcut',text:'Start a new listing here once you have permission to use agent tools. Provide the property details and images requested by the form.'},
+    {selector:'.metrics-grid',title:'Your account statistics',text:'These summary cards show your property count, total property views, contact actions, and verification status. The numbers update when the dashboard can retrieve the latest data.'},
+    {selector:'#recentHeading',title:'Recent listing activity',text:'This area shows recent recorded views and customer contact actions on your listings. Select View activity to open the detailed activity page when your tools are unlocked.'},
+    {selector:'#recentActivity',title:'Activity details preview',text:'The panel below the heading displays recent activity or a helpful empty/loading message when there is no activity to show yet.'},
+    {selector:'#walletPreview',title:'Agent wallet preview',text:'This section previews wallet availability, balance, bank name, account label, account name, and account number when those details are available. Wallet setup may depend on approval and current account eligibility.'},
+    {selector:'#walletPreview .wallet-open-btn',title:'Open the full wallet',text:'Use this button to open the wallet page for more details. If a wallet or bank account is not active yet, follow the instructions shown on that page; do not assume the preview means setup is complete.'},
+    {selector:'#agentToolsSection',title:'Agent tools area',text:'This section groups the main listing and customer tools. Some links are intentionally locked until registration payment is confirmed and DBH Admin verifies or approves your account.'},
+    {selector:'#propertyTool',title:'My Properties tool',text:'Open this tool to review and manage properties you have submitted. A submitted property may still need admin review before it is published to customers.'},
+    {selector:'#addTool',title:'Add Property tool',text:'Create a listing by entering property information and uploading the required images and supporting details. Check your information carefully before submitting.'},
+    {selector:'#enquiryTool',title:'Customer Enquiries tool',text:'Use this section to review available customer enquiries and property-related conversations, and respond through the options provided in the portal.'},
+    {selector:'#dbhSidebar a[data-page="properties.html"]',title:'My Properties in the sidebar',text:'The sidebar is available across the agent portal. Choose My Properties to manage your submitted listings. Listings may need approval before customers can see them.'},
+    {selector:'#dbhSidebar a[data-page="add-property.html"]',title:'Add Property in the sidebar',text:'Use this navigation item to open the listing form. It may be locked until registration payment and DBH verification are complete.'},
+    {selector:'#dbhSidebar a[data-page="activity.html"]',title:'Activity & Reports',text:'Review activity recorded on your listings, including available views and contact actions. This section may require agent tools to be unlocked.'},
+    {selector:'#dbhSidebar a[data-page="enquiries.html"]',title:'Complaints & Reports',text:'Open this area for customer-related enquiries, complaints, and reports available to your account.'},
+    {selector:'#dbhSidebar a[data-page="payment-result.html"]',title:'Payment Receipts',text:'Find payment records and open available receipts here. Keep your reference details if you need help from DBH support.'},
+    {selector:'#dbhSidebar a[data-page="wallet.html"]',title:'Agent Wallet',text:'Open your wallet to check available wallet and banking features. Access and setup depend on the account’s current status.'},
+    {selector:'#dbhSidebar a[data-page="agent-documents.html"]',title:'Verification documents',text:'Upload or review required identity and legal documents here. If a document is declined, read the admin note and follow the instructions before resubmitting.'},
+    {selector:'#dbhSidebar a[data-page="notifications.html"]',title:'Notifications',text:'Check this section for payment updates, verification decisions, account notices, and messages from DBH Admin.'},
+    {selector:'#dbhSidebar a[data-page="settings.html"]',title:'My Profile & Settings',text:'Keep your photo, phone, WhatsApp, business details, service location, and professional bio up to date. Connect a supported social account here. Website and licence details are optional.'}
   ];
-  let index=0,activeTarget=null,started=false;
+  let index=0,activeTarget=null,started=false,activeSteps=[];
   const overlay=document.getElementById('dbhTourOverlay'),card=document.getElementById('dbhTourCard');
   const title=document.getElementById('dbhTourTitle'),copy=document.getElementById('dbhTourText'),count=document.getElementById('dbhTourCount'),progress=document.getElementById('dbhTourProgress'),back=document.getElementById('dbhTourBack'),next=document.getElementById('dbhTourNext');
   function clearTarget(){if(activeTarget){activeTarget.classList.remove('dbh-tour-spotlight');activeTarget=null}}
@@ -537,24 +558,25 @@ $('logout').onclick=async()=>{
   }
   function render(){
     clearTarget();
-    const step=tourSteps[index];
+    const step=activeSteps[index];
     let target=findTarget(step);
     if(!target&&step.selector.includes('#dbhSidebar a[data-page="')){
       target=document.querySelector('#dbhSidebar a[data-page="settings.html"]');
     }
     if(!target)return finish(false);
-    openMobileSidebar(target);
-    if(target.closest('#dbhSidebar')&&window.innerWidth<=900){
-      target.scrollIntoView({behavior:'auto',block:'nearest'});
-    }else if(index===0||index===1||index===2){
+    if(target.closest('#dbhSidebar')){
+      openMobileSidebar(target);
+      if(window.innerWidth<=900) target.scrollIntoView({behavior:'auto',block:'nearest'});
+    }else{
+      closeMobileSidebar();
       target.scrollIntoView({behavior:'smooth',block:'center'});
     }
     activeTarget=target;target.classList.add('dbh-tour-spotlight');
     title.textContent=step.title;copy.textContent=step.text;
-    count.textContent='STEP '+(index+1)+' OF '+tourSteps.length;
-    progress.style.width=((index+1)/tourSteps.length*100)+'%';
+    count.textContent='STEP '+(index+1)+' OF '+activeSteps.length;
+    progress.style.width=((index+1)/activeSteps.length*100)+'%';
     back.disabled=index===0;back.style.opacity=index===0?'.45':'1';
-    next.innerHTML=index===tourSteps.length-1?'Finish tour <i class="fa-solid fa-check"></i>':'Next <i class="fa-solid fa-arrow-right"></i>';
+    next.innerHTML=index===activeSteps.length-1?'Finish tour <i class="fa-solid fa-check"></i>':'Next <i class="fa-solid fa-arrow-right"></i>';
     overlay.hidden=false;card.hidden=false;
   }
   function finish(markComplete){
@@ -565,14 +587,16 @@ $('logout').onclick=async()=>{
     if(started)return;
     let completed=false;try{completed=localStorage.getItem('dbhAgentTourCompleted_v1')==='1'}catch(_){}
     if(!force&&completed)return;
+    activeSteps=tourSteps.filter(step=>{const target=findTarget(step);if(!target)return false;if(step.optional)return target.getClientRects().length>0;return true;});
+    if(!activeSteps.length)return;
     started=true;index=0;render();
   }
   back.addEventListener('click',()=>{if(index>0){index--;render()}});
-  next.addEventListener('click',()=>{if(index<tourSteps.length-1){index++;render()}else finish(true)});
+  next.addEventListener('click',()=>{if(index<activeSteps.length-1){index++;render()}else finish(true)});
   document.getElementById('dbhTourSkip').addEventListener('click',()=>finish(true));
   document.getElementById('startAgentTour').addEventListener('click',()=>start(true));
   overlay.addEventListener('click',()=>{});
-  document.addEventListener('keydown',e=>{if(!started)return;if(e.key==='Escape')finish(true);else if(e.key==='ArrowRight'&&index<tourSteps.length-1){index++;render()}else if(e.key==='ArrowLeft'&&index>0){index--;render()}});
+  document.addEventListener('keydown',e=>{if(!started)return;if(e.key==='Escape')finish(true);else if(e.key==='ArrowRight'&&index<activeSteps.length-1){index++;render()}else if(e.key==='ArrowLeft'&&index>0){index--;render()}});
   window.addEventListener('resize',()=>{if(started)render()});
   window.startDBHAgentTour=()=>start(true);
   window.setTimeout(()=>start(false),1100);

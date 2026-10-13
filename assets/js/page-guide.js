@@ -1,0 +1,55 @@
+/* DBH Agent Portal — reusable page guide with completion celebration. */
+(function(){
+'use strict';
+if(window.__dbhUniversalGuideLoaded)return;window.__dbhUniversalGuideLoaded=true;
+const css = \`
+#dbhGuideLaunch{position:fixed!important;right:20px!important;bottom:20px!important;z-index:2147483000!important;border:0!important;border-radius:999px!important;padding:13px 18px!important;background:linear-gradient(135deg,#0759b7,#0b75e8)!important;color:#fff!important;font:800 13px/1.2 system-ui,sans-serif!important;box-shadow:0 12px 30px #0759b744!important;cursor:pointer!important;display:flex!important;align-items:center!important;gap:9px!important}
+#dbhGuideLaunch:hover{transform:translateY(-2px)}
+#dbhGuidePanel{position:fixed!important;right:20px!important;bottom:78px!important;width:min(390px,calc(100vw - 28px))!important;z-index:2147483001!important;background:#fff!important;color:#10243e!important;border:1px solid #dbeafe!important;border-radius:20px!important;padding:20px!important;box-shadow:0 20px 70px #061b3650!important;font:14px/1.55 system-ui,sans-serif!important;box-sizing:border-box!important}
+#dbhGuidePanel *{box-sizing:border-box!important}#dbhGuidePanel .dbh-guide-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+#dbhGuidePanel .dbh-guide-kicker{font-size:10px;font-weight:900;letter-spacing:.13em;text-transform:uppercase;color:#0b63ce}
+#dbhGuidePanel .dbh-guide-close{border:0;background:#f1f5f9;color:#334155;border-radius:10px;width:32px;height:32px;font-size:19px;cursor:pointer}
+#dbhGuidePanel h3{margin:6px 0 8px!important;font-size:19px!important;line-height:1.25!important;color:#062b52!important}#dbhGuidePanel p{margin:0 0 16px!important;color:#475569!important;font-size:13px!important}
+#dbhGuidePanel .dbh-guide-progress{height:5px;background:#eaf1fb;border-radius:99px;overflow:hidden;margin:14px 0}#dbhGuidePanel .dbh-guide-progress span{display:block;height:100%;background:linear-gradient(90deg,#0b63ce,#38bdf8);border-radius:99px;transition:width .2s ease}
+#dbhGuidePanel .dbh-guide-actions{display:flex;align-items:center;justify-content:space-between;gap:8px}#dbhGuidePanel .dbh-guide-actions button{border:0;border-radius:11px;padding:10px 14px;font:800 12px system-ui,sans-serif;cursor:pointer}
+#dbhGuidePanel .dbh-guide-skip{background:#f1f5f9;color:#64748b}#dbhGuidePanel .dbh-guide-next{background:#0b63ce;color:#fff;min-width:100px}
+.dbh-guide-target{outline:3px solid #38bdf8!important;outline-offset:5px!important;border-radius:10px!important;position:relative!important;z-index:2147482999!important;box-shadow:0 0 0 8px #38bdf822!important;scroll-margin:100px!important}
+#dbhGuideSuccess{position:fixed!important;inset:0!important;z-index:2147483646!important;background:rgba(3,20,42,.68)!important;backdrop-filter:blur(7px)!important;display:grid!important;place-items:center!important;padding:18px!important;font-family:system-ui,sans-serif!important}
+#dbhGuideSuccess .dbh-success-card{width:min(440px,100%)!important;background:linear-gradient(180deg,#fff,#f4f9ff)!important;color:#0b2442!important;border:1px solid #dbeafe!important;border-radius:26px!important;padding:28px 24px!important;text-align:center!important;box-shadow:0 30px 90px #020d1f70!important;animation:dbhSuccessPop .35s cubic-bezier(.2,.8,.2,1) both!important}
+#dbhGuideSuccess img{width:88px!important;height:88px!important;object-fit:contain!important;margin:0 auto 10px!important;display:block!important}#dbhGuideSuccess .dbh-success-pill{display:inline-block;background:#e0f2fe;color:#075985;border-radius:999px;padding:6px 10px;font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
+#dbhGuideSuccess h2{font-size:24px!important;line-height:1.2!important;margin:13px 0 8px!important;color:#062b52!important}#dbhGuideSuccess p{font-size:14px!important;line-height:1.6!important;color:#526275!important;margin:0 0 20px!important}
+#dbhGuideSuccess button{width:100%!important;border:0!important;border-radius:13px!important;padding:13px!important;background:linear-gradient(135deg,#0759b7,#0b75e8)!important;color:#fff!important;font-size:13px!important;font-weight:900!important;cursor:pointer!important}
+@keyframes dbhSuccessPop{from{opacity:0;transform:translateY(12px) scale(.96)}to{opacity:1;transform:none}}
+@media(max-width:480px){#dbhGuideLaunch{right:12px!important;bottom:12px!important;padding:12px 14px!important;font-size:12px!important}#dbhGuidePanel{right:12px!important;bottom:70px!important;width:calc(100vw - 24px)!important}}
+@media(prefers-reduced-motion:reduce){#dbhGuidePanel *,#dbhGuideSuccess *{animation:none!important;transition:none!important}}
+\`;
+const style=document.createElement('style');style.id='dbhUniversalGuideStyles';style.textContent=css;document.head.appendChild(style);
+const pageName=(location.pathname.split('/').pop()||'dashboard.html').replace(/\.html$/i,'').replace(/[-_]/g,' ');
+const pretty=pageName.replace(/\b\w/g,c=>c.toUpperCase());
+const main=document.querySelector('main,.main-content,.content,.wrap,.page-content,.container')||document.body;
+const heading=document.querySelector('main h1,.main-content h1,.content h1,.wrap h1,h1,h2');
+const pageTitle=(heading&&heading.textContent.trim())||pretty||'this page';
+document.querySelectorAll('button,a,[role="button"]').forEach(el=>{const label=(el.innerText||el.getAttribute('aria-label')||el.title||'').trim();if(/^(how to use|how to use this page|start tour|take a tour)$/i.test(label)){el.dataset.dbhOldGuideLauncher='1';el.style.setProperty('display','none','important');}});
+function selectorFor(el){if(!el)return null;if(el.id)return '#'+CSS.escape(el.id);if(el.dataset&&el.dataset.page)return '[data-page="'+el.dataset.page.replace(/"/g,'\\"')+'"]';const tag=el.tagName.toLowerCase();const cls=Array.from(el.classList||[]).filter(c=>/^[a-zA-Z_-][\w-]*$/.test(c)).slice(0,2);return tag+(cls.length?'.'+cls.map(c=>CSS.escape(c)).join('.'):'');}
+function getSteps(){
+ const s=[{title:'Welcome to '+pageTitle,body:'This short guide explains the main areas on this page. Use Next to continue, or Skip if you already know how everything works.',selector:null}];
+ const nav=document.querySelector('#dbhSidebar nav,.sidebar nav,nav');if(nav)s.push({title:'Move around DBH',body:'Use the navigation menu to open other agent sections. On a phone, open the menu first if it is collapsed.',selector:selectorFor(nav)});
+ if(heading)s.push({title:'Know which page you are on',body:'This heading identifies the current section. Read the descriptions on the page before starting an action.',selector:selectorFor(heading)});
+ const form=main.querySelector('form');const field=form&&form.querySelector('input:not([type="hidden"]),select,textarea');if(form&&field)s.push({title:'Complete forms carefully',body:'Fill in required fields and check your details before submitting. Keep passwords and OTP codes private.',selector:selectorFor(form)});
+ const primary=Array.from(main.querySelectorAll('button[type="submit"],button.btn-primary,.btn-primary,.primary-btn,[data-action],a.btn')).find(el=>{const t=(el.innerText||el.getAttribute('aria-label')||'').trim();return t&&!/how to use|skip|back|next/i.test(t)&&el.offsetWidth>0;});
+ if(primary)s.push({title:'Before you take action',body:'Review the details before using the main action button. For payments, withdrawals, or property submissions, wait for the result message before leaving.',selector:selectorFor(primary)});
+ const content=main.querySelector('.card,.panel,.section,.content-card,.stat,.item,table');if(content&&!s.some(x=>x.selector===selectorFor(content)))s.push({title:'Review the information here',body:'Cards, tables, and status labels show information available in this section. If something is missing, refresh once and check the displayed status.',selector:selectorFor(content)});
+ s.push({title:'You are ready',body:'Reopen this guide any time using the How to use button. Finish the guide to see your success message.',selector:null});return s.slice(0,6);
+}
+function esc(v){return String(v).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
+const launch=document.createElement('button');launch.id='dbhGuideLaunch';launch.type='button';launch.innerHTML='<span aria-hidden="true">✦</span><span>How to use</span>';launch.setAttribute('aria-label','Open the DBH page guide');document.body.appendChild(launch);
+let panel=null,steps=[],index=0,highlighted=null;
+function clearHighlight(){if(highlighted)highlighted.classList.remove('dbh-guide-target');highlighted=null;}
+function closeGuide(){clearHighlight();if(panel)panel.remove();panel=null;}
+function showSuccess(){const old=document.getElementById('dbhGuideSuccess');if(old)old.remove();const el=document.createElement('div');el.id='dbhGuideSuccess';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.innerHTML='<div class="dbh-success-card"><img src="https://images.emojiterra.com/google/noto-emoji/animated-emoji/1f389.gif" alt="Animated celebration"><span class="dbh-success-pill">Guide completed</span><h2>Congratulations, Agent!</h2><h2 style="font-size:19px!important;margin-top:0!important">First Guide Completed</h2><p>You have successfully finished your DBH page guide. Reopen <strong>How to use</strong> whenever you need a reminder.</p><button type="button">Great, let’s go</button></div>';document.body.appendChild(el);const done=()=>el.remove();el.querySelector('button').addEventListener('click',done);el.addEventListener('click',e=>{if(e.target===el)done();});}
+function showStep(){clearHighlight();const step=steps[index];if(!step)return;if(step.selector){try{highlighted=document.querySelector(step.selector);}catch(_){highlighted=null;}if(highlighted){highlighted.classList.add('dbh-guide-target');highlighted.scrollIntoView({behavior:'smooth',block:'center'});}}
+ panel.innerHTML='<div class="dbh-guide-top"><span class="dbh-guide-kicker">DBH QUICK GUIDE · STEP '+(index+1)+' OF '+steps.length+'</span><button class="dbh-guide-close" type="button" aria-label="Close guide">×</button></div><h3>'+esc(step.title)+'</h3><p>'+esc(step.body)+'</p><div class="dbh-guide-progress" aria-label="Guide progress"><span style="width:'+(((index+1)/steps.length)*100)+'%"></span></div><div class="dbh-guide-actions"><button class="dbh-guide-skip" type="button">Skip guide</button><button class="dbh-guide-next" type="button">'+(index===steps.length-1?'Finish guide ✓':'Next →')+'</button></div>';
+ panel.querySelector('.dbh-guide-close').addEventListener('click',closeGuide);panel.querySelector('.dbh-guide-skip').addEventListener('click',closeGuide);panel.querySelector('.dbh-guide-next').addEventListener('click',()=>{if(index<steps.length-1){index++;showStep();}else{closeGuide();showSuccess();}});
+}
+launch.addEventListener('click',()=>{closeGuide();steps=getSteps();index=0;panel=document.createElement('section');panel.id='dbhGuidePanel';panel.setAttribute('role','dialog');panel.setAttribute('aria-label','How to use this DBH page');document.body.appendChild(panel);showStep();});
+})();

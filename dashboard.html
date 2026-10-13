@@ -81,6 +81,8 @@ html,body{width:100%;max-width:100%;overflow-x:clip}body{min-width:0}.shell{grid
 @media(max-width:560px){.payment-modal-backdrop{padding:12px}.payment.payment-modal{grid-template-columns:1fr;padding:21px;border-radius:19px;gap:14px}.payment-modal .price{text-align:left;min-width:0;border-top:1px solid #ffffff30;padding-top:12px}.payment-modal .price strong{font-size:29px}.payment-modal .price small{max-width:none}.payment-modal .payment-actions{display:flex}.payment-modal .paybtn{width:100%;justify-content:center}}
 @media(prefers-reduced-motion:reduce){.payment-modal-backdrop,.payment.payment-modal{animation:none!important}}
 
+
+.setup-reminder{position:fixed;right:22px;bottom:22px;z-index:180;display:none;width:min(410px,calc(100vw - 28px));padding:18px;background:#fff;border:1px solid #bfdbfe;border-radius:18px;box-shadow:0 22px 70px #062b5230;animation:setupReminderIn .3s ease both}.setup-reminder.show{display:block}.setup-reminder-head{display:flex;gap:11px;align-items:flex-start}.setup-reminder-icon{width:40px;height:40px;flex:0 0 40px;display:grid;place-items:center;border-radius:12px;background:#eff6ff;color:#0b63ce}.setup-reminder-copy{flex:1;min-width:0}.setup-reminder-copy strong{display:block;color:#082e55;font-size:13px}.setup-reminder-copy p{font-size:10px;line-height:1.6;color:#64748b;margin:5px 0 0}.setup-reminder-list{display:grid;gap:6px;margin:13px 0}.setup-reminder-item{display:flex;gap:8px;align-items:center;font-size:10px;color:#334155}.setup-reminder-item i{color:#0b63ce}.setup-reminder-actions{display:flex;gap:8px}.setup-reminder-actions button{flex:1;border:1px solid #dbeafe;border-radius:10px;padding:10px 12px;background:#fff;color:#0b63ce;font-size:10px;font-weight:900;cursor:pointer}.setup-reminder-actions .primary{background:#0b63ce;border-color:#0b63ce;color:#fff}.setup-reminder-close{position:absolute;top:9px;right:9px;border:0;background:transparent;color:#94a3b8;font-size:17px;cursor:pointer;padding:4px}@keyframes setupReminderIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}@media(max-width:550px){.setup-reminder{right:12px;bottom:12px;padding:15px}.setup-reminder-actions{display:grid;grid-template-columns:1fr}}@media(prefers-reduced-motion:reduce){.setup-reminder{animation:none}}
 </style>
 </head>
 <body>
@@ -196,6 +198,7 @@ html,body{width:100%;max-width:100%;overflow-x:clip}body{min-width:0}.shell{grid
 </main>
 </div>
 
+<div id="setupReminder" class="setup-reminder" role="status" aria-live="polite"><button type="button" id="setupReminderClose" class="setup-reminder-close" aria-label="Dismiss reminder">×</button><div class="setup-reminder-head"><div class="setup-reminder-icon"><i class="fa-solid fa-list-check"></i></div><div class="setup-reminder-copy"><strong id="setupReminderTitle">Finish your agent setup</strong><p id="setupReminderText">Complete your professional profile so customers can trust and contact you.</p></div></div><div id="setupReminderList" class="setup-reminder-list"></div><div class="setup-reminder-actions"><button type="button" id="setupReminderLater">Remind me later</button><button type="button" class="primary" id="setupReminderGo">Finish setup <i class="fa-solid fa-arrow-right"></i></button></div></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/js/app.js?v=20261010-dashboard-usd-fee"></script>
 <script>
@@ -246,6 +249,27 @@ function setToolAccess(open){
   $('toolState').style.borderColor=open?'#bbf7d0':'#fde68a';
 }
 
+function scheduleAgentSetupReminder(app,user){
+ const identities=Array.isArray(user?.identities)?user.identities:[];
+ const hasSocial=identities.some(i=>['x','github','gitlab'].includes(String(i.provider||'').toLowerCase()));
+ const tasks=[
+  {label:'Add a professional profile photo',done:!!app.profile_photo_url},
+  {label:'Confirm your phone and WhatsApp numbers',done:!!String(app.phone||'').trim()&&!!String(app.whatsapp_number||'').trim()},
+  {label:'Add your business name and agent type',done:!!String(app.business_name||'').trim()&&!!String(app.business_type||'').trim()},
+  {label:'Set your service location and description',done:!!String(app.state||'').trim()&&!!String(app.city||'').trim()&&!!String(app.bio||'').trim()},
+  {label:'Connect X, GitHub or GitLab',done:hasSocial}
+ ];
+ const remaining=tasks.filter(t=>!t.done);if(!remaining.length)return;
+ const panel=$('setupReminder'),list=$('setupReminderList');
+ $('setupReminderTitle').textContent='Your agent setup is not finished';
+ $('setupReminderText').textContent='You have '+remaining.length+' profile setup '+(remaining.length===1?'item':'items')+' remaining. Complete them to make your DBH profile more professional.';
+ list.replaceChildren();
+ remaining.slice(0,4).forEach(task=>{const row=document.createElement('div');row.className='setup-reminder-item';const icon=document.createElement('i');icon.className='fa-regular fa-circle';const label=document.createElement('span');label.textContent=task.label;row.append(icon,label);list.appendChild(row)});
+ if(remaining.length>4){const more=document.createElement('div');more.className='setup-reminder-item';more.textContent='+'+(remaining.length-4)+' more setup items';list.appendChild(more)}
+ const close=()=>panel.classList.remove('show');
+ $('setupReminderClose').onclick=close;$('setupReminderLater').onclick=close;$('setupReminderGo').onclick=()=>{location.href='settings.html'};
+ window.setTimeout(()=>panel.classList.add('show'),60000);
+}
 function countText(id,count){const el=$(id);if(el)el.textContent=typeof count==='number'?count.toLocaleString('en-NG'):'—'}
 function formatActivityTime(value){if(!value)return '';const d=new Date(value);if(Number.isNaN(d.getTime()))return '';return new Intl.DateTimeFormat('en-NG',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}).format(d)}
 function safeText(value){return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
@@ -439,6 +463,7 @@ async function boot(){
       setToolAccess(false);
     }
 
+    scheduleAgentSetupReminder(app,user);
   }catch(error){
     console.error('Dashboard error:',error);
     showMessage('Something went wrong while loading the dashboard. Please refresh and try again.','err');

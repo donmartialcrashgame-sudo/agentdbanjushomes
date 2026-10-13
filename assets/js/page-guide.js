@@ -129,12 +129,13 @@
     highlighted=null;
     const step=steps[index];
     if(step.target&&visible(step.target)){
+      if(backdrop)backdrop.style.background='transparent';
       highlighted=step.target;
       highlighted.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center',inline:'nearest'});
       highlighted.classList.add('dbh-guide-target');
       positionSpotlight();
       spotlight.style.display='block';
-    }else{spotlight.style.display='none';}
+    }else{spotlight.style.display='none';if(backdrop)backdrop.style.background='rgba(3,15,32,.72)';}
     const prevDisabled=index===0;
     panel.innerHTML='<div class="dbh-guide-top"><span class="dbh-guide-kicker">FORMAL PAGE TOUR · STEP '+(index+1)+' OF '+steps.length+'</span><button class="dbh-guide-close" type="button" aria-label="Close tour">×</button></div><h3>'+esc(step.title)+'</h3><p aria-live="polite">'+esc(step.body)+'</p>'+(step.tip?'<div class="dbh-guide-tip">'+esc(step.tip)+'</div>':'')+'<div class="dbh-guide-progress"><span style="width:'+((index+1)/steps.length*100)+'%"></span></div><div class="dbh-guide-actions"><button class="dbh-guide-skip" type="button">Skip tour</button><div style="display:flex;gap:7px"><button class="dbh-guide-prev" type="button" '+(prevDisabled?'disabled':'')+'>← Previous</button><button class="dbh-guide-next" type="button">'+(index===steps.length-1?'Finish tour ✓':'Next →')+'</button></div></div>';
     panel.querySelector('.dbh-guide-close').addEventListener('click',closeTour);

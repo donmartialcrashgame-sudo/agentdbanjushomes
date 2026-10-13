@@ -83,6 +83,14 @@ html,body{width:100%;max-width:100%;overflow-x:clip}body{min-width:0}.shell{grid
 
 
 .setup-reminder{position:fixed;right:22px;bottom:22px;z-index:180;display:none;width:min(410px,calc(100vw - 28px));padding:18px;background:#fff;border:1px solid #bfdbfe;border-radius:18px;box-shadow:0 22px 70px #062b5230;animation:setupReminderIn .3s ease both}.setup-reminder.show{display:block}.setup-reminder-head{display:flex;gap:11px;align-items:flex-start}.setup-reminder-icon{width:40px;height:40px;flex:0 0 40px;display:grid;place-items:center;border-radius:12px;background:#eff6ff;color:#0b63ce}.setup-reminder-copy{flex:1;min-width:0}.setup-reminder-copy strong{display:block;color:#082e55;font-size:13px}.setup-reminder-copy p{font-size:10px;line-height:1.6;color:#64748b;margin:5px 0 0}.setup-reminder-list{display:grid;gap:6px;margin:13px 0}.setup-reminder-item{display:flex;gap:8px;align-items:center;font-size:10px;color:#334155}.setup-reminder-item i{color:#0b63ce}.setup-reminder-actions{display:flex;gap:8px}.setup-reminder-actions button{flex:1;border:1px solid #dbeafe;border-radius:10px;padding:10px 12px;background:#fff;color:#0b63ce;font-size:10px;font-weight:900;cursor:pointer}.setup-reminder-actions .primary{background:#0b63ce;border-color:#0b63ce;color:#fff}.setup-reminder-close{position:absolute;top:9px;right:9px;border:0;background:transparent;color:#94a3b8;font-size:17px;cursor:pointer;padding:4px}@keyframes setupReminderIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}@media(max-width:550px){.setup-reminder{right:12px;bottom:12px;padding:15px}.setup-reminder-actions{display:grid;grid-template-columns:1fr}}@media(prefers-reduced-motion:reduce){.setup-reminder{animation:none}}
+
+/* First-time interactive dashboard walkthrough */
+.how-to-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;flex:0 0 auto;border:1px solid #bfdbfe;background:#fff;color:#0b63ce;border-radius:12px;padding:11px 14px;font-size:10px;font-weight:900;cursor:pointer;box-shadow:0 5px 16px #0b63ce0d}.how-to-btn:hover{background:#eff6ff;transform:translateY(-1px)}
+.dbh-tour-overlay[hidden],.dbh-tour-card[hidden]{display:none!important}.dbh-tour-overlay{position:fixed;inset:0;z-index:4000;background:rgba(2,15,31,.64);backdrop-filter:blur(2px)}.dbh-tour-spotlight{position:relative!important;z-index:4002!important;outline:3px solid #60a5fa!important;outline-offset:4px!important;box-shadow:0 0 0 7px rgba(96,165,250,.28),0 0 0 9999px rgba(2,15,31,.64)!important;pointer-events:none!important;border-radius:14px!important}.dbh-tour-card{position:fixed;z-index:4005;right:20px;bottom:20px;width:min(410px,calc(100vw - 28px));padding:19px;background:#fff;border:1px solid #bfdbfe;border-radius:19px;box-shadow:0 25px 90px #0005;color:#0f172a;animation:dbhTourIn .24s ease both}.dbh-tour-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.dbh-tour-brand{font-size:9px;font-weight:900;letter-spacing:.12em;color:#0b63ce}.dbh-tour-count{font-size:9px;font-weight:900;color:#64748b;background:#f1f5f9;padding:6px 9px;border-radius:99px}.dbh-tour-card h3{font-size:17px;line-height:1.3;margin:0 0 7px;color:#082e55}.dbh-tour-card p{font-size:11px;line-height:1.7;color:#526275;margin:0}.dbh-tour-progress{height:5px;background:#eaf1f8;border-radius:99px;overflow:hidden;margin:15px 0}.dbh-tour-progress span{display:block;height:100%;width:0;background:linear-gradient(90deg,#0b63ce,#60a5fa);transition:width .2s ease}.dbh-tour-actions{display:flex;align-items:center;gap:8px}.dbh-tour-actions button{border:1px solid #dbeafe;border-radius:10px;background:#fff;color:#0b63ce;padding:10px 12px;font-size:10px;font-weight:900;cursor:pointer}.dbh-tour-actions .next{margin-left:auto;background:#0b63ce;color:#fff;border-color:#0b63ce}.dbh-tour-actions .skip{border-color:transparent;color:#64748b}.dbh-tour-card .dbh-tour-note{margin-top:10px;font-size:9px;color:#64748b}.dbh-tour-spotlight[aria-disabled="true"]{opacity:1!important}
+@keyframes dbhTourIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media(max-width:900px){.welcome{display:flex!important;align-items:flex-start!important;gap:10px}.how-to-btn{white-space:nowrap;padding:10px 11px}.dbh-tour-card{right:12px;bottom:12px;width:calc(100vw - 24px);padding:16px}.dbh-tour-card h3{font-size:16px}}
+@media(max-width:480px){.welcome{flex-direction:column}.how-to-btn{align-self:flex-start}.dbh-tour-actions{gap:6px}.dbh-tour-actions button{padding:10px}.dbh-tour-card .dbh-tour-note{font-size:8px}}
+@media(prefers-reduced-motion:reduce){.dbh-tour-card,.dbh-tour-progress span{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
@@ -106,6 +114,7 @@ html,body{width:100%;max-width:100%;overflow-x:clip}body{min-width:0}.shell{grid
 <main class="main">
 <div class="welcome">
 <div><div class="eyebrow">AGENT DASHBOARD</div><h1 id="welcome">Welcome back</h1><div class="sub">Manage your DBH agent account, payment, verification and — once approved — your property marketplace tools.</div></div>
+<button class="how-to-btn" id="startAgentTour" type="button"><i class="fa-solid fa-circle-play"></i> How to use</button>
 </div>
 
 <div class="notice" id="applicationNotice">
@@ -199,6 +208,15 @@ html,body{width:100%;max-width:100%;overflow-x:clip}body{min-width:0}.shell{grid
 </div>
 
 <div id="setupReminder" class="setup-reminder" role="status" aria-live="polite"><button type="button" id="setupReminderClose" class="setup-reminder-close" aria-label="Dismiss reminder">×</button><div class="setup-reminder-head"><div class="setup-reminder-icon"><i class="fa-solid fa-list-check"></i></div><div class="setup-reminder-copy"><strong id="setupReminderTitle">Finish your agent setup</strong><p id="setupReminderText">Complete your professional profile so customers can trust and contact you.</p></div></div><div id="setupReminderList" class="setup-reminder-list"></div><div class="setup-reminder-actions"><button type="button" id="setupReminderLater">Remind me later</button><button type="button" class="primary" id="setupReminderGo">Finish setup <i class="fa-solid fa-arrow-right"></i></button></div></div>
+<div class="dbh-tour-overlay" id="dbhTourOverlay" hidden></div>
+<section class="dbh-tour-card" id="dbhTourCard" role="dialog" aria-modal="true" aria-labelledby="dbhTourTitle" hidden>
+  <div class="dbh-tour-top"><span class="dbh-tour-brand"><i class="fa-solid fa-compass"></i> DBH QUICK GUIDE</span><span class="dbh-tour-count" id="dbhTourCount">STEP 1 OF 12</span></div>
+  <h3 id="dbhTourTitle">Welcome to your agent dashboard</h3>
+  <p id="dbhTourText">This short tour will show you what each area is for.</p>
+  <div class="dbh-tour-progress"><span id="dbhTourProgress"></span></div>
+  <div class="dbh-tour-actions"><button class="skip" id="dbhTourSkip" type="button">Skip tour</button><button id="dbhTourBack" type="button">Back</button><button class="next" id="dbhTourNext" type="button">Next <i class="fa-solid fa-arrow-right"></i></button></div>
+  <p class="dbh-tour-note">This tour explains the sections; it will not change payments, verification, or listing status.</p>
+</section>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/js/app.js?v=20261010-dashboard-usd-fee"></script>
 <script>
@@ -481,6 +499,84 @@ $('logout').onclick=async()=>{
   setButtonLoading(button,true,'Signing out...');
   try{await S.auth.signOut();location.href='index.html'}catch(error){console.error(error);setButtonLoading(button,false,'')}
 };
+
+
+/* First-time dashboard walkthrough. The tour only highlights sections; it never changes account access. */
+(function(){
+  const tourSteps=[
+    {selector:'.hero-dashboard',title:'Your dashboard overview',text:'Start here for a summary of your DBH workspace. Use the quick buttons to reach common tasks. Your account status and any required next steps appear above.'},
+    {selector:'#applicationNotice',title:'Account status and next steps',text:'Read this notice for payment, verification, or administrator instructions. Registration payment and admin approval are separate steps; completing one does not automatically complete the other.'},
+    {selector:'#quickVerification',title:'Trust and verification',text:'Open Verification to upload or review the documents requested by DBH Admin and check your application status.'},
+    {selector:'#dbhSidebar a[data-page="add-property.html"]',title:'Add Property',text:'When your registration payment is confirmed and your account is approved/verified, use Add Property to submit a listing, its details, photos, and supporting information. It may remain locked until then.'},
+    {selector:'#dbhSidebar a[data-page="properties.html"]',title:'My Properties',text:'View and manage the properties you have submitted. Listings can require admin review before they are published to customers.'},
+    {selector:'#dbhSidebar a[data-page="activity.html"]',title:'Activity & Reports',text:'Review activity recorded on your listings, such as views and customer contact actions. This section may require your agent tools to be unlocked.'},
+    {selector:'#dbhSidebar a[data-page="enquiries.html"]',title:'Complaints & Reports',text:'Use this section to review property-related enquiries, complaints, and customer reports that are available to your account.'},
+    {selector:'#dbhSidebar a[data-page="payment-result.html"]',title:'Payment Receipts',text:'Find your payment records and open available receipts here. Keep your receipt details for reference if you need support.'},
+    {selector:'#dbhSidebar a[data-page="wallet.html"]',title:'Agent Wallet',text:'Open your wallet to review wallet details and any available banking setup. Wallet features depend on the account’s current eligibility and setup status.'},
+    {selector:'#dbhSidebar a[data-page="agent-documents.html"]',title:'Verification',text:'Upload or review your required identity and legal documents. If a document is declined, read the admin note and follow the instructions before resubmitting.'},
+    {selector:'#dbhSidebar a[data-page="notifications.html"]',title:'Notifications',text:'Check this section for account updates, verification decisions, payment notices, and messages from DBH Admin.'},
+    {selector:'#dbhSidebar a[data-page="settings.html"]',title:'My Profile & Settings',text:'Keep your photo, contact details, business information, service location, and professional bio up to date. Connect a supported social account here. Website and licence details are optional.'}
+  ];
+  let index=0,activeTarget=null,started=false;
+  const overlay=document.getElementById('dbhTourOverlay'),card=document.getElementById('dbhTourCard');
+  const title=document.getElementById('dbhTourTitle'),copy=document.getElementById('dbhTourText'),count=document.getElementById('dbhTourCount'),progress=document.getElementById('dbhTourProgress'),back=document.getElementById('dbhTourBack'),next=document.getElementById('dbhTourNext');
+  function clearTarget(){if(activeTarget){activeTarget.classList.remove('dbh-tour-spotlight');activeTarget=null}}
+  function findTarget(step){try{return document.querySelector(step.selector)}catch(_){return null}}
+  function openMobileSidebar(target){
+    const side=document.getElementById('dbhSidebar');
+    if(!side||window.innerWidth>900)return;
+    if(target&&side.contains(target)){
+      side.classList.add('open');
+      document.getElementById('dbhSidebarOverlay')?.classList.add('show');
+    }
+  }
+  function closeMobileSidebar(){
+    if(window.innerWidth>900)return;
+    document.getElementById('dbhSidebar')?.classList.remove('open');
+    document.getElementById('dbhSidebarOverlay')?.classList.remove('show');
+  }
+  function render(){
+    clearTarget();
+    const step=tourSteps[index];
+    let target=findTarget(step);
+    if(!target&&step.selector.includes('#dbhSidebar a[data-page="')){
+      target=document.querySelector('#dbhSidebar a[data-page="settings.html"]');
+    }
+    if(!target)return finish(false);
+    openMobileSidebar(target);
+    if(target.closest('#dbhSidebar')&&window.innerWidth<=900){
+      target.scrollIntoView({behavior:'auto',block:'nearest'});
+    }else if(index===0||index===1||index===2){
+      target.scrollIntoView({behavior:'smooth',block:'center'});
+    }
+    activeTarget=target;target.classList.add('dbh-tour-spotlight');
+    title.textContent=step.title;copy.textContent=step.text;
+    count.textContent='STEP '+(index+1)+' OF '+tourSteps.length;
+    progress.style.width=((index+1)/tourSteps.length*100)+'%';
+    back.disabled=index===0;back.style.opacity=index===0?'.45':'1';
+    next.innerHTML=index===tourSteps.length-1?'Finish tour <i class="fa-solid fa-check"></i>':'Next <i class="fa-solid fa-arrow-right"></i>';
+    overlay.hidden=false;card.hidden=false;
+  }
+  function finish(markComplete){
+    clearTarget();overlay.hidden=true;card.hidden=true;closeMobileSidebar();started=false;
+    if(markComplete){try{localStorage.setItem('dbhAgentTourCompleted_v1','1')}catch(_){}}
+  }
+  function start(force){
+    if(started)return;
+    let completed=false;try{completed=localStorage.getItem('dbhAgentTourCompleted_v1')==='1'}catch(_){}
+    if(!force&&completed)return;
+    started=true;index=0;render();
+  }
+  back.addEventListener('click',()=>{if(index>0){index--;render()}});
+  next.addEventListener('click',()=>{if(index<tourSteps.length-1){index++;render()}else finish(true)});
+  document.getElementById('dbhTourSkip').addEventListener('click',()=>finish(true));
+  document.getElementById('startAgentTour').addEventListener('click',()=>start(true));
+  overlay.addEventListener('click',()=>{});
+  document.addEventListener('keydown',e=>{if(!started)return;if(e.key==='Escape')finish(true);else if(e.key==='ArrowRight'&&index<tourSteps.length-1){index++;render()}else if(e.key==='ArrowLeft'&&index>0){index--;render()}});
+  window.addEventListener('resize',()=>{if(started)render()});
+  window.startDBHAgentTour=()=>start(true);
+  window.setTimeout(()=>start(false),1100);
+})();
 
 boot();
 </script>

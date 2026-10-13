@@ -5,8 +5,10 @@
   window.__dbhUniversalGuideLoaded = true;
 
   const css = `
-    #dbhGuideLaunch{position:fixed!important;top:12px!important;right:18px!important;bottom:auto!important;z-index:2147483640!important;display:flex!important;align-items:center!important;gap:9px!important;padding:12px 17px!important;border:1px solid #ffffff55!important;border-radius:999px!important;background:linear-gradient(135deg,#062b52,#0b63ce)!important;color:#fff!important;font:850 12px/1.2 system-ui,sans-serif!important;box-shadow:0 8px 26px #062b5240!important;cursor:pointer!important}
-    #dbhGuideLaunch:hover{transform:translateY(-1px);filter:brightness(1.08)}
+    /* Animate the existing page-specific tour button; never create a second launcher. */
+    #startAgentTour,.how-to-use-btn,.howToUseBtn,[data-tour-launcher="true"]{animation:dbhTourPulse 2.4s ease-in-out infinite!important;box-shadow:0 0 0 0 rgba(11,99,206,.28)!important}
+    #startAgentTour:hover,.how-to-use-btn:hover,.howToUseBtn:hover,[data-tour-launcher="true"]:hover{animation-play-state:paused!important;transform:translateY(-1px)!important}
+    @keyframes dbhTourPulse{0%,100%{box-shadow:0 0 0 0 rgba(11,99,206,.24)!important}50%{box-shadow:0 0 0 7px rgba(11,99,206,0)!important}}
     #dbhTourBackdrop{position:fixed!important;inset:0!important;z-index:2147483000!important;background:transparent!important;pointer-events:none!important}
     #dbhTourSpotlight{position:fixed!important;z-index:2147483002!important;pointer-events:none!important;border:3px solid #7dd3fc!important;border-radius:13px!important;background:transparent!important;box-shadow:0 0 0 5px #38bdf833,0 0 0 9999px rgba(3,15,32,.72)!important;transition:top .22s ease,left .22s ease,width .22s ease,height .22s ease!important}
     #dbhGuidePanel{position:fixed!important;left:50%!important;bottom:18px!important;transform:translateX(-50%)!important;width:min(520px,calc(100vw - 24px))!important;max-height:48vh!important;overflow:auto!important;z-index:2147483645!important;background:#fff!important;color:#10243a!important;border:1px solid #bfdbfe!important;border-radius:20px!important;padding:20px!important;box-shadow:0 22px 70px #020d1f70!important;font:14px/1.55 system-ui,sans-serif!important;box-sizing:border-box!important}
@@ -39,8 +41,8 @@
     #dbhGuideSuccess p{font-size:13px!important;line-height:1.6!important;color:#526275!important}
     #dbhGuideSuccess button{width:100%!important;border:0!important;border-radius:13px!important;padding:13px!important;background:#0b63ce!important;color:#fff!important;font-size:13px!important;font-weight:900!important;cursor:pointer!important}
     .dbh-guide-target{position:relative!important;z-index:2147483001!important;outline:3px solid #7dd3fc!important;outline-offset:4px!important;border-radius:10px!important;box-shadow:0 0 0 8px #38bdf833!important;scroll-margin:110px!important}
-    @media(max-width:600px){#dbhGuideLaunch{top:8px!important;right:8px!important;padding:10px 12px!important;font-size:11px!important}#dbhGuidePanel{bottom:8px!important;max-height:54vh!important;padding:16px!important}#dbhGuidePanel h3{font-size:18px!important}}
-    @media(prefers-reduced-motion:reduce){#dbhGuidePanel *,#dbhGuideWelcome *,#dbhTourSpotlight{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+    @media(max-width:600px){#dbhGuidePanel{bottom:8px!important;max-height:54vh!important;padding:16px!important}#dbhGuidePanel h3{font-size:18px!important}}
+    @media(prefers-reduced-motion:reduce){#startAgentTour,.how-to-use-btn,.howToUseBtn,[data-tour-launcher="true"],#dbhGuidePanel *,#dbhGuideWelcome *,#dbhTourSpotlight{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
   `;
   const style = document.createElement('style');
   style.id = 'dbhFormalTourStyles';
@@ -52,12 +54,6 @@
   const pageName = path.replace(/\.html$/,'').replace(/[-_]/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
   const heading = document.querySelector('main h1,.main-content h1,.content h1,.wrap h1,h1,h2');
   const pageTitle = heading && heading.textContent.trim() ? heading.textContent.trim() : pageName;
-  const launch = document.createElement('button');
-  launch.id = 'dbhGuideLaunch'; launch.type = 'button';
-  launch.innerHTML = '<span aria-hidden="true">✦</span><span>Start page tour</span>';
-  launch.setAttribute('aria-label','Start the guided tour for this page');
-  document.body.appendChild(launch);
-
   let panel=null, backdrop=null, spotlight=null, welcome=null, steps=[], index=0, highlighted=null, oldFocus=null;
   const esc = value => String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const visible = el => !!el && el.getClientRects().length>0 && getComputedStyle(el).visibility!=='hidden' && getComputedStyle(el).display!=='none';
@@ -158,11 +154,5 @@
     document.addEventListener('keydown',keyHandler);window.addEventListener('resize',positionSpotlight);window.addEventListener('scroll',positionSpotlight,true);
     showStep();
   }
-  launch.addEventListener('click',()=>{
-    oldFocus=document.activeElement;
-    welcome=document.createElement('div');welcome.id='dbhGuideWelcome';welcome.setAttribute('role','dialog');welcome.setAttribute('aria-modal','true');
-    welcome.innerHTML='<div class="dbh-welcome-card"><div class="dbh-welcome-icon">✦</div><div class="dbh-welcome-label">D Banjus Homes · Agent Portal</div><h2>Guided tour of '+esc(pageTitle)+'</h2><p>This is a step-by-step walkthrough of the page you are currently viewing. The tour highlights real parts of the interface, explains what each area is for, and points out what to check before you take action.</p><ul><li>Follow each highlighted area in order.</li><li>Use Previous and Next to move through the explanations.</li><li>Press Escape or Skip tour to exit at any time.</li><li>The tour will not submit forms or change your account.</li></ul><button type="button">Begin guided tour →</button></div>';
-    document.body.appendChild(welcome);
-    welcome.querySelector('button').addEventListener('click',()=>{welcome.remove();welcome=null;startTour();});
-  });
+  /* The dashboard's existing guided tour is the single source of truth. */
 })();

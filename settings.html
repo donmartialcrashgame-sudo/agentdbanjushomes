@@ -286,8 +286,8 @@ $('socialDetailsModal').addEventListener('click',e=>{if(e.target===$('socialDeta
 $('disconnectSocialAccount').onclick=disconnectSocialAccount;
 
 function cleanDomain(input){
- let d=String(input||'').trim().toLowerCase().replace(/^https?:\\/\\//,'').replace(/\\/$/,'');
- if(!d||d.length>253||/[\\/@: ?#]/.test(d)||!/^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,63}$/.test(d))throw new Error('Enter a valid domain name, such as yourdomain.com.');
+ let d=String(input||'').trim().toLowerCase().replace(/^https?:\/\//,'').replace(/\/$/,'');
+ if(!d||d.length>253||/[\/@: ?#]/.test(d)||!/^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(d))throw new Error('Enter a valid domain name, such as yourdomain.com.');
  if(d==='dbanjushomes.online'||d.endsWith('.dbanjushomes.online')||d.endsWith('.onrender.com'))throw new Error('Enter a domain you own, not a DBH or Render domain.');
  return d;
 }

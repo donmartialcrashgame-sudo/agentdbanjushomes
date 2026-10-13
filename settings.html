@@ -48,7 +48,7 @@
 
 <section class="setting-card" id="domainHostingCard"><div class="setting-head"><div class="head-icon"><i class="fa-solid fa-globe"></i></div><div><h2>Custom domain & DBH hosting</h2><p>Verify a domain you own and request that it opens your DBH-hosted public agent profile.</p></div></div><div class="setting-body">
 <div class="message" id="domainMessage" aria-live="polite"></div>
-<div class="field"><label for="customDomain">Your domain name</label><input id="customDomain" inputmode="url" autocomplete="url" placeholder="yourdomain.com"><div class="hint">Enter only the domain, without a path, email address, or existing URL. Example: yourdomain.com or agents.yourdomain.com.</div></div>
+<div id="domainConnectedSummary" hidden style="display:none;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px;border:1px solid #bfdbfe;border-radius:14px;background:#f8fbff"><div style="min-width:0"><strong id="domainConnectedName" style="display:block;font-size:13px;overflow-wrap:anywhere">Domain connected</strong><span id="domainConnectedState" style="display:block;font-size:10px;color:#64748b;margin-top:5px">Domain status</span></div><button class="btn primary" type="button" id="viewDomainDetails">View details</button></div><div id="domainEditFields"><div class="field"><label for="customDomain">Your domain name</label><input id="customDomain" inputmode="url" autocomplete="url" placeholder="yourdomain.com"><div class="hint">Enter only the domain, without a path, email address, or existing URL. Example: yourdomain.com or agents.yourdomain.com.</div></div></div>
 <div class="field" style="margin-top:14px"><label for="domainDestination">DBH destination</label><input id="domainDestination" readonly value="Your DBH public agent profile"><div class="hint">The domain will be routed to your DBH-hosted profile after DBH activates it. This does not create a separate website or change your existing DNS records automatically.</div></div>
 <div class="domain-status" id="domainStatus" style="margin:14px 0;padding:13px;border:1px solid #dbeafe;background:#f8fbff;border-radius:12px;font-size:10px;line-height:1.6;color:#28527b">No custom domain has been configured.</div>
 <div id="dnsInstructions" hidden style="margin-top:14px;padding:15px;border:1px solid #dbeafe;border-radius:13px;background:#f8fbff"><strong style="font-size:11px;color:#0b3767">Add this DNS TXT record at your domain provider</strong><p class="hint">This record proves you control the domain. Do not delete or change your mail records.</p><div class="grid" style="margin-top:12px"><div class="field full"><label>Record type</label><input readonly value="TXT"></div><div class="field full"><label>Record name / host</label><input id="dnsRecordName" readonly><button class="btn" type="button" data-copy="dnsRecordName" style="margin-top:7px">Copy record name</button></div><div class="field full"><label>Record value</label><input id="dnsRecordValue" readonly><button class="btn" type="button" data-copy="dnsRecordValue" style="margin-top:7px">Copy record value</button></div></div><p class="hint">DNS changes can take time to appear. The check looks for the exact TXT value using a public DNS resolver.</p></div>
@@ -56,6 +56,7 @@
 <div class="hint" style="margin-top:13px"><i class="fa-solid fa-shield-halved"></i> DNS verification is separate from hosting activation. DBH must approve and configure the custom domain and HTTPS before it becomes live. Never share your domain provider password.</div>
 </div></section>
 
+<div id="domainDetailsModal" hidden class="social-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="domainDetailsTitle"><div class="social-modal"><div class="social-modal-head"><div><div class="eyebrow">DBH CUSTOM DOMAIN</div><h2 id="domainDetailsTitle">Domain details</h2><p>Review your domain, DNS verification and hosting activation status.</p></div><button class="icon" type="button" id="closeDomainDetails" aria-label="Close domain details"><i class="fa-solid fa-xmark"></i></button></div><div class="social-detail-grid"><div class="social-detail-card"><h3>Domain</h3><div class="social-detail-row"><span>Address</span><strong id="domainDetailAddress">—</strong></div><div class="social-detail-row"><span>DNS ownership</span><strong id="domainDetailDns">—</strong></div></div><div class="social-detail-card"><h3>Hosting</h3><div class="social-detail-row"><span>Activation</span><strong id="domainDetailActivation">—</strong></div><div class="social-detail-row"><span>Destination</span><strong>DBH public agent profile</strong></div></div></div><div id="domainDetailHint" class="hint">A saved domain is not necessarily live until DNS routing and HTTPS are configured.</div><div class="social-detail-actions"><button class="btn" type="button" id="editDomainDetails">Edit domain settings</button><a class="btn primary" id="openCustomDomain" href="#" target="_blank" rel="noopener noreferrer" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center">Open domain <i class="fa-solid fa-arrow-up-right-from-square" style="margin-left:7px"></i></a></div></div></div>
 <section class="setting-card"><div class="setting-head"><div class="head-icon"><i class="fa-solid fa-bell"></i></div><div><h2>Notifications</h2><p>Choose how this browser handles DBH agent notifications.</p></div></div><div class="setting-body">
 <div class="toggle-row"><div class="toggle-copy"><strong>Customer enquiry alerts</strong><span>Show alerts when a customer contacts you about a property.</span></div><label class="switch"><input type="checkbox" id="prefEnquiries" checked><span class="slider"></span></label></div>
 <div class="toggle-row"><div class="toggle-copy"><strong>Property status alerts</strong><span>Notify you when DBH changes a property's verification or publishing status.</span></div><label class="switch"><input type="checkbox" id="prefProperty" checked><span class="slider"></span></label></div>
@@ -300,8 +301,17 @@ function domainSetup(){
 }
 function paintDomainSetup(links){
  const d=links?.domain_setup&&typeof links.domain_setup==='object'?links.domain_setup:{};
+ const connected=!!d.domain;
  $('customDomain').value=d.domain||'';
- $('domainStatus').textContent=d.domain?(d.dns_verified?'DNS ownership verified. Hosting activation is '+(d.activation_status||'pending DBH review')+'.':'Domain saved. Generate DNS instructions and verify ownership.'):'No custom domain has been configured.';
+ $('domainEditFields').hidden=connected;
+ $('domainEditFields').style.display=connected?'none':'block';
+ $('domainConnectedSummary').hidden=!connected;
+ $('domainConnectedSummary').style.display=connected?'flex':'none';
+ if(connected){
+  $('domainConnectedName').textContent=d.domain;
+  $('domainConnectedState').textContent=(d.dns_verified?'DNS verified':'DNS not verified')+' · '+(d.activation_status||'awaiting DBH hosting activation');
+ }
+ $('domainStatus').textContent=connected?(d.dns_verified?'DNS ownership verified. Hosting activation is '+(d.activation_status||'pending DBH review')+'.':'Domain saved. DNS ownership has not been verified yet.'):'No custom domain has been configured.';
  if(d.domain&&d.token){$('dnsRecordName').value='_dbh-verify.'+d.domain;$('dnsRecordValue').value='dbh-agent-verification='+d.token;$('dnsInstructions').hidden=false;$('verifyDomain').disabled=false;}
 }
 function currentDomainSetup(){return {...domainSetup(),domain:cleanDomain($('customDomain').value)}}
@@ -310,6 +320,21 @@ async function persistDomainSetup(setup){
  await profileAction({action:'save_agent_profile',full_name:val('fullName'),phone:val('phone'),whatsapp_number:val('whatsapp'),business_name:val('businessName'),business_type:val('businessType'),state:val('state'),city:val('city'),address:val('address'),bio:val('bio'),years_experience:val('yearsExperience'),license_number:val('licenseNumber'),social_links:links});
  currentApp={...currentApp,social_links:links};
 }
+function showDomainDetails(){
+ const d=domainSetup();if(!d.domain)return;
+ $('domainDetailAddress').textContent=d.domain;
+ $('domainDetailDns').textContent=d.dns_verified?'Verified':'Not verified';
+ $('domainDetailActivation').textContent=d.activation_status||'Pending DBH review';
+ $('domainDetailHint').textContent=d.dns_verified?'DNS ownership is verified. If the address still does not open, DBH must check the hosting service's custom-domain mapping, DNS target and HTTPS certificate.':'Add the TXT record and verify ownership. The domain will only open after its DNS points to DBH hosting and the hostname is configured on the hosting service.';
+ $('openCustomDomain').href='https://'+d.domain;
+ $('domainDetailsModal').hidden=false;document.body.style.overflow='hidden';
+}
+function closeDomainDetails(){ $('domainDetailsModal').hidden=true;document.body.style.overflow='';}
+$('viewDomainDetails').onclick=showDomainDetails;
+$('closeDomainDetails').onclick=closeDomainDetails;
+$('domainDetailsModal').addEventListener('click',e=>{if(e.target===$('domainDetailsModal'))closeDomainDetails()});
+$('editDomainDetails').onclick=()=>{closeDomainDetails();$('domainEditFields').hidden=false;$('domainEditFields').style.display='block';$('domainConnectedSummary').hidden=true;$('domainConnectedSummary').style.display='none';$('customDomain').focus()};
+
 $('prepareDomain').onclick=async()=>{
  try{
   const domain=cleanDomain($('customDomain').value);

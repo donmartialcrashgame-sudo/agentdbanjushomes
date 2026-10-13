@@ -91,6 +91,8 @@ html,body{width:100%;max-width:100%;overflow-x:clip}body{min-width:0}.shell{grid
 @media(max-width:900px){.welcome{display:flex!important;align-items:flex-start!important;gap:10px}.how-to-btn{white-space:nowrap;padding:10px 11px}.dbh-tour-card{right:12px;bottom:12px;width:calc(100vw - 24px);padding:16px}.dbh-tour-card h3{font-size:16px}}
 @media(max-width:480px){.welcome{flex-direction:column}.how-to-btn{align-self:flex-start}.dbh-tour-actions{gap:6px}.dbh-tour-actions button{padding:10px}.dbh-tour-card .dbh-tour-note{font-size:8px}}
 @media(prefers-reduced-motion:reduce){.dbh-tour-card,.dbh-tour-progress span{animation:none!important;transition:none!important}}
+.dbh-tour-success[hidden]{display:none!important}.dbh-tour-success{position:fixed;inset:0;z-index:5000;display:grid;place-items:center;padding:18px;background:rgba(2,15,31,.72);backdrop-filter:blur(7px);animation:dbhSuccessFade .22s ease both}.dbh-tour-success-card{position:relative;isolation:isolate;overflow:hidden;width:min(440px,100%);padding:30px 28px 25px;text-align:center;border:1px solid #dbeafe;border-radius:28px;background:linear-gradient(155deg,#fff 0%,#f5faff 100%);box-shadow:0 30px 100px #0005;animation:dbhSuccessPop .36s cubic-bezier(.2,.8,.2,1) both}.dbh-success-glow{position:absolute;z-index:-1;width:240px;height:180px;top:-100px;left:calc(50% - 120px);border-radius:50%;background:#bfdbfe;filter:blur(45px);opacity:.7}.dbh-success-close{position:absolute;top:13px;right:13px;width:34px;height:34px;border:1px solid #e2e8f0;border-radius:11px;background:#fff;color:#64748b;cursor:pointer}.dbh-success-gif{display:block;width:104px;height:104px;object-fit:contain;margin:0 auto 7px}.dbh-success-kicker{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border:1px solid #bbf7d0;border-radius:99px;background:#f0fdf4;color:#15803d;font-size:9px;font-weight:900;letter-spacing:.1em}.dbh-tour-success-card h2{margin:16px 0 9px;color:#082e55;font-size:clamp(23px,5vw,29px);letter-spacing:-.04em}.dbh-tour-success-card p{margin:0 auto;color:#526275;font-size:12px;line-height:1.8;max-width:350px}.dbh-success-tip{display:flex;align-items:flex-start;gap:10px;margin:19px 0;padding:12px 13px;border:1px solid #dbeafe;border-radius:14px;background:#eff6ff;text-align:left;color:#315777;font-size:10px;line-height:1.65}.dbh-success-tip>i{margin-top:2px;color:#0b63ce}.dbh-success-done{width:100%;display:flex;justify-content:center;align-items:center;gap:9px;padding:13px 16px;border:0;border-radius:13px;background:linear-gradient(110deg,#0b63ce,#084b9c);color:#fff;font-size:11px;font-weight:900;box-shadow:0 9px 22px #0b63ce2c;cursor:pointer;transition:transform .18s,box-shadow .18s}.dbh-success-done:hover{transform:translateY(-2px);box-shadow:0 13px 28px #0b63ce38}@keyframes dbhSuccessFade{from{opacity:0}to{opacity:1}}@keyframes dbhSuccessPop{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}@media(max-width:480px){.dbh-tour-success{padding:12px}.dbh-tour-success-card{padding:26px 20px 20px;border-radius:23px}.dbh-success-gif{width:88px;height:88px}}@media(prefers-reduced-motion:reduce){.dbh-tour-success,.dbh-tour-success-card,.dbh-success-done{animation:none!important;transition:none!important}}
+
 </style>
 </head>
 <body>
@@ -217,6 +219,18 @@ html,body{width:100%;max-width:100%;overflow-x:clip}body{min-width:0}.shell{grid
   <div class="dbh-tour-actions"><button class="skip" id="dbhTourSkip" type="button">Skip tour</button><button id="dbhTourBack" type="button">Back</button><button class="next" id="dbhTourNext" type="button">Next <i class="fa-solid fa-arrow-right"></i></button></div>
   <p class="dbh-tour-note">This tour explains the sections; it will not change payments, verification, or listing status.</p>
 </section>
+<div id="dbhTourSuccess" class="dbh-tour-success" hidden role="dialog" aria-modal="true" aria-labelledby="dbhTourSuccessTitle">
+  <div class="dbh-tour-success-card">
+    <div class="dbh-success-glow"></div>
+    <button type="button" id="dbhTourSuccessClose" class="dbh-success-close" aria-label="Close success message"><i class="fa-solid fa-xmark"></i></button>
+    <img class="dbh-success-gif" src="https://images.emojiterra.com/google/noto-emoji/animated-emoji/1f389.gif" alt="Animated celebration confetti">
+    <span class="dbh-success-kicker"><i class="fa-solid fa-circle-check"></i> FIRST GUIDE COMPLETED</span>
+    <h2 id="dbhTourSuccessTitle">Congratulations, Agent!</h2>
+    <p>You’ve successfully finished your first DBH dashboard guide. You now know where to find the main tools, notifications, wallet, properties, and account settings.</p>
+    <div class="dbh-success-tip"><i class="fa-solid fa-lightbulb"></i><span>You can replay the guide anytime by clicking <strong>How to use</strong> on your dashboard.</span></div>
+    <button type="button" id="dbhTourSuccessDone" class="dbh-success-done">Great, let’s go <i class="fa-solid fa-arrow-right"></i></button>
+  </div>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/js/app.js?v=20261010-dashboard-usd-fee"></script>
 <script>
@@ -599,9 +613,10 @@ $('logout').onclick=async()=>{
     card.style.right='auto';
     card.style.bottom='auto';
   }
-  function finish(markComplete){
+  function finish(markComplete,showSuccess=false){
     clearTarget();overlay.hidden=true;card.hidden=true;card.style.left='';card.style.top='';card.style.right='';card.style.bottom='';closeMobileSidebar();started=false;
     if(markComplete){try{localStorage.setItem('dbhAgentTourCompleted_v1','1')}catch(_){}}
+    if(showSuccess){const success=document.getElementById('dbhTourSuccess');if(success){success.hidden=false;document.getElementById('dbhTourSuccessDone')?.focus()}}
   }
   function start(force){
     if(started)return;
@@ -612,8 +627,12 @@ $('logout').onclick=async()=>{
     started=true;index=0;render();
   }
   back.addEventListener('click',()=>{if(index>0){index--;render()}});
-  next.addEventListener('click',()=>{if(index<activeSteps.length-1){index++;render()}else finish(true)});
+  next.addEventListener('click',()=>{if(index<activeSteps.length-1){index++;render()}else finish(true,true)});
   document.getElementById('dbhTourSkip').addEventListener('click',()=>finish(true));
+  const closeTourSuccess=()=>{const success=document.getElementById('dbhTourSuccess');if(success)success.hidden=true};
+  document.getElementById('dbhTourSuccessClose')?.addEventListener('click',closeTourSuccess);
+  document.getElementById('dbhTourSuccessDone')?.addEventListener('click',closeTourSuccess);
+  document.getElementById('dbhTourSuccess')?.addEventListener('click',e=>{if(e.target.id==='dbhTourSuccess')closeTourSuccess()});
   document.getElementById('startAgentTour').addEventListener('click',()=>start(true));
   overlay.addEventListener('click',()=>{});
   document.addEventListener('keydown',e=>{if(!started)return;if(e.key==='Escape')finish(true);else if(e.key==='ArrowRight'&&index<activeSteps.length-1){index++;render()}else if(e.key==='ArrowLeft'&&index>0){index--;render()}});

@@ -2,7 +2,7 @@
 (function(){
 'use strict';
 if(window.__dbhUniversalGuideLoaded)return;window.__dbhUniversalGuideLoaded=true;
-const css = \`
+const css = `
 #dbhGuideLaunch{position:fixed!important;right:20px!important;bottom:20px!important;z-index:2147483000!important;border:0!important;border-radius:999px!important;padding:13px 18px!important;background:linear-gradient(135deg,#0759b7,#0b75e8)!important;color:#fff!important;font:800 13px/1.2 system-ui,sans-serif!important;box-shadow:0 12px 30px #0759b744!important;cursor:pointer!important;display:flex!important;align-items:center!important;gap:9px!important}
 #dbhGuideLaunch:hover{transform:translateY(-2px)}
 #dbhGuidePanel{position:fixed!important;right:20px!important;bottom:78px!important;width:min(390px,calc(100vw - 28px))!important;z-index:2147483001!important;background:#fff!important;color:#10243e!important;border:1px solid #dbeafe!important;border-radius:20px!important;padding:20px!important;box-shadow:0 20px 70px #061b3650!important;font:14px/1.55 system-ui,sans-serif!important;box-sizing:border-box!important}
@@ -22,7 +22,7 @@ const css = \`
 @keyframes dbhSuccessPop{from{opacity:0;transform:translateY(12px) scale(.96)}to{opacity:1;transform:none}}
 @media(max-width:480px){#dbhGuideLaunch{right:12px!important;bottom:12px!important;padding:12px 14px!important;font-size:12px!important}#dbhGuidePanel{right:12px!important;bottom:70px!important;width:calc(100vw - 24px)!important}}
 @media(prefers-reduced-motion:reduce){#dbhGuidePanel *,#dbhGuideSuccess *{animation:none!important;transition:none!important}}
-\`;
+`;
 const style=document.createElement('style');style.id='dbhUniversalGuideStyles';style.textContent=css;document.head.appendChild(style);
 const pageName=(location.pathname.split('/').pop()||'dashboard.html').replace(/\.html$/i,'').replace(/[-_]/g,' ');
 const pretty=pageName.replace(/\b\w/g,c=>c.toUpperCase());

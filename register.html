@@ -23,7 +23,36 @@ button{font:inherit;cursor:pointer}.primary{border:0;background:var(--blue);colo
 .success-state{display:none;text-align:center;padding:25px 5px}.success-state.show{display:block}.success-icon{width:64px;height:64px;margin:0 auto 16px;border-radius:50%;background:#effdf4;color:#16a34a;display:grid;place-items:center;font-size:28px}.success-state h3{font-size:24px;margin:0 0 8px}.success-state p{font-size:12px;color:var(--muted);line-height:1.7}
 @media(max-width:800px){.layout{grid-template-columns:1fr}.hero{min-height:auto}.grid{grid-template-columns:1fr}.full{grid-column:auto}.hero h1{font-size:32px}.wrap{padding:25px 12px 50px}.card{padding:22px;border-radius:20px}.actions{display:grid}.actions>*{width:100%;text-align:center}.otp-row{flex-direction:column}.otp-row button{width:100%}}
 @media(max-width:520px){.top{padding:0 12px}.brand div{font-size:12px}.back{font-size:10px;padding:9px}.hero{padding:23px;border-radius:20px}.card{padding:19px}}
-.spin{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:rot .7s linear infinite;vertical-align:-2px;margin-right:8px}@keyframes rot{to{transform:rotate(360deg)}}.loading{pointer-events:none;opacity:.72}</style></head><body>
+.spin{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:rot .7s linear infinite;vertical-align:-2px;margin-right:8px}@keyframes rot{to{transform:rotate(360deg)}}.loading{pointer-events:none;opacity:.72}
+/* Refined DBH registration UI */
+body{background:radial-gradient(circle at 10% 12%,#e3efff 0,transparent 28%),linear-gradient(180deg,#f8fbff,#eef4fb)!important}
+.top{box-shadow:0 4px 20px rgba(6,38,74,.045);padding-inline:clamp(14px,5vw,64px)}
+.brand img{box-shadow:0 5px 14px #062b5220}
+.wrap{max-width:1160px;padding-top:clamp(22px,4vw,44px)}
+.layout{grid-template-columns:minmax(260px,.78fr) minmax(0,1.22fr);gap:clamp(14px,2.5vw,26px);align-items:stretch}
+.hero{min-height:100%;padding:clamp(23px,3vw,34px);box-shadow:0 22px 55px #062b5225}
+.hero h1{font-size:clamp(30px,3.2vw,43px);max-width:390px}
+.benefits{gap:15px}.benefit{font-size:12px;line-height:1.65}
+.benefit i{display:grid;place-items:center;width:34px;height:34px;flex:0 0 34px;border:1px solid #ffffff26;background:#ffffff13;border-radius:11px}
+.card{padding:clamp(19px,3vw,32px);border-radius:23px;box-shadow:0 20px 60px rgba(8,39,70,.08)}
+.head h2{font-size:clamp(23px,2.5vw,30px)}.step{border:1px solid #dbeafe;letter-spacing:.02em}
+.progress{height:7px;margin:20px 0 23px}.grid{gap:17px}
+.field label{font-size:12px;color:#18324e;margin-bottom:8px}
+.field input{min-height:48px;padding:13px 14px;background:#fbfdff;border-color:#d7e2ef;border-radius:12px;transition:border-color .18s,box-shadow .18s,background .18s}
+.field input:hover{border-color:#a8c7ee}.field input:focus{background:#fff;border-color:#60a5fa;box-shadow:0 0 0 4px #dbeafe}
+.field input[aria-invalid="true"]{border-color:#dc2626;background:#fffafa;box-shadow:0 0 0 3px #fee2e2}
+.field-error{display:none;color:#b91c1c;font-size:11px;line-height:1.45;margin-top:6px}.field-error.show{display:block}
+.hint{font-size:11px;line-height:1.6}.confirm{padding:14px;margin-top:20px;font-size:11px;line-height:1.65;background:#f7faff;border-color:#dce8f5}
+.confirm input{width:16px;height:16px;flex:0 0 16px}
+.primary,.outline{min-height:46px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:12px;transition:transform .18s,box-shadow .18s,background .18s}
+.primary{background:linear-gradient(135deg,#0759b7,#0b75e8);box-shadow:0 8px 18px #0b63ce24}.primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 12px 24px #0b63ce32}
+.outline:hover{background:#f8fbff;border-color:#bfdbfe}.actions{align-items:center}
+.msg{font-size:12px;padding:13px 14px;margin-bottom:14px}.otp{margin-top:18px;padding:17px;background:linear-gradient(180deg,#f8fbff,#eff6ff);border-color:#c6defd}
+.otp-title{font-size:13px;color:#0a376b}.otp-row input{min-width:0;min-height:48px;background:#fff}.resend{font-size:11px;padding:7px 0}
+@media(max-width:800px){.layout{grid-template-columns:minmax(0,1fr)}.hero{min-height:auto}.benefits{grid-template-columns:repeat(2,minmax(0,1fr));display:grid}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.full{grid-column:1/-1}.actions{display:flex}.actions>*{width:auto;flex:1}}
+@media(max-width:520px){.top{height:64px}.brand img{width:37px;height:37px}.wrap{padding:18px 11px 38px}.hero{padding:22px;border-radius:18px}.hero h1{font-size:31px}.benefits{grid-template-columns:1fr;gap:12px}.card{padding:18px;border-radius:18px}.head{align-items:flex-start;flex-direction:column;gap:12px}.head h2{font-size:25px}.step{align-self:flex-start}.grid{grid-template-columns:1fr;gap:15px}.full{grid-column:auto}.actions{display:grid}.actions>*{width:100%}.otp-row{flex-direction:column}.otp-row button{width:100%}}
+@media(prefers-reduced-motion:reduce){.primary,.field input{transition:none!important}.loader img{animation:none!important}}
+</style></head><body>
 <div class="loader" id="loader"><div class="loader-box"><img src="https://dbanjushomes.online/dbh-logo.jpg" alt="DBH"><strong>DBH Agent Network</strong><span id="loaderText">Loading secure registration...</span><button id="loaderRetry" type="button" style="display:none">Continue</button></div></div>
 <header class="top"><a class="brand" href="index.html"><img src="https://dbanjushomes.online/dbh-logo.jpg" alt="DBH"><div>D Banjus Homes Nig Ltd<small>AGENT NETWORK</small></div></a><a class="back" href="index.html"><i class="fa-solid fa-arrow-left"></i> Back</a></header>
 <main class="wrap"><div class="layout">
@@ -33,10 +62,10 @@ button{font:inherit;cursor:pointer}.primary{border:0;background:var(--blue);colo
 <div id="formState"><div class="head"><div><h2>Create your account</h2><p>Use your real contact details. You will verify your email before continuing.</p></div><span class="step" id="stepLabel">STEP 1 OF 2</span></div>
 <div class="progress"><span id="progress"></span></div><div id="error" class="msg"></div><div id="success" class="msg"></div>
 <form id="form"><div class="grid">
-<div class="field full"><label>Full name *</label><input id="fullName" autocomplete="name" placeholder="Enter your full name" required></div>
-<div class="field"><label>Email address *</label><input id="email" type="email" autocomplete="email" placeholder="you@example.com" required></div>
-<div class="field"><label>Phone number *</label><input id="phone" type="tel" autocomplete="tel" placeholder="08012345678" required></div>
-<div class="field full"><label>WhatsApp number *</label><input id="whatsapp" type="tel" placeholder="08012345678" required><div class="hint">DBH will use this exact number later for the WhatsApp verification step.</div></div>
+<div class="field full"><label for="fullName">Full name *</label><input id="fullName" name="fullName" autocomplete="name" placeholder="Enter your first and last name" minlength="3" maxlength="100" required aria-describedby="fullNameError"><div class="field-error" id="fullNameError"></div></div>
+<div class="field"><label for="email">Email address *</label><input id="email" name="email" type="email" autocomplete="email" inputmode="email" autocapitalize="none" spellcheck="false" maxlength="254" placeholder="you@example.com" required aria-describedby="emailError"><div class="field-error" id="emailError"></div></div>
+<div class="field"><label for="phone">Phone number *</label><input id="phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="08012345678" minlength="7" maxlength="20" required aria-describedby="phoneError"><div class="field-error" id="phoneError"></div></div>
+<div class="field full"><label for="whatsapp">WhatsApp number *</label><input id="whatsapp" name="whatsapp" type="tel" autocomplete="tel" inputmode="tel" placeholder="08012345678" minlength="7" maxlength="20" required aria-describedby="whatsappHint whatsappError"><div class="hint" id="whatsappHint">Enter the number you actively use on WhatsApp. DBH may contact you on this number during agent verification.</div><div class="field-error" id="whatsappError"></div></div>
 </div>
 <div class="confirm"><input id="agree" type="checkbox" required><span>I confirm that the information above is mine and accurate, and I agree to DBH reviewing my agent application.</span></div>
 <div class="otp" id="otpBox"><div class="otp-title"><i class="fa-solid fa-envelope-circle-check"></i> Enter the email code</div><div class="hint">We sent a 6-digit verification code to <strong id="emailShown"></strong>.</div><div class="otp-row"><input id="otp" maxlength="6" inputmode="numeric" autocomplete="one-time-code" placeholder="000000"><button class="primary" type="button" id="verify">Verify email <i class="fa-solid fa-arrow-right"></i></button></div><button class="resend" type="button" id="resend">Didn't receive it? Send a new code</button></div>
@@ -48,6 +77,29 @@ button{font:inherit;cursor:pointer}.primary{border:0;background:var(--blue);colo
 const U='https://cpgajlsyuieeengdnamy.supabase.co',K='sb_publishable_fbcJT-QGKyZg0tDkpbDkOQ_CcQf2ugW',FN=U+'/functions/v1/dbh-agent-registration';
 const S=window.supabase.createClient(U,K),$=id=>document.getElementById(id);let sent=false;
 function msg(id,t,c){$(id).textContent=t;$(id).className='msg show '+c}
+function digits(value){return String(value||'').replace(/[^0-9]/g,'')}
+function validateField(id){
+ const input=$(id),error=$(id+'Error');if(!input||!error)return true;
+ const value=input.value.trim();let text='';
+ if(!value)text='This field is required.';
+ else if(id==='fullName'&&value.length<3)text='Enter your full name (at least 3 characters).';
+ else if(id==='email'&&(!input.validity.valid||!value.includes('@')))text='Enter a valid email address, for example you@example.com.';
+ else if((id==='phone'||id==='whatsapp')&&digits(value).length<10)text='Enter a complete phone number, including the area or country code.';
+ else if((id==='phone'||id==='whatsapp')&&digits(value).length>15)text='Check the phone number; it appears to be too long.';
+ input.setAttribute('aria-invalid',text?'true':'false');error.textContent=text;error.classList.toggle('show',!!text);return !text;
+}
+function validateRegistration(){
+ const ids=['fullName','email','phone','whatsapp'];let valid=true;
+ ids.forEach(id=>{if(!validateField(id))valid=false});
+ if(!$('agree').checked){msg('error','Please confirm that your details are accurate before continuing.','err');valid=false}
+ if(!valid){const first=ids.find(id=>!validateField(id));if(first)$(first).focus();return false}
+ return true;
+}
+['fullName','email','phone','whatsapp'].forEach(id=>{
+ $(id).addEventListener('blur',()=>validateField(id));
+ $(id).addEventListener('input',()=>{if($(id).getAttribute('aria-invalid')==='true')validateField(id)});
+});
+
 function buttonLoading(btn,on,label){if(on){btn.dataset.original=btn.innerHTML;btn.disabled=true;btn.classList.add('loading');btn.innerHTML='<span class="spin"></span>'+label}else{btn.disabled=false;btn.classList.remove('loading');btn.innerHTML=btn.dataset.original||'<i class="fa-solid fa-paper-plane"></i> Send verification code'}}
 function withTimeout(p,ms,label){return Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(new Error(label)),ms))])}
 function hideLoader(){document.getElementById('loader').classList.add('hide')}
@@ -74,7 +126,7 @@ async function sendCode(){
     sent=true;$('emailShown').textContent=email;$('otpBox').classList.add('show');$('stepLabel').textContent='STEP 2 OF 2';$('progress').style.width='100%';msg('success','Verification code sent. Check your email inbox or spam folder.','ok');$('otp').focus();
   }finally{buttonLoading(btn,false,'Send verification code')}
 }
-$('form').addEventListener('submit',async e=>{e.preventDefault();$('error').className='msg';$('success').className='msg';if(!$('form').checkValidity())return msg('error','Please complete all required fields.','err');try{await sendCode()}catch(x){msg('error',x.message||'Unable to send verification code.','err')}});
+$('form').addEventListener('submit',async e=>{e.preventDefault();$('error').className='msg';$('success').className='msg';if(!$('form').checkValidity()){ $('form').reportValidity();return }if(!validateRegistration())return;try{await sendCode()}catch(x){msg('error',x.message||'Unable to send verification code.','err')}});
 $('resend').addEventListener('click',async()=>{try{await sendCode()}catch(x){msg('error',x.message||'Unable to resend the code.','err')}});
 $('verify').addEventListener('click',async()=>{const code=$('otp').value.trim();if(!sent)return msg('error','Please request a verification code first.','err');if(!/^\d{6}$/.test(code))return msg('error','Enter the 6-digit code.','err');const btn=$('verify');buttonLoading(btn,true,'Verifying...');try{const email=$('email').value.trim().toLowerCase();const {data,error}=await withTimeout(S.auth.verifyOtp({email,token:code,type:'email'}),15000,'Email verification timed out. Please request a new code.');if(error)throw error;if(!data.session)throw new Error('Secure session was not created. Please request a new code.');const r=await withTimeout(fetch(FN,{method:'POST',headers:{'Content-Type':'application/json','apikey':K,'Authorization':'Bearer '+data.session.access_token},body:JSON.stringify({action:'start_application',full_name:$('fullName').value.trim(),phone:$('phone').value.trim(),whatsapp:$('whatsapp').value.trim()})}),15000,'DBH registration service is taking too long. Please try again.');const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'Could not create the DBH agent application.');$('formState').style.display='none';$('done').classList.add('show');setTimeout(()=>location.href='agent-onboarding.html',900)}catch(x){msg('error',x.message||'Verification failed.','err')}finally{buttonLoading(btn,false,'Verify email')}});
 window.addEventListener('error',e=>{console.error(e.error||e.message);hideLoader();msg('error','The registration page encountered a browser error. Please refresh and try again.','err')});

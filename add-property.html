@@ -185,10 +185,11 @@ function options(el,items,placeholder,selected){
 }
 async function post(path,body){const r=await fetch(API+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body||{})});if(!r.ok)throw Error('Location list unavailable');const j=await r.json();if(j.error===true)throw Error(j.msg||'Location list unavailable');return j.data;}
 async function fetchCountries(){
- const r=await fetch('https://restcountries.com/v3.1/all?fields=name,cca2');
+ const r=await fetch('https://cpgajlsyuieeengdnamy.supabase.co/functions/v1/dbh-google-location',{method:'POST',headers:{'Content-Type':'application/json','apikey':'sb_publishable_fbcJT-QGKyZg0tDkpbDkOQ_CcQf2ugW'},body:JSON.stringify({action:'countries'})});
  if(!r.ok)throw Error('Country list unavailable');
  const data=await r.json();
- return data.map(x=>({name:x?.name?.common,code:x?.cca2})).filter(x=>x.name).sort((a,b)=>a.name.localeCompare(b.name));
+ if(!Array.isArray(data.countries))throw Error(data.error||'Country list unavailable');
+ return data.countries;
 }
 async function nigeriaLgas(){if(lgaMap)return lgaMap;const r=await fetch(NIGERIA_LGAS);if(!r.ok)throw Error('LGA list unavailable');const j=await r.json();lgaMap=j.lgas||j;return lgaMap;}
 function stateLgas(map,state){const k=Object.keys(map||{}).find(x=>x.toLowerCase()===txt(state).toLowerCase()||(x.toLowerCase()==='fct'&&/abuja|federal capital territory/i.test(state)));return k?map[k]:[];}

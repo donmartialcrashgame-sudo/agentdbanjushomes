@@ -213,7 +213,7 @@ lgaEl.addEventListener('change',()=>isAutofill(lgaEl));
 })();
 })();</script>
 <script>
-const U='https://cpgajlsyuieeengdnamy.supabase.co',K='sb_publishable_fbcJT-QGKyZg0tDkpbDkOQ_CcQf2ugW',S=window.supabase.createClient(U,K);
+const U='https://cpgajlsyuieeengdnamy.supabase.co',K='sb_publishable_fbcJT-QGKyZg0tDkpbDkOQ_CcQf2ugW',S=window.DBHSupabaseClient||(window.DBHSupabaseClient=window.supabase.createClient(U,K));
 const $=id=>document.getElementById(id),TOTAL=6,STEP_NAMES=['Basic information','Price & location','Property details','Features & amenities','Property images','Documents & review'];
 let user=null,app=null,session=null,step=1,editingId=new URLSearchParams(location.search).get('id')||'',existingImages=0,existingDocs=0,existingPaymentStatus='unpaid';
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));

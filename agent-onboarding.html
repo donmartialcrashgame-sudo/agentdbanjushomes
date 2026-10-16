@@ -13,6 +13,12 @@ function options(el,items,placeholder,selected){
  el.value=wanted?(list.find(v=>v.toLowerCase()===wanted.toLowerCase())||wanted):'';
 }
 async function post(path,body){const r=await fetch(API+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body||{})});if(!r.ok)throw Error('Location list unavailable');const j=await r.json();if(j.error===true)throw Error(j.msg||'Location list unavailable');return j.data;}
+async function fetchCountries(){
+ const r=await fetch('https://restcountries.com/v3.1/all?fields=name,cca2');
+ if(!r.ok)throw Error('Country list unavailable');
+ const data=await r.json();
+ return data.map(x=>({name:x?.name?.common,code:x?.cca2})).filter(x=>x.name).sort((a,b)=>a.name.localeCompare(b.name));
+}
 async function nigeriaLgas(){if(lgaMap)return lgaMap;const r=await fetch(NIGERIA_LGAS);if(!r.ok)throw Error('LGA list unavailable');const j=await r.json();lgaMap=j.lgas||j;return lgaMap;}
 function stateLgas(map,state){const k=Object.keys(map||{}).find(x=>x.toLowerCase()===txt(state).toLowerCase()||(x.toLowerCase()==='fct'&&/abuja|federal capital territory/i.test(state)));return k?map[k]:[];}
 function isAutofill(el){if(el.dataset.dbhLocationAutofill==='1'){delete el.dataset.dbhLocationAutofill;return true;}return false;}
@@ -30,7 +36,7 @@ countryEl.addEventListener('change',()=>{if(isAutofill(countryEl))return;loadSta
 stateEl.addEventListener('change',()=>{if(isAutofill(stateEl))return;if(stateEl.value)loadLgas(stateEl.value,'');else{lgaEl.disabled=true;options(lgaEl,[],'Choose a state / region first');}});
 lgaEl.addEventListener('change',()=>isAutofill(lgaEl));
 (async()=>{const savedCountry=countryEl.value,savedState=stateEl.value,savedLga=lgaEl.value;countryEl.disabled=true;options(countryEl,[],'Loading countries…');
- try{const d=await post('/countries',{});const list=Array.isArray(d)?d.map(x=>typeof x==='string'?x:(x.country||x.name)).filter(Boolean):[];options(countryEl,list,'Select country',savedCountry);countryEl.disabled=false;if(countryEl.value)await loadStates(savedState,savedLga);else{stateEl.disabled=true;lgaEl.disabled=true;options(stateEl,[],'Choose a country first');options(lgaEl,[],'Choose a state / region first');}}
+ try{const d=await fetchCountries();const list=d.map(x=>x.name);options(countryEl,list,'Select country',savedCountry);countryEl.disabled=false;if(countryEl.value)await loadStates(savedState,savedLga);else{stateEl.disabled=true;lgaEl.disabled=true;options(stateEl,[],'Choose a country first');options(lgaEl,[],'Choose a state / region first');}}
  catch(e){options(countryEl,[],'Country list unavailable — refresh');countryEl.disabled=false;stateEl.disabled=true;lgaEl.disabled=true;}
 })();
 })();</script><script>

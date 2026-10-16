@@ -15,7 +15,7 @@
       body: JSON.stringify(body)
     });
     const data = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(data.error || "Google location search is unavailable.");
+    if (!response.ok) throw new Error(data.error || "Location search is unavailable.");
     return data;
   }
   function attach(options) {
@@ -59,12 +59,12 @@
               close(); status.textContent = "Loading selected address…"; status.className = "dbh-place-status";
               try {
                 const place = await request({action:"details", placeId:item.placeId});
-                input.value = place.address || item.description || "";
+                const primaryValue = options.primaryField ? place[options.primaryField] : place.address;\n                input.value = primaryValue || place.address || item.description || "";
                 setField("state", place.state); setField("lga", place.lga); setField("city", place.city);
                 setField("area", place.area); setField("country", place.country); setField("countryCode", place.country_code);
                 setField("placeId", place.placeId); setField("latitude", place.latitude); setField("longitude", place.longitude);
                 selected = true;
-                status.textContent = "Address selected from Google Maps.";
+                status.textContent = "Location details filled successfully."
                 status.className = "dbh-place-status success";
                 input.dispatchEvent(new Event("change", {bubbles:true}));
                 if (typeof options.onSelect === "function") options.onSelect(place);

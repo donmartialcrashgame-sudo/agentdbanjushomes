@@ -37,7 +37,13 @@ function paint(status,record,isProperty){
   $("title").textContent=isTestRegistration?"Sandbox test payment only":successful?"Registration payment successful!":failed?"Payment declined":"Payment pending";
   $("message").textContent=isTestRegistration?"This was a Flutterwave TEST MODE transaction. No real money was collected and this receipt does not satisfy the live registration fee.":successful?"Your live registration payment has been verified and recorded by DBH. Admin approval and verification remain separate steps.":failed?"This registration payment was not completed.":"This payment is still awaiting a final status.";
  }
- if(failed){$("sticker").className="decline";$("sticker").innerHTML='<img src="https://images.emojiterra.com/google/noto-emoji/unicode-17.0/color/svg/274c.svg" alt="Declined">'}else if(!successful){$("sticker").className="decline";$("sticker").innerHTML='<div style="font-size:80px">⏳</div>'}
+ const statusImage = failed
+  ? "https://dbanjushomes.online/Glossy%20Declined%20and%20Pending%20Icons11.png"
+  : successful
+   ? "https://dbanjushomes.online/Glossy%20Green%20Success%20Checkmark%20Badge.png"
+   : "https://dbanjushomes.online/Glossy%20Declined%20and%20Pending%20Icons22.png";
+ $("sticker").className = successful ? "celebrate" : "decline";
+ $("sticker").innerHTML = '<img src="' + statusImage + '" alt="' + (failed ? "Payment declined" : successful ? "Payment successful" : "Payment pending") + '" style="width:145px;height:145px;object-fit:contain">';
 }
 async function boot(){try{
  const {data:auth,error}=await S.auth.getSession();if(error)throw error;if(!auth.session){location.href="login.html";return}

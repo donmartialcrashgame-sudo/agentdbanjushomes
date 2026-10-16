@@ -1,4 +1,4 @@
-/* DBH Google Places helper. The Google API key remains server-side in Supabase. */
+/* DBH location picker. The provider API key remains server-side. */
 (function () {
   const ENDPOINT = "https://cpgajlsyuieeengdnamy.supabase.co/functions/v1/dbh-google-location";
   const ANON_KEY = "sb_publishable_fbcJT-QGKyZg0tDkpbDkOQ_CcQf2ugW";
@@ -62,8 +62,15 @@
                 const primaryValue = options.primaryField ? place[options.primaryField] : place.address;
                 input.value = primaryValue || place.address || item.description || "";
                 setField("state", place.state); setField("lga", place.lga); setField("city", place.city);
-                setField("area", place.area); setField("country", place.country); setField("countryCode", place.country_code);
-                setField("placeId", place.placeId); setField("latitude", place.latitude); setField("longitude", place.longitude);
+                setField("area", place.area); setField("country", place.country);
+                const addressEl = getEl("address");
+                if (addressEl && addressEl !== input) setField("address", place.address);
+                setField("countryCode", place.country_code);
+                if (options.authoritative === true) {
+                  setField("placeId", place.placeId); setField("latitude", place.latitude); setField("longitude", place.longitude);
+                } else {
+                  setField("placeId", ""); setField("latitude", ""); setField("longitude", "");
+                }
                 selected = true;
                 status.textContent = "Location details filled successfully."
                 status.className = "dbh-place-status success";

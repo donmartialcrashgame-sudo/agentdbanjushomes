@@ -59,7 +59,8 @@
               close(); status.textContent = "Loading selected address…"; status.className = "dbh-place-status";
               try {
                 const place = await request({action:"details", placeId:item.placeId});
-                const primaryValue = options.primaryField ? place[options.primaryField] : place.address;\n                input.value = primaryValue || place.address || item.description || "";
+                const primaryValue = options.primaryField ? place[options.primaryField] : place.address;
+                input.value = primaryValue || place.address || item.description || "";
                 setField("state", place.state); setField("lga", place.lga); setField("city", place.city);
                 setField("area", place.area); setField("country", place.country); setField("countryCode", place.country_code);
                 setField("placeId", place.placeId); setField("latitude", place.latitude); setField("longitude", place.longitude);

@@ -38,7 +38,7 @@
     input.parentNode.insertBefore(wrap, input); wrap.appendChild(input);
     const menu = document.createElement("div"); menu.className = "dbh-place-menu"; menu.setAttribute("role", "listbox"); wrap.appendChild(menu);
     const status = document.createElement("div"); status.className = "dbh-place-status"; wrap.insertAdjacentElement("afterend", status);
-    let timer = 0, sequence = 0, selected = false, nearbyCoords = null;
+    let timer = 0, sequence = 0, selected = false, nearbyCoords = null, hasSelectedPlace = false;
     const fields = options.fields || {};
     const getEl = key => {
       const selector = fields[key];
@@ -101,10 +101,13 @@
             const place = await request({action:"details", placeId:item.placeId});
             const primaryValue = options.primaryField ? place[options.primaryField] : place.address;
             input.value = primaryValue || place.address || item.description || "";
-            // Some address results omit neighbourhood/LGA components. Preserve what the user already selected or typed instead of blanking it.
-            ["state","lga","city","area","country"].forEach(key => {
-              if (place[key] != null && String(place[key]).trim() !== "") setField(key, place[key]);
-            });
+            // Populate location fields on the first address selection. When the user later changes the business address, preserve their existing country/state/LGA/city/area choices instead of resetting them.
+            const preserveOtherFields = options.preserveFieldsOnReselect === true && hasSelectedPlace;
+            if (!preserveOtherFields) {
+              ["state","lga","city","area","country"].forEach(key => {
+                if (place[key] != null && String(place[key]).trim() !== "") setField(key, place[key]);
+              });
+            }
             const addressEl = getEl("address");
             if (addressEl && addressEl !== input) setField("address", place.address);
             setField("countryCode", place.country_code);
@@ -114,6 +117,7 @@
               setField("placeId", ""); setField("latitude", ""); setField("longitude", "");
             }
             selected = true;
+            hasSelectedPlace = true;
             status.textContent = "Location details filled successfully.";
             status.className = "dbh-place-status success";
             input.dispatchEvent(new Event("change", {bubbles:true}));

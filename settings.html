@@ -25,6 +25,7 @@
 <div class="page-head"><div><div class="eyebrow">YOUR DBH IDENTITY</div><h1>Agent profile & settings</h1><p>Keep the information on your public DBH agent page accurate and complete.</p></div><span class="status-pill"><i class="fa-solid fa-circle"></i><span id="statusPill">Loading status...</span></span></div><div class="public-profile-note"><span><i class="fa-solid fa-circle-info"></i> After DBH approves or verifies your application, your photo, bio, experience, contact details, office address, social links and any licence number you enter can appear publicly on your agent page. Keep passwords and private legal documents out of your biography.</span><a id="publicProfileLink" class="public-preview-btn" href="#" aria-disabled="true"><i class="fa-regular fa-eye"></i> View public profile</a></div>
 <div id="message" class="message"></div>
 <div id="setupChecklist" class="setup-checklist" aria-live="polite"><div class="setup-check-head"><div class="setup-check-icon"><i class="fa-solid fa-list-check"></i></div><div class="setup-check-copy"><strong id="setupChecklistTitle">Finish setting up your agent profile</strong><p id="setupChecklistText">A few details will help customers recognize and contact you.</p></div></div><div class="setup-check-progress"><span id="setupChecklistBar"></span></div><div id="setupChecklistItems" class="setup-check-items"></div><div class="setup-check-actions"><button type="button" id="setupSocialBtn">Connect social account</button><button type="button" class="primary" id="setupProfileBtn">Complete profile</button></div></div>
+<section class="setting-card" id="working-hours"><div class="setting-head"><div class="head-icon"><i class="fa-regular fa-clock"></i></div><div><h2>Working hours</h2><p>Set the days and times customers can request property inspections with you. Your agent tools remain locked until you save at least one working day.</p></div></div><div class="setting-body"><div id="workingHoursRows" style="display:grid;gap:10px"></div><div class="hint" style="margin-top:12px">Times use West Africa Time (WAT). Mark a day closed when you are not available.</div><div class="actions"><span id="workingHoursStatus" class="hint" aria-live="polite"></span><button class="btn primary" type="button" id="saveWorkingHours">Save working hours</button></div></div></section>
 <div class="settings-grid">
 <section class="setting-card"><div class="setting-head"><div class="head-icon"><i class="fa-solid fa-user"></i></div><div><h2>Provider profile</h2><p>This is the identity customers and DBH see for your agent account.</p></div></div><div class="setting-body"><div class="grid">
 <div class="field full"><label>Profile photo</label><div class="profile-photo-panel"><img id="profilePhotoPreview" class="profile-photo-preview" src="https://dbanjushomes.online/dbh-logo.jpg" alt="Agent profile photo"><div class="profile-photo-fields"><input id="profilePhotoFile" type="file" accept="image/jpeg,image/png,image/webp"><div class="hint">Use a clear professional photo. JPG, PNG or WebP, maximum 2 MB.</div><div class="hint" id="photoStatus">Choose a photo to upload it to your public DBH profile.</div></div></div></div>
@@ -207,12 +208,41 @@ function renderSetupChecklist(){
  $('setupProfileBtn').onclick=()=>{const task=remaining.find(t=>t.target!=='social');if(!task){$('openSocialModal').click();return}const el=$(task.target);el?.scrollIntoView({behavior:'smooth',block:'center'});if(el&&el.type!=='file')el.focus({preventScroll:true})};
 }
 function setForm(app,user){currentApp=app;snapshot={fullName:app.full_name||user.user_metadata?.full_name||'',email:app.email||user.email||'',phone:app.phone||user.phone||'',whatsapp:app.whatsapp_number||'',businessName:app.business_name||'',businessType:app.business_type||'',state:app.state||'',city:app.city||'',address:app.address||'',bio:app.bio||'',yearsExperience:app.years_experience??'',licenseNumber:app.license_number||'',social:app.social_links&&typeof app.social_links==='object'?app.social_links:{},profilePhoto:app.profile_photo_url||''};$('fullName').value=snapshot.fullName;$('email').value=snapshot.email;$('phone').value=snapshot.phone;$('whatsapp').value=snapshot.whatsapp;$('businessName').value=snapshot.businessName;$('businessType').value=snapshot.businessType;$('state').value=snapshot.state;$('city').value=snapshot.city;$('address').value=snapshot.address;$('bio').value=snapshot.bio;$('yearsExperience').value=snapshot.yearsExperience;$('licenseNumber').value=snapshot.licenseNumber;$('socialWebsite').value=snapshot.social.website||'';if(snapshot.profilePhoto){$('profilePhotoPreview').src=snapshot.profilePhoto;$('photoStatus').textContent='Your saved profile photo is shown above.'}if($('publicProfileLink')){$('publicProfileLink').href='https://dbanjushomes.online/view-agent.html?id='+encodeURIComponent(user.id);const approved=['approved','verified'].includes(String(app.status||'').toLowerCase());$('publicProfileLink').setAttribute('aria-disabled',approved?'false':'true');$('publicProfileLink').title=approved?'Open your public DBH profile':'Your public profile becomes available after DBH approval or verification'}}
+
+const DBH_DAYS=[['monday','Monday'],['tuesday','Tuesday'],['wednesday','Wednesday'],['thursday','Thursday'],['friday','Friday'],['saturday','Saturday'],['sunday','Sunday']];
+let workingHoursDraft={};
+function renderWorkingHours(){
+ const root=$('workingHoursRows');if(!root)return;
+ root.innerHTML=DBH_DAYS.map(([key,label])=>{const v=workingHoursDraft[key]||{closed:true,open:'09:00',close:'17:00'};return '<div class="working-day-row" data-day="'+key+'" style="display:grid;grid-template-columns:minmax(90px,1fr) auto minmax(100px,1fr) minmax(100px,1fr);gap:10px;align-items:center;padding:11px;border:1px solid var(--line);border-radius:12px"><strong style="font-size:12px">'+label+'</strong><label style="font-size:11px;display:flex;align-items:center;gap:6px"><input class="day-closed" type="checkbox" '+(v.closed?'checked':'')+'> Closed</label><input class="day-open" aria-label="'+label+' opening time" type="time" value="'+(v.open||'09:00')+'" '+(v.closed?'disabled':'')+' style="min-width:0;padding:9px;border:1px solid var(--line);border-radius:8px"><input class="day-close" aria-label="'+label+' closing time" type="time" value="'+(v.close||'17:00')+'" '+(v.closed?'disabled':'')+' style="min-width:0;padding:9px;border:1px solid var(--line);border-radius:8px"></div>'}).join('');
+ root.querySelectorAll('.working-day-row').forEach(row=>row.querySelector('.day-closed').addEventListener('change',e=>{row.querySelector('.day-open').disabled=e.target.checked;row.querySelector('.day-close').disabled=e.target.checked}));
+}
+function collectWorkingHours(){
+ const result={};let active=0;
+ document.querySelectorAll('.working-day-row').forEach(row=>{const key=row.dataset.day,closed=row.querySelector('.day-closed').checked,open=row.querySelector('.day-open').value,close=row.querySelector('.day-close').value;if(!closed){if(!open||!close||open>=close)throw new Error('Please choose a valid opening and closing time for '+key+'.');active++}result[key]={closed,open,close}});
+ if(!active)throw new Error('Choose at least one working day before saving.');return result;
+}
+async function loadWorkingHours(){
+ const {data,error}=await S.from('agent_working_hours').select('weekly_hours').eq('user_id',currentUser.id).maybeSingle();
+ if(error)throw error;workingHoursDraft=data?.weekly_hours||{};renderWorkingHours();
+ $('workingHoursStatus').textContent=data?'Your saved schedule is loaded.':'No working hours saved yet.';
+}
+async function saveWorkingHours(){
+ const btn=$('saveWorkingHours'),status=$('workingHoursStatus');let weekly_hours;
+ try{weekly_hours=collectWorkingHours()}catch(e){status.textContent=e.message;status.style.color='#b91c1c';return}
+ loading(btn,true,'Saving hours…');status.textContent='Saving your schedule securely…';
+ try{const {error}=await S.from('agent_working_hours').upsert({user_id:currentUser.id,weekly_hours,timezone:'Africa/Lagos',updated_at:new Date().toISOString()},{onConflict:'user_id'});if(error)throw error;
+ workingHoursDraft=weekly_hours;status.textContent='Working hours saved. Your agent tools will now unlock when your account payment and verification requirements are also complete.';status.style.color='#15803d';
+ }catch(e){console.error(e);status.textContent='Could not save working hours: '+(e.message||'Please try again.');status.style.color='#b91c1c'}finally{loading(btn,false,'Save working hours')}
+}
+$('saveWorkingHours').addEventListener('click',saveWorkingHours);
+
 async function load(){
  const {data,error}=await S.auth.getSession();if(error||!data.session){location.href='login.html';return}currentUser=data.session.user;
  const q=await S.from('agent_applications').select('id,full_name,email,phone,whatsapp_number,business_name,business_type,state,city,address,bio,years_experience,license_number,social_links,profile_photo_url,status,session_status,created_at').eq('user_id',currentUser.id).order('created_at',{ascending:false}).limit(1).maybeSingle();
  if(q.error){console.error(q.error);show('We could not load your provider settings. Please refresh the page.','err');return}
  if(!q.data){location.href='agent-onboarding.html';return}
  setForm(q.data,currentUser);
+ try{await loadWorkingHours()}catch(e){console.error(e);$("workingHoursStatus").textContent="Could not load your working hours. Please refresh.";}
  paintDomainSetup(q.data.social_links||{});
  paintSocialConnections();
  renderSetupChecklist();

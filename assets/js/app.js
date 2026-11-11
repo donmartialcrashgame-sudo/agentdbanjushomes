@@ -172,6 +172,12 @@
         const session=sessionResult&&sessionResult.data&&sessionResult.data.session;
         if(!session) return;
         const uid=session.user.id;
+        const schedule=await client.from('agent_working_hours').select('weekly_hours').eq('user_id',uid).maybeSingle();
+        const hours=schedule.data?.weekly_hours||{};
+        const scheduleReady=!schedule.error&&Object.values(hours).some(function(day){return day&&day.closed===false&&day.open&&day.close});
+        const currentPage=(location.pathname.split('/').pop()||'dashboard.html').toLowerCase();
+        const gatedPages=['properties.html','add-property.html','activity.html','enquiries.html'];
+        if(!scheduleReady&&gatedPages.includes(currentPage)){location.replace('dashboard.html');return;}
         const q=await client.from('agent_applications').select('full_name,email,status,session_status,created_at').eq('user_id',uid).order('created_at',{ascending:false}).limit(1).maybeSingle();
         const a=q&&q.data;
         const nameEl=document.getElementById('name'),emailEl=document.getElementById('email');

@@ -10,6 +10,7 @@
     ['wallet.html','svg-wallet','Agent Wallet',''],
     ['agent-documents.html','fa-id-card','Verification',''],
     ['notifications.html','fa-bell','Notifications',''],
+    ['inspection-bookings.html','fa-calendar-check','Inspection Bookings',''],
     ['settings.html','fa-user-gear','My Profile & Settings','']
   ];
 

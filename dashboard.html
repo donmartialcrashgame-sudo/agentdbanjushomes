@@ -209,6 +209,7 @@ html,body{width:100%;max-width:100%;overflow-x:clip}body{min-width:0}.shell{grid
 </main>
 </div>
 
+<style>#dbhHoursGate{position:fixed;inset:0;z-index:9999;background:rgba(3,20,38,.72);backdrop-filter:blur(7px);display:none;place-items:center;padding:18px}#dbhHoursGate.show{display:grid}#dbhHoursGate .gate-card{width:min(520px,100%);background:#fff;border-radius:25px;padding:32px 28px;text-align:center;box-shadow:0 30px 90px #0005;animation:dbhGateIn .35s ease}#dbhHoursGate .gate-icon{width:118px;height:118px;margin:0 auto 18px;display:grid;place-items:center;color:#0b63ce;background:#eff6ff;border:1px solid #bfdbfe;border-radius:32px}#dbhHoursGate .gate-icon svg{width:76px;height:76px}#dbhHoursGate h2{font-size:25px;margin:0 0 10px;color:#062b52}#dbhHoursGate p{font-size:13px;line-height:1.75;color:#64748b;margin:0 auto 22px;max-width:410px}#dbhHoursGate button{border:0;border-radius:12px;background:#0b63ce;color:#fff;padding:14px 20px;font-weight:900;cursor:pointer;width:100%}#dbhHoursGate small{display:block;color:#64748b;font-size:10px;margin-top:12px}@keyframes dbhGateIn{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}</style><div id="dbhHoursGate" role="dialog" aria-modal="true" aria-labelledby="dbhHoursGateTitle"><div class="gate-card"><div class="gate-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M21 12c0-4.88-4.12-9-9-9s-9 4.12-9 9c0 2.58 1.16 4.95 2.98 6.61L3.8 20.79l1.41 1.41 2.4-2.4c1.31.75 2.81 1.19 4.39 1.19s3.08-.44 4.39-1.19l2.4 2.4 1.41-1.41-2.18-2.18C19.83 16.95 21 14.59 21 12M5 12c0-3.79 3.21-7 7-7s7 3.21 7 7-3.21 7-7 7-7-3.21-7-7"></path><path d="M17 11h-4V7h-2v6h6zM8.31 2.74a3.985 3.985 0 0 0-5.14.42c-1.4 1.4-1.53 3.58-.42 5.14 1.03-2.5 3.06-4.53 5.56-5.56m7.38 0c2.5-1.03 5.14.42 5.56 5.56 1.12-1.56.98-3.74-.42-5.14s-3.58-1.53-5.14-.42"></path></svg></div><h2 id="dbhHoursGateTitle">Add your working hours</h2><p>Before you can use your agent tools, tell customers when you are available for property inspections. Set your working days and opening and closing times. You can update them anytime in Settings.</p><button type="button" id="dbhHoursGateButton">Set my working hours <i class="fa-solid fa-arrow-right"></i></button><small>Your agent tools will unlock automatically after you save your schedule.</small></div></div>
 <div id="setupReminder" class="setup-reminder" role="status" aria-live="polite"><button type="button" id="setupReminderClose" class="setup-reminder-close" aria-label="Dismiss reminder">×</button><div class="setup-reminder-head"><div class="setup-reminder-icon"><i class="fa-solid fa-list-check"></i></div><div class="setup-reminder-copy"><strong id="setupReminderTitle">Finish your agent setup</strong><p id="setupReminderText">Complete your professional profile so customers can trust and contact you.</p></div></div><div id="setupReminderList" class="setup-reminder-list"></div><div class="setup-reminder-actions"><button type="button" id="setupReminderLater">Remind me later</button><button type="button" class="primary" id="setupReminderGo">Finish setup <i class="fa-solid fa-arrow-right"></i></button></div></div>
 <div class="dbh-tour-overlay" id="dbhTourOverlay" hidden></div>
 <section class="dbh-tour-card" id="dbhTourCard" role="dialog" aria-modal="true" aria-labelledby="dbhTourTitle" hidden>
@@ -257,7 +258,9 @@ function setButtonLoading(button,on,label){
   if(on){button.dataset.original=button.innerHTML;button.disabled=true;button.innerHTML='<span class="spin"></span>'+label}
   else{button.disabled=false;button.innerHTML=button.dataset.original||label}
 }
+let dbhHoursReady=false;
 function setToolAccess(open){
+  open=!!open&&dbhHoursReady;
   if(window.DBHAgentSidebar) window.DBHAgentSidebar.setAccess(open);
   ['propertyTool','addTool','enquiryTool','quickProperties','quickAdd'].forEach(id=>{
     const el=$(id);if(!el)return;
@@ -420,8 +423,11 @@ async function boot(){
     const hasDeclinedDocument=Array.isArray(declinedDocs)&&declinedDocs.length>0;
     const dismissed=app.payment_card_dismissed===true || sessionStorage.getItem('dbhRegistrationPaymentDeferred')==='1';
     $('paymentReminder').hidden=paid||suspended||!dismissed;
+    const {data:workingHours,error:hoursError}=await S.from('agent_working_hours').select('weekly_hours').eq('user_id',user.id).maybeSingle();
+    dbhHoursReady=!hoursError&&!!workingHours&&Object.values(workingHours.weekly_hours||{}).some(day=>day&&day.closed===false&&day.open&&day.close);
     const unlocked=paid&&verified&&!suspended;
     setToolAccess(unlocked);
+    if(!dbhHoursReady){setToolAccess(false);$('dbhHoursGate').classList.add('show');$('dbhHoursGateButton').onclick=()=>location.href='settings.html#working-hours';}
 
     if(paid){
       $('paymentReminder').hidden=true;
